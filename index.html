@@ -255,8 +255,8 @@ table.rc td:last-child{text-align:right;font-weight:800;color:var(--gold)}
     <button class="kidrow" id="kidBtn" aria-pressed="false">
       <span class="kidicon">🔊</span>
       <span><b id="kidTitle">Read-aloud mode: off</b>
-        <small>Every question and every answer is read out loud, and the clock is put away &mdash;
-        take as long as you like. For readers who would rather listen.</small></span>
+        <small>Every question is read out loud &mdash; the four answers are yours to read &mdash; and the clock
+        is put away, so take as long as you like.</small></span>
     </button>
 
     <div class="row" style="margin-top:26px">
@@ -290,8 +290,8 @@ table.rc td:last-child{text-align:right;font-weight:800;color:var(--gold)}
       The more you play a grade, the harder that grade gets.<br>
       Get all the way out of the <b style="color:var(--gold)">castle</b> &mdash; the last of the seven &mdash; and your face goes home,
       to whoever has been waiting up. Every face has a different family.<br>
-      Rather listen than read? Turn on <b style="color:#7fd7ff">read-aloud mode</b> above: every question and every answer
-      is read out, and the clock is put away.
+      Rather listen than read? Turn on <b style="color:#7fd7ff">read-aloud mode</b> above: every question is read out
+      &mdash; not the answers &mdash; and the clock is put away.
       <span style="color:var(--ink)">Keys <kbd>1</kbd>&ndash;<kbd>4</kbd> answer, <kbd>Enter</kbd> continues.</span>
     </div>
   </div>
@@ -2290,16 +2290,35 @@ const SFX={
    Maths does not survive being handed straight to a speech engine, so
    every symbol is spelled out in words first.
    ===================================================================== */
+/* Superscript digits are NOT a contiguous Unicode range — ¹ ² ³ are Latin-1 and
+   the rest live at U+2070. Never write [⁰-⁹]: spell the class out. */
+const SUBS="₀₁₂₃₄₅₆₇₈₉", SUPS="⁰¹²³⁴⁵⁶⁷⁸⁹";
+const SUBC="[₀₁₂₃₄₅₆₇₈₉]", SUPC="[⁰¹²³⁴⁵⁶⁷⁸⁹]";
+const unscript = s => s.split("").map(c=>{
+  const i=SUBS.indexOf(c), j=SUPS.indexOf(c);
+  return i>=0 ? i : j>=0 ? j : c; }).join("");
 const SAY = [
-  [/\s*\+\s*/g," plus "], [/\s*[−–—-]\s*/g," minus "], [/\s*[×*]\s*/g," times "],
+  /* A ? that stands in for a number reads as "what"; one that merely ends a
+     sentence is silent. This has to run before the operators become words. */
+  [/([=+\-−×÷*/]\s*)\?/g,"$1 what"], [/\?(\s*[=+\-−×÷*/])/g," what$1"],
+  /* notation unpicked before the plain symbols are, because an integral carries
+     its limits as tiny digits and a log carries its base the same way */
+  [new RegExp("∫("+SUBC+"+)("+SUPC+"+)","g"),(m,a,b)=>` the integral from ${unscript(a)} to ${unscript(b)} of `],
+  [new RegExp("log("+SUBC+"+)","g"),(m,a)=>` log base ${unscript(a)} of `],
+  [/lim\s*\(\s*x\s*→\s*([^)]+)\)/g," the limit as x goes to $1 of "],
+  [new RegExp(SUBC+"+","g"),m=>" "+unscript(m)+" "], [/→/g," goes to "],
+  [/\s*\+\s*/g," plus "], [/\s*[−–—-]\s*/g," minus "], [/\s*[×*·]\s*/g," times "],
   [/\s*[÷]\s*/g," divided by "], [/\s*=\s*/g," equals "], [/\s*≈\s*/g," is about "],
   [/\s*≤\s*/g," is less than or equal to "], [/\s*≥\s*/g," is greater than or equal to "],
   [/\s*<\s*/g," is less than "], [/\s*>\s*/g," is greater than "],
   [/(\d)\s*\/\s*(\d)/g,"$1 over $2"], [/√/g," the square root of "], [/π/g," pi "],
-  [/²/g," squared "], [/³/g," cubed "], [/⁴/g," to the power four "], [/ⁿ/g," to the power n "],
+  [/²/g," squared "], [/³/g," cubed "], [/ⁿ/g," to the power n "], [/⁻/g," minus "],
+  [new RegExp(SUPC+"+","g"),m=>" to the power "+unscript(m)+" "],
   [/°/g," degrees "], [/%/g," percent "], [/∞/g," infinity "], [/θ/g," theta "],
   [/Δ/g," delta "], [/Σ/g," the sum of "], [/∫/g," the integral of "], [/±/g," plus or minus "],
-  [/\?/g," what"], [/\s{2,}/g," "]
+  [/\s*\?\s*$/,""], [/\?/g," what "],
+  [/\s*\/\s*/g," over "],              /* anything left, like A/(x + 5) */
+  [/\s{2,}/g," "]
 ];
 function speakable(s){ let t=String(s); for(const [re,to] of SAY) t=t.replace(re,to); return t.trim(); }
 function stopSpeech(){ try{ if(window.speechSynthesis) speechSynthesis.cancel(); }catch(e){} }
@@ -2311,12 +2330,11 @@ function say(text,rate){
     speechSynthesis.speak(u);
   }catch(e){}
 }
-/* the question, then every option, numbered the way the buttons are */
+/* the question only — the four options are read by the player, not to them */
 function readAloud(p){
   if(!kidMode||!p) return;
   stopSpeech();
   say(p.question, 0.88);
-  p.choices.forEach((c,i)=>say(`Number ${i+1}. ${c}.`, 0.92));
 }
 
 /* =====================================================================
@@ -3139,7 +3157,7 @@ function toggleMusic(){ musicOn=!musicOn; save.music=musicOn; store();
   if(musicOn){ ac(); musicStart(); } musicGain(); }
 
 $("#kidBtn").onclick=()=>{ kidMode=!kidMode; save.kid=kidMode; store(); SFX.click(); paintKid();
-  if(kidMode) say("Read aloud is on. I will read every question to you, and there is no clock.");
+  if(kidMode) say("Read aloud is on. I will read each question to you, and there is no clock.");
   else stopSpeech(); };
 $("#readBtn").onclick=()=>{ readAloud(S.spoken); };
 $("#startBtn").onclick=()=>{ ac(); musicStart(); startGame(); };
