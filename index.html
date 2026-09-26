@@ -287,7 +287,9 @@ table.rc td:last-child{text-align:right;font-weight:800;color:var(--gold)}
       on top of whatever you picked up inside. Come out dark and you come out poor.<br>
       Escape a place and the next one opens &mdash; the graveyard, the forest, the mountain, the cave, the dungeon, the castle &mdash;
       but only <b style="color:var(--gold)">for the grade you beat it at</b>. Open the graveyard at Grade 4 and Grade 5 still starts back at the house.
-      The more you play a grade, the harder that grade gets.<br>
+      The more you play a grade, the harder that grade gets &mdash; the hard types come out and the wrong answers
+      start sitting right next to the right one. It <b style="color:var(--gold)">never leaves the grade you picked</b>:
+      choose Grade 4 and all ten rooms are Grade 4.<br>
       Get all the way out of the <b style="color:var(--gold)">castle</b> &mdash; the last of the seven &mdash; and your face goes home,
       to whoever has been waiting up. Every face has a different family.<br>
       Rather listen than read? Turn on <b style="color:#7fd7ff">read-aloud mode</b> above: every question is read out
@@ -1699,20 +1701,22 @@ function challengeProblem(level, tight, avoid){
   const gi = P(pool);
   if(avoid) avoid.add(TOPIC[level][gi]);
   const p = makeProblem(level, gi);
-  if(tight && /^-?\d+$/.test(p.answer)){
-    const a = parseInt(p.answer,10);
-    const near = SH([a+1,a-1,a+2,a-2,a+10,a-10]).filter(v=>v!==a);
-    p.choices = SH([p.answer, ...near.slice(0,3).map(String)]);
-  }
+  if(tight) tighten(p);
   return p;
 }
 
-/* ---------- difficulty tiers: the more you play a grade, the nastier it gets ---------- */
+/* ---------- difficulty tiers ----------
+   The more you play a grade, the nastier that grade gets — but it never leaves
+   the grade you chose. An earlier build pulled whole rooms from the grade above
+   (up to six of the ten) and that was rejected: picking Grade 4 has to mean ten
+   Grade 4 questions. Difficulty comes from `hard` (how many rooms use the hard
+   types of your own grade) and `tight` (how many have near-miss wrong answers,
+   so nothing can be ruled out at a glance). */
 const TIERS = [
-  {name:"Restless", blurb:"all ten rooms at your grade",              mix:[0,0,0,0,0,0,0,0,0,0]},
-  {name:"Haunted",  blurb:"two rooms pulled from the grade above",    mix:[0,0,0,0,0,0,0,0,1,1]},
-  {name:"Cursed",   blurb:"four rooms from the grade above",          mix:[0,0,0,0,0,0,1,1,1,1]},
-  {name:"Damned",   blurb:"five rooms above, two of them two grades up", mix:[0,0,0,1,1,1,1,1,2,2]}
+  {name:"Restless", blurb:"ten rooms at your grade, and a wrong answer looks wrong", hard:0, tight:0},
+  {name:"Haunted",  blurb:"still your grade, but the wrong answers start sitting closer", hard:1, tight:3},
+  {name:"Cursed",   blurb:"the harder types your grade has, and most answers are near misses", hard:2, tight:6},
+  {name:"Damned",   blurb:"the hardest your grade has, and nothing is easy to rule out", hard:3, tight:10}
 ];
 function tierFor(level){ const r=(save.prog&&save.prog[level])||0; return r>=12?3:r>=6?2:r>=2?1:0; }
 
@@ -2630,36 +2634,43 @@ function paintFamilies(){
 /* =====================================================================
    RUN
    ===================================================================== */
-/* Ten rooms, ten genuinely different problem types. The preferred grade is
-   tried first, then its neighbours, and if those are somehow exhausted the
-   whole bank is searched nearest-grade-first rather than allowing a repeat.
-   `used` comes back out so the chest and the hatch can avoid it too. */
+/* Ten rooms, ten genuinely different problem types, **all at the grade the
+   player picked** — there is no path here that reaches another grade, on
+   purpose. The tier decides how many rooms use the grade's hard types and how
+   many get near-miss wrong answers.
+   `used` comes back out so the chest and the hatch can avoid those topics. */
 function buildPlan(level, used){
-  const tier=tierFor(level), mix=SH(TIERS[tier].mix);
-  const pools={}; const plan=[]; const usedTopics = used || new Set();
-  const poolFor=l=>{ if(!pools[l]) pools[l]=SH(BANK[l].gens.map((_,i)=>i)); return pools[l]; };
-  const take=l=>{
-    const pool=poolFor(l), hard=HARD[l]||[];
-    /* rooms take the ordinary types first, which leaves the hard ones for
-       the chest and the hatch — that is where they are supposed to show up */
-    let idx=pool.findIndex(g=>!usedTopics.has(TOPIC[l][g]) && hard.indexOf(g)<0);
-    if(idx<0) idx=pool.findIndex(g=>!usedTopics.has(TOPIC[l][g]));
+  const spec=TIERS[tierFor(level)];
+  const usedTopics = used || new Set();
+  const pool = SH(BANK[level].gens.map((_,i)=>i));
+  const hard = HARD[level] || [];
+  /* two hard types are held back for the chest and the hatch */
+  const wantHard = Math.max(0, Math.min(spec.hard, hard.length-2));
+  const fresh = g => !usedTopics.has(TOPIC[level][g]);
+  const take = wantsHard => {
+    let idx = wantsHard ? pool.findIndex(g=>fresh(g) && hard.indexOf(g)>=0) : -1;
+    if(idx<0) idx = pool.findIndex(g=>fresh(g) && (wantsHard || hard.indexOf(g)<0));
+    if(idx<0) idx = pool.findIndex(fresh);
     if(idx<0) return null;
-    const g=pool.splice(idx,1)[0]; usedTopics.add(TOPIC[l][g]);
-    return {lvl:l,gen:g};
+    const g=pool.splice(idx,1)[0]; usedTopics.add(TOPIC[level][g]);
+    return {lvl:level, gen:g, hard:hard.indexOf(g)>=0, tight:false};
   };
-  const byDistance = BANK.map((_,i)=>i).sort((a,b)=>Math.abs(a-level)-Math.abs(b-level));
-  for(const up of mix){
-    const l=Math.min(BANK.length-1, level+up);
-    let chosen=null;
-    for(const order of [l, Math.min(BANK.length-1,l+1), level, Math.max(0,level-1)]){
-      chosen=take(order); if(chosen) break;
-    }
-    if(!chosen) for(const order of byDistance){ chosen=take(order); if(chosen) break; }
-    if(!chosen){ const g=R(0,BANK[l].gens.length-1); chosen={lvl:l,gen:g}; }   /* cannot happen: 190+ types, 10 rooms */
-    plan.push(chosen);
-  }
-  return plan;
+  const plan=[];
+  for(let i=0;i<10;i++){ const slot=take(i<wantHard); if(slot) plan.push(slot); }
+  SH(plan.map((_,i)=>i)).slice(0, Math.min(spec.tight, plan.length))
+    .forEach(i=>{ plan[i].tight=true; });
+  return SH(plan);
+}
+
+/* The near-miss treatment: the wrong answers move to ±1, ±2, ±10 of the right
+   one, so nothing can be eliminated by eye. Used by the tiers and by the hatch. */
+function tighten(p){
+  if(!/^-?\d+$/.test(p.answer)) return p;
+  const a=parseInt(p.answer,10);
+  const near=SH([a+1,a-1,a+2,a-2,a+10,a-10]).filter(v=>v!==a);
+  p.choices=SH([p.answer, ...near.slice(0,3).map(String)]);
+  p.tightened=true;
+  return p;
 }
 
 function startGame(){
@@ -2681,7 +2692,8 @@ function loadRoom(){
   S.roomQStart=Date.now(); S.roomHeld=0;
   const slot=S.plan[Math.min(S.plan.length-1,S.room)];
   S.current=makeProblem(slot.lvl, slot.gen);
-  S.current.fromAbove = slot.lvl>S.level ? BANK[slot.lvl].name : null;
+  S.current.hardType = slot.hard;
+  if(slot.tight) tighten(S.current);
   $("#scene").innerHTML=sceneSVG(S.room,S.avatar);
   $("#roomtag").textContent=`${S.room+1}. ${W().rooms[S.room]}`;
   $("#roomline").textContent=P(SCARELINES);
@@ -2746,7 +2758,9 @@ function askQuestion(p,mode){
   S.spoken=p;
   const label = mode==="bonus" ? "Bonus chest · " : mode==="shortcut" ? "The hatch · " : "";
   $("#topic").innerHTML = label + esc(p.topic) +
-    (mode==="normal" && p.fromAbove ? ` <i class="above">${esc(p.fromAbove)}</i>` : "") +
+    (mode==="normal" ? ` <i class="above">${esc(BANK[S.level].name)}</i>` : "") +
+    (mode==="normal" && p.hardType ? ` <i class="above hard">a hard one</i>`
+      : mode==="normal" && p.tightened ? ` <i class="above hard">close answers</i>` : "") +
     (mode==="bonus" ? ` <i class="above hard">hard · ${esc(BANK[S.level].name)}</i>` : "") +
     (mode==="shortcut" ? ` <i class="above hard">very hard · exact answer · ${esc(BANK[S.level].name)}</i>` : "");
   $("#question").textContent = p.question;
