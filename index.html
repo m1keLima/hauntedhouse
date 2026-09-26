@@ -1,0 +1,2604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Haunted House">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230d0a14'/%3E%3Cellipse cx='32' cy='38' rx='22' ry='16' fill='%23ff8a1f'/%3E%3Cpath d='M32 12 26 22h12z' fill='%234fbf7a'/%3E%3Cpolygon points='24,32 20,40 28,40' fill='%230d0a14'/%3E%3Cpolygon points='40,32 36,40 44,40' fill='%230d0a14'/%3E%3Cpath d='M22 46q10 8 20 0' stroke='%230d0a14' stroke-width='3' fill='none'/%3E%3C/svg%3E">
+<title>Haunted House</title>
+<style>
+:root{
+  --bg:#05040a; --bg2:#0d0a14; --ink:#f0e6d6; --dim:#9a8caa;
+  --pumpkin:#ff8a1f; --blood:#c4121f; --gold:#ffcf5c; --good:#4fbf7a; --bad:#ff4d5c;
+  --line:#2e2140; --card:rgba(16,10,24,.88);
+}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;min-height:100%;overscroll-behavior:none}
+body{
+  background:
+    radial-gradient(1200px 760px at 50% -14%, #1c1028 0%, var(--bg2) 46%, var(--bg) 100%);
+  color:var(--ink);
+  font-family:"Trebuchet MS","Segoe UI",system-ui,-apple-system,sans-serif;
+  font-size:17px; -webkit-font-smoothing:antialiased; overflow-x:hidden; position:relative;
+  -webkit-user-select:none; user-select:none; touch-action:manipulation;
+}
+/* creeping fog over the whole page */
+body::before{content:"";position:fixed;inset:-20%;pointer-events:none;z-index:1;
+  background:radial-gradient(60% 40% at 20% 30%, rgba(150,130,190,.05), transparent 60%),
+             radial-gradient(50% 40% at 80% 70%, rgba(120,100,170,.045), transparent 60%);
+  animation:drift 46s ease-in-out infinite alternate}
+@keyframes drift{from{transform:translate(-3%,-2%) scale(1)}to{transform:translate(3%,2%) scale(1.08)}}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:2;
+  background:radial-gradient(circle at 50% 45%, transparent 48%, rgba(0,0,0,.72) 100%)}
+body.dying::after{animation:dread 1.9s ease-in-out infinite}
+@keyframes dread{0%,100%{background:radial-gradient(circle at 50% 45%, transparent 48%, rgba(0,0,0,.72) 100%)}
+  50%{background:radial-gradient(circle at 50% 45%, transparent 40%, rgba(96,4,10,.62) 100%)}}
+#app{max-width:1020px;margin:0 auto;padding:18px 16px 48px;position:relative;z-index:3}
+h1,h2,h3{margin:0 0 .4em;font-weight:800;letter-spacing:.5px}
+h1{font-size:clamp(38px,9vw,74px);text-align:center;line-height:1;
+  background:linear-gradient(180deg,#ffd469 0%,var(--pumpkin) 48%,#8c1d06 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 0 36px rgba(255,138,31,.26));animation:titleflick 7s infinite}
+@keyframes titleflick{0%,100%{opacity:1}52%{opacity:.82}54%{opacity:1}77%{opacity:.7}79%{opacity:1}}
+.sub{text-align:center;color:var(--dim);margin:2px 0 22px;font-size:14px;letter-spacing:4px;text-transform:uppercase}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;
+  box-shadow:0 22px 60px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,255,255,.035)}
+.hidden{display:none !important}
+.center{text-align:center}
+.row{display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:center}
+
+.seclabel{font-size:13px;letter-spacing:3px;text-transform:uppercase;color:var(--pumpkin);
+  margin:22px 0 10px;font-weight:700}
+.seclabel:first-child{margin-top:0}
+.grid-levels{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:10px}
+.lvl{position:relative;background:#150e20;border:1px solid var(--line);color:var(--ink);border-radius:12px;
+  padding:12px 8px;cursor:pointer;font:inherit;font-size:16px;font-weight:600;text-align:center;transition:.15s;line-height:1.3}
+.lvl small{display:block;color:var(--dim);font-size:12px;margin-top:4px;font-weight:400}
+.lvl .tierdot{position:absolute;top:5px;right:8px;color:var(--blood);font-style:normal;font-size:15px;letter-spacing:1px}
+.lvl:hover{border-color:var(--pumpkin);transform:translateY(-2px)}
+.lvl[aria-pressed="true"]{background:linear-gradient(180deg,#ff9a33,#b64a06);border-color:#ffca7a;color:#240d00}
+.lvl[aria-pressed="true"] small{color:#5a2200}
+.lvl[aria-pressed="true"] .tierdot{color:#4a0a0a}
+.grid-worlds{display:grid;grid-template-columns:repeat(auto-fill,minmax(146px,1fr));gap:10px}
+.wld{background:#150e20;border:1px solid var(--line);color:var(--ink);border-radius:12px;padding:12px 8px;
+  cursor:pointer;font:inherit;font-size:15px;font-weight:600;text-align:center;transition:.15s;line-height:1.3}
+.wld .wicon{display:block;font-size:26px;margin-bottom:4px}
+.wld small{display:block;color:var(--dim);font-size:11.5px;margin-top:4px;font-weight:400}
+.wld:hover:not(:disabled){border-color:var(--pumpkin);transform:translateY(-2px)}
+.wld[aria-pressed="true"]{background:linear-gradient(180deg,#5c2b8a,#2e1250);border-color:#b98ae0;color:#fff}
+.wld[aria-pressed="true"] small{color:#d9c4f0}
+.wld.locked{opacity:.4;cursor:not-allowed;filter:grayscale(1)}
+.unlock{margin:14px 0 4px;padding:13px 16px;border-radius:12px;font-size:17px;text-align:center;
+  background:rgba(92,43,138,.22);border:1px solid #6b3aa0;color:var(--ink)}
+.grid-av{display:grid;grid-template-columns:repeat(auto-fill,minmax(122px,1fr));gap:12px}
+.av{background:#150e20;border:1px solid var(--line);border-radius:14px;padding:12px 6px 10px;cursor:pointer;
+  text-align:center;transition:.15s;font:inherit;color:var(--ink)}
+.av svg{display:block;margin:0 auto 6px}
+.av span{font-size:14px;color:var(--dim)}
+.av:hover{border-color:#cfe0ff;transform:translateY(-3px)}
+.av[aria-pressed="true"]{border-color:var(--pumpkin);background:#25122c;box-shadow:0 0 0 2px rgba(255,138,31,.28)}
+.av[aria-pressed="true"] span{color:var(--gold)}
+input[type=text]{background:#120c1c;border:1px solid var(--line);border-radius:12px;color:var(--ink);
+  font:inherit;font-size:19px;padding:13px 16px;width:100%;max-width:340px;
+  -webkit-user-select:text;user-select:text}
+input[type=text]:focus{outline:none;border-color:var(--pumpkin)}
+input[type=text]::placeholder{color:#5c5070}
+.btn{border:0;border-radius:12px;padding:15px 30px;font:inherit;font-weight:800;font-size:19px;cursor:pointer;
+  background:linear-gradient(180deg,#ff9a33,#b64a06);color:#240d00;
+  box-shadow:0 10px 26px rgba(255,138,31,.26);transition:.15s}
+.btn:hover{transform:translateY(-2px);box-shadow:0 14px 32px rgba(255,138,31,.36)}
+.btn.ghost{background:transparent;border:1px solid var(--line);color:var(--dim);box-shadow:none;font-size:15px;padding:12px 20px}
+.btn.ghost:hover{color:var(--ink);border-color:#cfe0ff}
+#tierNote{font-size:14px;color:var(--dim);margin-top:10px;line-height:1.6}
+#saveline{font-size:13px;color:var(--dim);text-align:center;margin-top:16px;line-height:1.7}
+#saveline a{color:var(--dim)}
+.howto{font-size:15.5px;line-height:1.85;color:var(--dim)}
+kbd{background:#271a38;border:1px solid var(--line);border-radius:5px;padding:2px 7px;font-size:13px}
+
+#hud{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+.hudbox{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:9px 14px;
+  font-size:16px;display:flex;align-items:center;gap:9px}
+.lanterns{display:flex;gap:4px;align-items:center}
+.candy{color:var(--gold);font-weight:800;font-size:19px}
+#tierBadge{color:var(--blood);font-weight:800;letter-spacing:1.5px;text-transform:uppercase;font-size:13px}
+.spacer{flex:1}
+.iconbtn{background:#150e20;border:1px solid var(--line);color:var(--dim);border-radius:10px;
+  width:40px;height:40px;font-size:17px;cursor:pointer}
+.iconbtn:hover{color:var(--gold);border-color:var(--gold)}
+#chase{position:relative;height:52px;background:#0a0710;border:1px solid var(--line);
+  border-radius:12px;overflow:hidden;margin-bottom:12px}
+#chasetrack{position:absolute;inset:0;display:flex}
+#chasetrack i{flex:1 1 10%;border-right:1px solid rgba(255,255,255,.055);font-style:normal;
+  font-size:10px;color:#3d3450;text-align:center;padding-top:3px;transition:.3s}
+#chasetrack i:last-child{border-right:0}
+#chasetrack i.here{background:rgba(255,138,31,.1);color:var(--pumpkin);font-weight:800}
+#king,#hero{position:absolute;bottom:2px;left:0;z-index:2;transition:left .6s cubic-bezier(.4,1.4,.5,1)}
+
+#scenewrap{position:relative;border-radius:16px;overflow:hidden;border:1px solid var(--line);
+  box-shadow:0 24px 60px rgba(0,0,0,.75)}
+#scene{display:block;width:100%;height:auto}
+#roomtag{position:absolute;left:14px;top:12px;font-size:13px;letter-spacing:3.5px;text-transform:uppercase;
+  color:var(--gold);text-shadow:0 2px 10px #000;font-weight:700}
+#chest,#hatch{position:absolute;bottom:7%;cursor:pointer;animation:bob 2.4s ease-in-out infinite}
+#chest{right:5%;filter:drop-shadow(0 0 16px rgba(255,207,92,.75))}
+#hatch{left:32%;filter:drop-shadow(0 0 16px rgba(196,18,31,.7));animation-duration:3.1s}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.flick{animation:flick 3.1s infinite}
+@keyframes flick{0%,100%{opacity:.85}43%{opacity:.58}47%{opacity:.96}61%{opacity:.48}70%{opacity:.9}}
+.eyes{animation:blink 6.5s infinite}
+@keyframes blink{0%,92%,100%{opacity:.85}94%,98%{opacity:0}}
+.mote{animation:float 11s linear infinite}
+@keyframes float{0%{transform:translateY(0)}100%{transform:translateY(-34px)}}
+.fogdrift{animation:fogx 26s ease-in-out infinite alternate}
+.fogdrift2{animation:fogx 34s ease-in-out infinite alternate-reverse}
+@keyframes fogx{from{transform:translateX(-7%)}to{transform:translateX(7%)}}
+.kingglow{animation:kingpulse 3.4s ease-in-out infinite}
+@keyframes kingpulse{0%,100%{opacity:1}50%{opacity:.86}}
+
+#qcard{margin-top:14px}
+#topic{font-size:13px;letter-spacing:2.5px;text-transform:uppercase;color:var(--pumpkin);font-weight:700}
+#topic .above{font-style:normal;background:#2a1730;border:1px solid var(--line);color:var(--dim);
+  border-radius:6px;padding:2px 8px;margin-left:8px;letter-spacing:1px;font-size:11px}
+#topic .above.hard{color:#ffb0b6;border-color:#5e1620;background:#2a0d12}
+#timerwrap{display:flex;align-items:center;gap:12px;margin:12px 0 2px}
+#timerbar{flex:1;height:10px;border-radius:6px;background:#1a1224;overflow:hidden;
+  border:1px solid var(--line);box-shadow:inset 0 1px 3px rgba(0,0,0,.6)}
+#timerfill{height:100%;width:100%;border-radius:6px;background:linear-gradient(90deg,#4fbf7a,#8fd36a);
+  transition:background .3s}
+#timerwrap.warn #timerfill{background:linear-gradient(90deg,#ffb347,#ff8a1f)}
+#timerwrap.late #timerfill{background:linear-gradient(90deg,#c4121f,#ff4d5c)}
+#timerwrap.done #timerfill{background:#3a2a30}
+#timertext{font-variant-numeric:tabular-nums;font-weight:800;font-size:16px;color:var(--good);min-width:58px;text-align:right}
+#timerwrap.warn #timertext{color:var(--gold)}
+#timerwrap.late #timertext{color:var(--bad);animation:tick .5s steps(2) infinite}
+#timerwrap.done #timertext{color:#6b5c78;animation:none}
+@keyframes tick{0%,100%{opacity:1}50%{opacity:.5}}
+#timerhint{font-size:11.5px;letter-spacing:1.5px;text-transform:uppercase;color:#6b5c78;min-width:150px}
+@media(max-width:560px){#timerhint{display:none}}
+#question{font-size:clamp(22px,4.2vw,34px);margin:12px 0 18px;line-height:1.4;font-weight:700}
+#choices{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:560px){#choices{grid-template-columns:1fr}}
+.ch{background:#150e20;border:1px solid var(--line);border-radius:12px;padding:18px 16px;font:inherit;
+  font-size:21px;color:var(--ink);cursor:pointer;text-align:left;transition:.13s;display:flex;align-items:center;gap:13px}
+.ch b{display:inline-flex;width:32px;height:32px;flex:0 0 32px;align-items:center;justify-content:center;
+  border-radius:8px;background:#271a38;color:var(--dim);font-size:15px}
+.ch:hover:not(:disabled){border-color:var(--pumpkin);background:#21132e;transform:translateX(4px)}
+.ch:disabled{cursor:default;opacity:.4}
+.ch.right{border-color:var(--good);background:rgba(79,191,122,.15);opacity:1}
+.ch.right b{background:var(--good);color:#05200f}
+.ch.wrong{border-color:var(--bad);background:rgba(255,77,92,.13);opacity:1}
+.ch.wrong b{background:var(--bad);color:#2a0407}
+#feedback{margin-top:14px;border-radius:12px;padding:16px 18px;font-size:17px;line-height:1.6;display:none}
+#feedback.show{display:block;animation:fade .25s}
+@keyframes fade{from{opacity:0;transform:translateY(7px)}to{opacity:1}}
+#feedback.ok{background:rgba(79,191,122,.09);border:1px solid rgba(79,191,122,.38)}
+#feedback.no{background:rgba(196,18,31,.1);border:1px solid rgba(196,18,31,.42)}
+#feedback .ft{font-weight:800;margin-bottom:7px;font-size:18px}
+#feedback .steps{color:var(--dim);font-size:16px;margin-top:5px}
+#feedback .steps b{color:var(--ink)}
+#feedback .again{color:var(--gold)}
+#nextwrap{margin-top:16px;text-align:right}
+
+#overlay{position:fixed;inset:0;background:rgba(3,2,6,.94);display:flex;align-items:center;justify-content:center;
+  padding:20px;z-index:60;backdrop-filter:blur(7px)}
+#overlay .card{max-width:660px;width:100%;max-height:92vh;overflow:auto}
+table.rc{width:100%;border-collapse:collapse;margin:14px 0;font-size:16px}
+table.rc td{padding:9px 4px;border-bottom:1px solid var(--line)}
+table.rc td:last-child{text-align:right;font-weight:800;color:var(--gold)}
+.rank{text-align:center;font-size:clamp(26px,6vw,40px);font-weight:800;color:var(--pumpkin);margin:10px 0 2px}
+.missed{font-size:16px;color:var(--dim);line-height:1.75}
+</style>
+</head>
+<body>
+<div id="app">
+
+<section id="setup">
+  <h1>Haunted House</h1>
+  <p class="sub">Seven places &middot; Ten rooms each &middot; One Pumpkin King</p>
+
+  <div class="card">
+    <div class="seclabel">1 &mdash; Who is going in?</div>
+    <input type="text" id="nameInput" placeholder="Your name" maxlength="16" autocomplete="off" spellcheck="false">
+
+    <div class="seclabel">2 &mdash; Where are you going?</div>
+    <div class="grid-worlds" id="worldGrid"></div>
+
+    <div class="seclabel">3 &mdash; Choose your level</div>
+    <div class="grid-levels" id="levelGrid"></div>
+    <div id="tierNote"></div>
+
+    <div class="seclabel">4 &mdash; Choose your face</div>
+    <div class="grid-av" id="avGrid"></div>
+
+    <div class="row" style="margin-top:26px">
+      <button class="btn" id="startBtn">Approach the house</button>
+      <button class="btn ghost" id="sfxBtn">Sound: on</button>
+      <button class="btn ghost" id="musBtn">Music: on</button>
+    </div>
+    <div id="saveline"></div>
+  </div>
+
+  <div class="card" style="margin-top:16px">
+    <div class="seclabel">What is waiting</div>
+    <div class="howto">
+      You start on the porch. Answer to get in, then one problem per room &mdash; ten in all, and never the same kind twice.<br>
+      You carry <b style="color:var(--gold)">3 jack-o'-lanterns</b>. A wrong answer costs <b style="color:var(--gold)">half a lantern</b>
+      and you may try again &mdash; you get a hint, not the answer.<br>
+      The <b style="color:var(--pumpkin)">Pumpkin King</b> is in the room with you. Every half lantern you lose, he is closer. At nothing, he has you.<br>
+      A <b style="color:var(--gold)">chest</b> may appear once you are below full lanterns: the hardest kind of problem your grade has,
+      worth <b style="color:var(--gold)">half a lantern</b> back. Wrong costs nothing.<br>
+      A <b style="color:var(--blood)">hatch</b> in the floor skips three rooms &mdash; but a wrong answer down there costs
+      <b style="color:var(--blood)">a whole lantern</b>.<br>
+      Every problem runs a <b style="color:var(--good)">30-second candy clock</b>. It never costs you anything to be slow &mdash;
+      but answer while it is still running and you take <b style="color:var(--gold)">up to 5 extra sweets</b>, more the faster you are.<br>
+      What you carry out is decided by the lanterns you still have &mdash; <b style="color:var(--gold)">ten sweets for each one</b>,
+      on top of whatever you picked up inside. Come out dark and you come out poor.<br>
+      Escape a place and the next one opens &mdash; the graveyard, the forest, the mountain, the cave, the dungeon, the castle &mdash;
+      but only <b style="color:var(--gold)">for the grade you beat it at</b>. Open the graveyard at Grade 4 and Grade 5 still starts back at the house.
+      The more you play a grade, the harder that grade gets.
+      <span style="color:var(--ink)">Keys <kbd>1</kbd>&ndash;<kbd>4</kbd> answer, <kbd>Enter</kbd> continues.</span>
+    </div>
+  </div>
+</section>
+
+<section id="game" class="hidden">
+  <div id="hud">
+    <div class="hudbox"><span id="roomnum">Room 1 / 10</span></div>
+    <div class="hudbox"><span class="lanterns" id="lanterns"></span></div>
+    <div class="hudbox">🍬 <span class="candy" id="candynum">0</span></div>
+    <div class="hudbox"><span id="tierBadge">Restless</span></div>
+    <div class="spacer"></div>
+    <button class="iconbtn" id="musBtn2" title="Music on/off">♪</button>
+    <button class="iconbtn" id="sfxBtn2" title="Sound on/off">🔊</button>
+    <button class="btn ghost" id="quitBtn">Walk out</button>
+  </div>
+
+  <div id="chase">
+    <div id="chasetrack"></div>
+    <div id="king"></div><div id="hero"></div>
+  </div>
+
+  <div id="scenewrap">
+    <svg id="scene" viewBox="0 0 800 460" preserveAspectRatio="xMidYMid slice"></svg>
+    <div id="roomtag"></div>
+    <div id="chest" class="hidden" title="A chest, glowing">
+      <svg width="86" height="72" viewBox="0 0 64 54">
+        <rect x="4" y="22" width="56" height="28" rx="4" fill="#4a2e14" stroke="#a5762f" stroke-width="2"/>
+        <path d="M4 24 a28 16 0 0 1 56 0Z" fill="#5c3a1c" stroke="#a5762f" stroke-width="2"/>
+        <rect x="27" y="20" width="10" height="14" rx="2" fill="#ffcf5c"/>
+        <circle cx="32" cy="27" r="2.4" fill="#4a2e14"/>
+        <g fill="#ffcf5c" opacity=".9"><circle cx="12" cy="12" r="2"/><circle cx="52" cy="14" r="2.4"/><circle cx="32" cy="6" r="1.8"/></g>
+      </svg></div>
+    <div id="hatch" class="hidden" title="A hatch in the floor">
+      <svg width="96" height="62" viewBox="0 0 72 46">
+        <ellipse cx="36" cy="30" rx="32" ry="14" fill="#05030a"/>
+        <path d="M6 30 a30 13 0 0 1 60 0" fill="none" stroke="#6b4a2c" stroke-width="3"/>
+        <path d="M40 30 L66 12 a30 13 0 0 0 -30 5Z" fill="#33221a" stroke="#6b4a2c" stroke-width="2"/>
+        <g fill="#c4121f" opacity=".95"><ellipse cx="30" cy="30" rx="2.6" ry="1.8"/><ellipse cx="41" cy="31" rx="2.6" ry="1.8"/></g>
+        <path d="M22 38 q14 6 28 0" stroke="#c4121f" stroke-width="1.6" fill="none" opacity=".55"/>
+      </svg></div>
+  </div>
+
+  <div class="card" id="qcard">
+    <div id="topic"></div>
+    <div id="timerwrap">
+      <div id="timerbar"><div id="timerfill"></div></div>
+      <span id="timertext">30.0s</span>
+      <span id="timerhint">candy clock</span>
+    </div>
+    <div id="question"></div>
+    <div id="choices"></div>
+    <div id="feedback"></div>
+    <div id="nextwrap" class="hidden"><button class="btn" id="nextBtn">Continue</button></div>
+  </div>
+</section>
+
+<div id="overlay" class="hidden"><div class="card" id="overlayCard"></div></div>
+</div>
+
+<script>
+"use strict";
+/* ===== shared helpers (mirrors the game file) ===== */
+const R = (a,b) => Math.floor(Math.random()*(b-a+1))+a;
+const P = a => a[R(0,a.length-1)];
+const SH = a => { a=a.slice(); for(let i=a.length-1;i>0;i--){const j=R(0,i);[a[i],a[j]]=[a[j],a[i]];} return a; };
+const gcd = (a,b) => b ? gcd(b, a%b) : Math.abs(a);
+const N = x => String(Math.round(x*1e6)/1e6);
+function frac(n,d){ const g=gcd(n,d)||1; n/=g; d/=g; if(d<0){n=-n;d=-d;} return d===1?String(n):n+"/"+d; }
+function sup(n){ const m={"-":"⁻","0":"⁰","1":"¹","2":"²","3":"³","4":"⁴","5":"⁵","6":"⁶","7":"⁷","8":"⁸","9":"⁹","x":"ˣ","n":"ⁿ","+":"⁺"};
+  return String(n).split("").map(c=>m[c]||c).join(""); }
+function signed(n){ return (n<0?"− ":"+ ")+Math.abs(n); }
+function cplx(re,im){ if(im===0) return String(re); if(re===0) return (im===1?"i":im===-1?"−i":im+"i");
+  return re+" "+(im<0?"−":"+")+" "+(Math.abs(im)===1?"":Math.abs(im))+"i"; }
+const clock = m => { m=((m%720)+720)%720; const h=Math.floor(m/60)||12; return h+":"+String(m%60).padStart(2,"0"); };
+
+/* =====================================================================
+   PROBLEM BANK — at least ten distinct problem types per level, so a
+   ten-room run never repeats a type.
+   ===================================================================== */
+const BANK = [
+
+/* ---------------- 1. Grade 1 ---------------- */
+{name:"Grade 1", note:"add & subtract to 20", gens:[
+  ()=>{const a=R(2,9),b=R(2,9);return{t:"Addition",q:`${a} + ${b} = ?`,a:a+b,w:[a+b+1,a+b-1,a+b+2,a*b],s:`Start at ${a} and count on ${b} more. You land on ${a+b}.`};},
+  ()=>{const a=R(8,20),b=R(2,a-2);return{t:"Subtraction",q:`${a} − ${b} = ?`,a:a-b,w:[a-b+1,a-b-1,a+b,b-1],s:`Take ${b} away from ${a}: ${a-b}.`};},
+  ()=>{const a=R(3,15),n=R(2,5);return{t:"Counting on",q:`What number is ${n} more than ${a}?`,a:a+n,w:[a-n,a+n+1,a+n-1,a*n],s:`${a} + ${n} = ${a+n}.`};},
+  ()=>{const a=R(1,9);return{t:"Making ten",q:`10 + ${a} = ?`,a:10+a,w:[a,20+a,10-a,11+a],s:`One ten and ${a} ones is ${10+a}.`};},
+  ()=>{const a=R(2,8),b=R(2,8),c=R(1,4);return{t:"Three numbers",q:`${a} + ${b} + ${c} = ?`,a:a+b+c,w:[a+b,a+b+c+1,a+b+c-2,a+b-c],s:`${a}+${b}=${a+b}, then ${a+b}+${c}=${a+b+c}.`};},
+  ()=>{const a=R(11,19);return{t:"Tens and ones",q:`How many ones are in ${a}?`,a:a-10,w:[a,10,a-9,a-11],s:`${a} is one ten and ${a-10} ones.`};},
+  ()=>{const n=R(2,9);return{t:"Doubles",q:`${n} + ${n} = ?`,a:2*n,w:[2*n+1,2*n-1,n*n,n+2],s:`Double ${n} is ${2*n}.`};},
+  ()=>{const b=R(1,9);return{t:"Number bonds",q:`? + ${b} = 10`,a:10-b,w:[b,10+b,10-b+1,11-b].filter(v=>v!==10-b),s:`${10-b} and ${b} make ten.`};},
+  ()=>{let a=R(4,19),b=R(4,19);if(a===b)b++;return{t:"Comparing",q:`Which number is larger, ${a} or ${b}?`,a:String(Math.max(a,b)),w:[String(Math.min(a,b)),"They are equal",String(a+b)],s:`${Math.max(a,b)} comes later when you count, so it is larger.`};},
+  ()=>{const sh=P([["a triangle",3],["a square",4],["a pentagon",5],["a hexagon",6]]);
+    return{t:"Shapes",q:`How many sides does ${sh[0]} have?`,a:sh[1],w:[sh[1]+1,sh[1]-1,sh[1]+2,sh[1]*2],s:`${sh[0].charAt(0).toUpperCase()+sh[0].slice(1)} has ${sh[1]} sides.`};},
+  ()=>{const a=R(12,20),b=R(2,6);return{t:"Taking away",q:`You had ${a} sweets and ate ${b}. How many are left?`,a:a-b,w:[a+b,a-b-1,a-b+1,b],s:`${a} − ${b} = ${a-b}.`};}
+]},
+
+/* ---------------- 2. Grade 2 ---------------- */
+{name:"Grade 2", note:"2-digit, early ×", gens:[
+  ()=>{const a=R(21,79),b=R(11,20);return{t:"2-digit addition",q:`${a} + ${b} = ?`,a:a+b,w:[a+b+10,a+b-10,a+b+1,a-b],s:`Add the tens, then the ones → ${a+b}.`};},
+  ()=>{const a=R(40,99),b=R(11,39);return{t:"2-digit subtraction",q:`${a} − ${b} = ?`,a:a-b,w:[a-b+10,a-b-10,a+b,b-a+100],s:`${a} − ${b} = ${a-b}.`};},
+  ()=>{const t=P([2,5,10]),n=R(2,9);return{t:"Skip counting",q:`${t} × ${n} = ?`,a:t*n,w:[t*n+t,t*n-t,t+n,t*n+1],s:`Count by ${t}s, ${n} times: ${t*n}.`};},
+  ()=>{const a=R(3,9),s=R(11,18);return{t:"Missing addend",q:`${a} + ? = ${s}`,a:s-a,w:[s+a,s-a+1,s-a-1,a],s:`${s} − ${a} = ${s-a}.`};},
+  ()=>{const n=R(2,9);return{t:"Doubling",q:`Double ${n+10} = ?`,a:2*(n+10),w:[n+10,2*n+10,2*(n+10)+2,n+20],s:`${n+10} + ${n+10} = ${2*(n+10)}.`};},
+  ()=>{const a=R(2,9),b=R(2,9);return{t:"Even or odd",q:`Is ${a*10+b} even or odd?`,a:(b%2===0)?"Even":"Odd",w:[(b%2===0)?"Odd":"Even","Both","Neither"],s:`Look at the ones digit, ${b}. ${b%2===0?"An even ones digit means an even number.":"An odd ones digit means an odd number."}`};},
+  ()=>{const h=R(1,9),t=R(0,9),o=R(1,9),n=h*100+t*10+o,d=P(["hundreds","tens","ones"]);
+    const v=d==="hundreds"?h*100:d==="tens"?t*10:o;
+    return{t:"Place value",q:`In ${n}, what is the value of the ${d} digit?`,a:v,w:[h,t,o,v+10].filter(x=>x!==v),s:`The ${d} digit is ${d==="hundreds"?h:d==="tens"?t:o}, so it is worth ${v}.`};},
+  ()=>{const r=R(2,6),c=R(2,6);return{t:"Arrays",q:`An array has ${r} rows of ${c}. How many in total?`,a:r*c,w:[r+c,r*c+r,r*c-c,2*(r+c)],s:`${r} rows of ${c} is ${r} × ${c} = ${r*c}.`};},
+  ()=>{const start=R(1,11)*60+P([0,15,30]),add=P([15,30,45,60]);
+    return{t:"Telling time",q:`What time is ${add} minutes after ${clock(start)}?`,a:clock(start+add),w:[clock(start-add),clock(start+add+15),clock(start+add-30),clock(start+60)],s:`${clock(start)} plus ${add} minutes is ${clock(start+add)}.`};},
+  ()=>{const t=R(1,6),f=R(1,5);const v=t*10+f*5;
+    return{t:"Money",q:`You have ${t} ten-pence coins and ${f} five-pence coins. How much is that, in pence?`,a:v,w:[t+f,v+5,v-5,t*5+f*10],s:`${t}×10p = ${t*10}p and ${f}×5p = ${f*5}p, so ${v}p altogether.`};},
+  ()=>{let a=R(20,99),b=R(20,99);if(a===b)b++;return{t:"Comparing numbers",q:`Which is greater, ${a} or ${b}?`,a:String(Math.max(a,b)),w:[String(Math.min(a,b)),"They are equal",String(a+b)],s:`Compare the tens digits first: ${Math.max(a,b)} is greater.`};}
+]},
+
+/* ---------------- 3. Grade 3 ---------------- */
+{name:"Grade 3", note:"× ÷ and fractions", gens:[
+  ()=>{const a=R(3,10),b=R(3,10);return{t:"Times tables",q:`${a} × ${b} = ?`,a:a*b,w:[a*b+a,a*b-b,a+b,a*b+1],s:`${a} groups of ${b} is ${a*b}.`};},
+  ()=>{const b=R(3,9),q=R(3,9);return{t:"Division",q:`${b*q} ÷ ${b} = ?`,a:q,w:[q+1,q-1,b,b*q],s:`How many ${b}s fit into ${b*q}? ${q}.`};},
+  ()=>{const d=P([2,3,4,5]),k=R(2,6);return{t:"Fraction of a set",q:`What is 1/${d} of ${d*k}?`,a:k,w:[d,d*k-d,k+d,d*k/2].filter(v=>v!==k),s:`Split ${d*k} into ${d} equal groups: each has ${k}.`};},
+  ()=>{const w=R(3,12),h=R(3,12);return{t:"Perimeter",q:`A rectangle is ${w} cm by ${h} cm. What is its perimeter?`,a:2*(w+h),w:[w*h,w+h,2*w*h,2*(w+h)+2],s:`Perimeter = 2 × (${w} + ${h}) = ${2*(w+h)} cm.`};},
+  ()=>{const a=R(2,9),b=R(2,9),c=R(2,5);return{t:"Multiply then add",q:`${a} × ${b} + ${c} = ?`,a:a*b+c,w:[a*(b+c),a*b-c,a*b+c+1,a+b+c],s:`Multiply first: ${a}×${b}=${a*b}. Then add ${c} → ${a*b+c}.`};},
+  ()=>{const t=R(2,8),o=R(1,9),n=t*10+o,ans=o>=5?(t+1)*10:t*10;
+    return{t:"Rounding",q:`Round ${n} to the nearest ten.`,a:ans,w:[t*10,(t+1)*10,n,ans+10].filter(v=>v!==ans),s:`The ones digit is ${o}, so it rounds ${o>=5?"up":"down"} → ${ans}.`};},
+  ()=>{const b=R(3,9),q=R(3,9);return{t:"Missing factor",q:`? × ${b} = ${b*q}`,a:q,w:[b,b*q,q+1,q-1],s:`${b*q} ÷ ${b} = ${q}.`};},
+  ()=>{let d1=P([2,3,4,5,6,8]),d2=P([2,3,4,5,6,8]);while(d2===d1)d2=P([2,3,4,5,6,8]);
+    const big=d1<d2?d1:d2;
+    return{t:"Comparing fractions",q:`Which is bigger, 1/${d1} or 1/${d2}?`,a:`1/${big}`,w:[`1/${d1===big?d2:d1}`,"They are equal",`1/${d1+d2}`],s:`The more pieces you cut something into, the smaller each piece. ${big} is the smaller denominator, so 1/${big} is bigger.`};},
+  ()=>{const g=R(3,8),each=R(3,9);return{t:"Multiplication problems",q:`${g} spiders each have ${each} eggs. How many eggs altogether?`,a:g*each,w:[g+each,g*each+g,g*each-each,g*each+10],s:`${g} × ${each} = ${g*each}.`};},
+  ()=>{const k=R(3,8),n=R(3,7);return{t:"Sharing equally",q:`${k*n} bones are shared equally between ${k} dogs. How many does each get?`,a:n,w:[k,k*n,n+1,n-1],s:`${k*n} ÷ ${k} = ${n}.`};},
+  ()=>{const s=R(3,11);return{t:"Area of a square",q:`A square has sides of ${s} cm. What is its area, in cm²?`,a:s*s,w:[4*s,2*s,s*s+s,s+s],s:`Area = ${s} × ${s} = ${s*s} cm².`};}
+]},
+
+/* ---------------- 4. Grade 4 ---------------- */
+{name:"Grade 4", note:"long × ÷, fractions", gens:[
+  ()=>{const a=R(112,899),b=R(3,9);return{t:"Multi-digit ×",q:`${a} × ${b} = ?`,a:a*b,w:[a*b+b,a*b-a,a*b+10,a*b-100],s:`${a} × ${b} = ${a*b}.`};},
+  ()=>{const d=R(4,9),q=R(12,60),r=R(1,d-1);return{t:"Remainders",q:`What is the remainder of ${d*q+r} ÷ ${d}?`,a:r,w:[q,d-r,r+1,0],s:`${d} × ${q} = ${d*q}, and ${d*q+r} − ${d*q} = ${r} left over.`};},
+  ()=>{let n,d;do{n=R(1,5);d=n+R(1,5);}while(gcd(n,d)!==1);const k=R(2,6);
+    return{t:"Equivalent fractions",q:`${n}/${d} = ? / ${d*k}`,a:n*k,w:[n,n+k,d*k-n,n*k+1],s:`Multiply top and bottom by ${k}: ${n}/${d} = ${n*k}/${d*k}.`};},
+  ()=>{const w=R(4,15),h=R(4,15);return{t:"Area",q:`A rectangle is ${w} m by ${h} m. What is its area, in m²?`,a:w*h,w:[2*(w+h),w+h,w*h+w,w*h-h],s:`Area = ${w} × ${h} = ${w*h} m².`};},
+  ()=>{const n=P([12,18,20,24,30,36]);const fs=[];for(let i=1;i<=n;i++) if(n%i===0) fs.push(i);
+    return{t:"Factors",q:`How many factors does ${n} have?`,a:fs.length,w:[fs.length+1,fs.length-1,fs.length+2,n/2],s:`The factors of ${n} are ${fs.join(", ")} — ${fs.length} of them.`};},
+  ()=>{const a=R(2,9),b=R(2,9),c=R(2,9);return{t:"Order of operations",q:`${a} + ${b} × ${c} = ?`,a:a+b*c,w:[(a+b)*c,a*b+c,a+b+c,a+b*c+1],s:`Multiply first: ${b}×${c}=${b*c}. Then ${a}+${b*c} = ${a+b*c}.`};},
+  ()=>{const d=R(3,9),q=R(21,99);return{t:"Long division",q:`${d*q} ÷ ${d} = ?`,a:q,w:[q+1,q-1,q+10,d*q],s:`${d} × ${q} = ${d*q}, so the answer is ${q}.`};},
+  ()=>{const w=R(2,5),n=R(1,w),d=R(2,6);const imp=w*d+n%d;const nn=n%d||1;
+    return{t:"Mixed numbers",q:`Write ${w} ${nn}/${d} as an improper fraction.`,a:`${w*d+nn}/${d}`,w:[`${w+nn}/${d}`,`${w*d}/${d}`,`${w*d+nn}/${d+1}`,`${d*nn}/${w}`],s:`${w} whole = ${w*d}/${d}. Add ${nn}/${d} → ${w*d+nn}/${d}.`};},
+  ()=>{const a=R(1,9),b=R(1,9);const v=Math.round((a+b/10)*10)/10;
+    return{t:"Decimal place value",q:`What is the value of the digit ${b} in ${v.toFixed(1)}?`,a:frac(b,10),w:[String(b),frac(b,100),String(b*10),frac(a,10)],s:`It sits in the tenths column, so it is worth ${b}/10.`};},
+  ()=>{const a=P([3,4,6]),b=P([5,8,9]);let l=a*b/gcd(a,b);
+    return{t:"Multiples",q:`What is the lowest common multiple of ${a} and ${b}?`,a:l,w:[a*b,a+b,l+a,Math.abs(a-b)||2].filter(v=>v!==l),s:`Multiples of ${a}: ${[1,2,3,4].map(k=>a*k).join(", ")}… The first one that ${b} also divides is ${l}.`};},
+  ()=>{const x=R(10,80);return{t:"Angles",q:`Two angles are complementary. One is ${x}°. What is the other?`,a:(90-x)+"°",w:[(180-x)+"°",(x)+"°",(360-x)+"°",(90+x)+"°"],s:`Complementary angles add to 90°, so 90° − ${x}° = ${90-x}°.`};}
+]},
+
+/* ---------------- 5. Grade 5 ---------------- */
+{name:"Grade 5", note:"decimals & fractions", gens:[
+  ()=>{const a=R(10,99)/10,b=R(10,99)/10;const s=Math.round((a+b)*10)/10;
+    return{t:"Decimal addition",q:`${a.toFixed(1)} + ${b.toFixed(1)} = ?`,a:s.toFixed(1),w:[(s+1).toFixed(1),(s-1).toFixed(1),(s+0.1).toFixed(1),(a*b).toFixed(1)],s:`Line up the decimal points: ${s.toFixed(1)}.`};},
+  ()=>{const a=R(11,99)/10,b=R(2,9);const p=Math.round(a*b*10)/10;
+    return{t:"Decimal ×",q:`${a.toFixed(1)} × ${b} = ?`,a:p.toFixed(1),w:[(p*10).toFixed(1),(p/10).toFixed(1),(p+b).toFixed(1),(p-1).toFixed(1)],s:`${Math.round(a*10)} × ${b} = ${Math.round(a*10)*b}, then move the point one place: ${p.toFixed(1)}.`};},
+  ()=>{let d1,d2,n1,n2;do{d1=P([2,3,4]);n1=R(1,d1-1);}while(gcd(n1,d1)!==1);
+    do{d2=P([5,6,8]);n2=R(1,d2-1);}while(gcd(n2,d2)!==1);
+    const n=n1*d2+n2*d1,d=d1*d2;
+    return{t:"Adding fractions",q:`${n1}/${d1} + ${n2}/${d2} = ?`,a:frac(n,d),w:[frac(n1+n2,d1+d2),frac(n,d1*d2+1),frac(n+1,d),frac(n1*n2,d)],s:`Common denominator ${d}: ${n1*d2}/${d} + ${n2*d1}/${d} = ${n}/${d}${(n+"/"+d)===frac(n,d)?"":" = "+frac(n,d)}.`};},
+  ()=>{const a=R(2,6),b=R(2,6),c=R(2,6),d=R(2,4);const v=a*(b+c)-d;
+    return{t:"Order of operations",q:`${a} × (${b} + ${c}) − ${d} = ?`,a:v,w:[a*b+c-d,a*(b+c+d),v+d*2,v-a],s:`Brackets first: ${b}+${c}=${b+c}. Then ${a}×${b+c}=${a*(b+c)}, minus ${d} → ${v}.`};},
+  ()=>{const l=R(2,9),w=R(2,9),h=R(2,9);return{t:"Volume",q:`A box is ${l} × ${w} × ${h} cm. What is its volume, in cm³?`,a:l*w*h,w:[l+w+h,2*(l*w+w*h+l*h),l*w,l*w*h+10],s:`Volume = ${l}×${w}×${h} = ${l*w*h} cm³.`};},
+  ()=>{const n=P([3,4,5,8,20,25]),k=R(1,n-1);const v=Math.round(k/n*1000)/1000;
+    return{t:"Fraction to decimal",q:`Write ${k}/${n} as a decimal.`,a:N(v),w:[N(Math.round(n/k*1000)/1000),N(v*10),N(v/10),N(Math.round((v+0.1)*1000)/1000)],s:`${k} ÷ ${n} = ${v}.`};},
+  ()=>{const n1=R(1,5),d1=R(2,7),n2=R(1,5),d2=R(2,7);
+    return{t:"Multiplying fractions",q:`${n1}/${d1} × ${n2}/${d2} = ?`,a:frac(n1*n2,d1*d2),w:[frac(n1+n2,d1+d2),frac(n1*d2,d1*n2),frac(n1*n2+1,d1*d2),frac(n1*n2,d1+d2)],s:`Multiply the tops and the bottoms: ${n1*n2}/${d1*d2}${(n1*n2+"/"+d1*d2)===frac(n1*n2,d1*d2)?"":" = "+frac(n1*n2,d1*d2)}.`};},
+  ()=>{const q=R(11,99)/10,b=R(2,9);const a=Math.round(q*b*10)/10;
+    return{t:"Dividing decimals",q:`${a.toFixed(1)} ÷ ${b} = ?`,a:N(Math.round(a/b*100)/100),w:[N(a*b),N(Math.round(a/b*100)/100+1),N(b/a),N(Math.round(a/b*10)/100)],s:`${a.toFixed(1)} ÷ ${b} = ${Math.round(a/b*100)/100}.`};},
+  ()=>{const p=P([10,20,25,50]),n=P([40,60,80,120,200]);
+    return{t:"Percent",q:`What is ${p}% of ${n}?`,a:N(p*n/100),w:[N(n-p*n/100),N(p*n/50),N(p+n),N(p*n/200)],s:`${p}% means ${p} out of every 100: ${p}/100 × ${n} = ${p*n/100}.`};},
+  ()=>{const k=R(2,9),n=R(1,6),d=n+R(1,6);
+    return{t:"Simplifying fractions",q:`Write ${n*k}/${d*k} in its simplest form.`,a:frac(n,d),w:[`${n*k}/${d*k}`,frac(d,n),frac(n+1,d),frac(n,d+1)].filter(v=>v!==frac(n,d)),s:`Divide top and bottom by ${k*gcd(n,d)} → ${frac(n,d)}.`};},
+  ()=>{const x=P([-5,-3,-2,2,3,5]),y=P([-6,-4,-1,1,4,6]);
+    const quad = x>0&&y>0?"First":x<0&&y>0?"Second":x<0&&y<0?"Third":"Fourth";
+    return{t:"Coordinates",q:`Which quadrant contains the point (${x}, ${y})?`,a:quad,w:["First","Second","Third","Fourth"].filter(v=>v!==quad),s:`x is ${x>0?"positive":"negative"} and y is ${y>0?"positive":"negative"}, which is the ${quad.toLowerCase()} quadrant.`};}
+]},
+
+/* ---------------- 6. Grade 6 ---------------- */
+{name:"Grade 6", note:"ratio, %, integers", gens:[
+  ()=>{const p=P([10,15,20,25,40,60,75]),n=P([40,60,80,120,200,240]);const v=p*n/100;
+    return{t:"Percent",q:`What is ${p}% of ${n}?`,a:N(v),w:[N(n-v),N(v*2),N(v/2),N(v+10)],s:`${p}/100 × ${n} = ${v}.`};},
+  ()=>{const k=R(2,9),a=R(2,7),b=R(2,7);
+    return{t:"Simplifying ratios",q:`Simplify the ratio ${a*k} : ${b*k}.`,a:`${a/gcd(a,b)} : ${b/gcd(a,b)}`,w:[`${a*k} : ${b*k}`,`${b} : ${a}`,`${a+1} : ${b}`,`${k} : ${k}`],s:`Divide both sides by ${k*gcd(a,b)} → ${a/gcd(a,b)} : ${b/gcd(a,b)}.`};},
+  ()=>{const a=R(-12,-2),b=R(3,14);return{t:"Adding integers",q:`${a} + ${b} = ?`,a:a+b,w:[a-b,b-a,-(a+b),a+b+1],s:`Start at ${a} and move ${b} to the right → ${a+b}.`};},
+  ()=>{const a=R(-9,-2),b=R(2,9);return{t:"Multiplying integers",q:`${a} × ${b} = ?`,a:a*b,w:[-a*b,a+b,a-b,a*b+b],s:`A negative times a positive is negative: ${a*b}.`};},
+  ()=>{const n=R(4,6);const arr=Array.from({length:n},()=>R(2,20));
+    const s=arr.reduce((x,y)=>x+y,0);const m=Math.round(s/n*100)/100;
+    return{t:"Mean",q:`Find the mean of ${arr.join(", ")}.`,a:N(m),w:[N(s),N(Math.max(...arr)),N(Math.min(...arr)),N(Math.round(s/(n-1)*100)/100)],s:`Sum = ${s}, and ${s} ÷ ${n} = ${m}.`};},
+  ()=>{const x=R(2,9),a=R(2,9),b=R(2,20);
+    return{t:"Evaluating expressions",q:`Evaluate ${a}x + ${b} when x = ${x}.`,a:a*x+b,w:[a+x+b,a*(x+b),a*x-b,a*x+b+a],s:`${a}(${x}) + ${b} = ${a*x} + ${b} = ${a*x+b}.`};},
+  ()=>{const n=R(3,9),cost=R(2,9);
+    return{t:"Unit rate",q:`${n} candles cost £${n*cost}. What does one candle cost?`,a:cost,w:[n*cost,cost+1,cost-1,n],s:`£${n*cost} ÷ ${n} = £${cost} each.`};},
+  ()=>{const g=P([4,6,8,9,12]),a=g*R(2,5),b=g*R(2,5);const real=gcd(a,b);
+    return{t:"Greatest common factor",q:`What is the greatest common factor of ${a} and ${b}?`,a:real,w:[a*b/real,real*2,real+1,Math.min(a,b)].filter(v=>v!==real),s:`The largest number dividing both ${a} and ${b} is ${real}.`};},
+  ()=>{const b=R(2,5),e=R(2,4);return{t:"Exponents",q:`${b}${sup(e)} = ?`,a:Math.pow(b,e),w:[b*e,Math.pow(e,b),Math.pow(b,e)+b,Math.pow(b,e-1)],s:`${Array(e).fill(b).join(" × ")} = ${Math.pow(b,e)}.`};},
+  ()=>{const b=R(4,16),h=R(3,12);const v=b*h/2;
+    return{t:"Area of a triangle",q:`A triangle has base ${b} and height ${h}. What is its area?`,a:N(v),w:[N(b*h),N(b+h),N(v+b),N(2*(b+h))],s:`Area = ½ × ${b} × ${h} = ${v}.`};},
+  ()=>{const x=R(2,12),a=R(2,9);return{t:"One-step equations",q:`Solve:  ${a}x = ${a*x}`,a:x,w:[a*x,x+1,a,a*x-a],s:`Divide both sides by ${a}: x = ${x}.`};}
+]},
+
+/* ---------------- 7. Grade 7 ---------------- */
+{name:"Grade 7", note:"equations, %, circles", gens:[
+  ()=>{const x=R(2,12),a=R(2,9),b=R(2,20);
+    return{t:"Two-step equations",q:`Solve for x:  ${a}x + ${b} = ${a*x+b}`,a:x,w:[x+1,x-1,a*x+b,Math.round((a*x+b)/a)+1],s:`Subtract ${b}: ${a}x = ${a*x}. Divide by ${a}: x = ${x}.`};},
+  ()=>{const base=P([40,50,80,120,200,250]),p=P([10,15,20,25,30]);const v=Math.round(base*(1+p/100)*100)/100;
+    return{t:"Percent increase",q:`A £${base} item rises by ${p}%. What is the new price?`,a:N(v),w:[N(base*p/100),N(base-base*p/100),N(base+p),N(v+p)],s:`Increase = ${base*p/100}. New price = ${base} + ${base*p/100} = ${v}.`};},
+  ()=>{const r=R(2,12);return{t:"Circle area",q:`A circle has radius ${r}. What is its area?`,a:`${r*r}π`,w:[`${2*r}π`,`${r}π`,`${r*r*2}π`,`${4*r}π`],s:`A = πr² = π × ${r}² = ${r*r}π.`};},
+  ()=>{const r=R(2,12);return{t:"Circumference",q:`A circle has radius ${r}. What is its circumference?`,a:`${2*r}π`,w:[`${r*r}π`,`${r}π`,`${4*r}π`,`${r+2}π`],s:`C = 2πr = ${2*r}π.`};},
+  ()=>{const a=R(2,9),b=R(2,9),k=R(2,7);
+    return{t:"Proportion",q:`Solve:  ${a}/${b} = x/${b*k}`,a:a*k,w:[a+k,b*k,a*b,a*k+b],s:`The denominator was multiplied by ${k}, so x = ${a} × ${k} = ${a*k}.`};},
+  ()=>{const x=R(2,10),a=R(2,7),b=R(2,9);const rhs=a*(x+b);
+    return{t:"Distributing",q:`Solve for x:  ${a}(x + ${b}) = ${rhs}`,a:x,w:[x+b,rhs-a*b,x-1,Math.round(rhs/a)+b],s:`Divide by ${a}: x + ${b} = ${x+b}. Subtract ${b}: x = ${x}.`};},
+  ()=>{const t=R(2,6),f=R(1,t-1<1?1:t-1);const tot=R(8,20);const g=R(1,tot-1);
+    return{t:"Probability",q:`A bag holds ${g} black marbles and ${tot-g} white. What is P(black)?`,a:frac(g,tot),w:[frac(tot-g,tot),frac(g,tot-g),frac(tot,g),frac(g+1,tot)].filter(v=>v!==frac(g,tot)),s:`${g} favourable out of ${tot} total → ${frac(g,tot)}.`};},
+  ()=>{const l=R(2,8),w=R(2,8),h=R(2,8);const sa=2*(l*w+w*h+l*h);
+    return{t:"Surface area",q:`A box is ${l} × ${w} × ${h}. What is its surface area?`,a:sa,w:[l*w*h,sa/2,sa+2*l,2*(l+w+h)],s:`SA = 2(lw + wh + lh) = 2(${l*w} + ${w*h} + ${l*h}) = ${sa}.`};},
+  ()=>{const p=R(2,8),real=R(3,12);
+    return{t:"Scale drawings",q:`A map uses 1 cm : ${p} km. How far apart in real life are two towns ${real} cm apart on the map?`,a:p*real+" km",w:[(real/p).toFixed(1)+" km",(p+real)+" km",(p*real+p)+" km",real+" km"],s:`${real} × ${p} = ${p*real} km.`};},
+  ()=>{const pr=P([200,400,500,800,1000]),r=P([2,4,5,10]),y=R(1,5);
+    return{t:"Simple interest",q:`£${pr} earns ${r}% simple interest for ${y} year${y>1?"s":""}. How much interest?`,a:N(pr*r*y/100),w:[N(pr*r/100),N(pr+pr*r*y/100),N(pr*y),N(pr*r*y/1000)],s:`I = P × r × t = ${pr} × ${r/100} × ${y} = ${pr*r*y/100}.`};},
+  ()=>{const x=R(20,150);return{t:"Angle relationships",q:`Two angles are supplementary. One is ${x}°. What is the other?`,a:(180-x)+"°",w:[(90-x)+"°",(360-x)+"°",x+"°",(180+x)+"°"],s:`Supplementary angles add to 180°, so 180° − ${x}° = ${180-x}°.`};}
+]},
+
+/* ---------------- 8. Grade 8 ---------------- */
+{name:"Grade 8", note:"linear, Pythagoras", gens:[
+  ()=>{const x=R(2,10),a=R(4,9),b=R(1,3),c=R(1,15);const d=(a-b)*x+c;
+    return{t:"Variables both sides",q:`Solve:  ${a}x + ${c} = ${b}x + ${d}`,a:x,w:[x+1,x-1,d-c,Math.round(d/a)],s:`Subtract ${b}x: ${a-b}x + ${c} = ${d}. Then ${a-b}x = ${d-c}, so x = ${x}.`};},
+  ()=>{const x1=R(-6,3),y1=R(-6,6),dx=R(1,6),dy=R(-8,8);const m=frac(dy,dx);
+    return{t:"Slope",q:`Find the slope of the line through (${x1}, ${y1}) and (${x1+dx}, ${y1+dy}).`,a:m,w:[frac(dx,dy||1),frac(-dy,dx),frac(dy+1,dx),frac(dy,dx+1)],s:`m = Δy/Δx = ${dy}/${dx}${(dy+"/"+dx)===m?"":" = "+m}.`};},
+  ()=>{const[t,u]=P([[3,4],[6,8],[5,12],[8,15],[9,12],[7,24]]);
+    return{t:"Pythagoras",q:`A right triangle has legs ${t} and ${u}. Find the hypotenuse.`,a:Math.hypot(t,u),w:[t+u,Math.abs(u-t),Math.round(Math.hypot(t,u))+1,t*u],s:`c² = ${t*t} + ${u*u} = ${t*t+u*u}, so c = ${Math.hypot(t,u)}.`};},
+  ()=>{const a=R(2,7),b=R(2,7);
+    return{t:"Exponent laws",q:`Simplify:  x${sup(a)} · x${sup(b)}`,a:`x${sup(a+b)}`,w:[`x${sup(a*b)}`,`x${sup(Math.abs(a-b)||1)}`,`2x${sup(a+b)}`,`x${sup(a+b+1)}`],s:`Multiplying powers of the same base adds the exponents: ${a}+${b} = ${a+b}.`};},
+  ()=>{const m=R(11,99)/10,e=R(3,7);
+    return{t:"Scientific notation",q:`Write ${(m*Math.pow(10,e)).toLocaleString("en-US")} in scientific notation.`,
+      a:`${m.toFixed(1)} × 10${sup(e)}`,w:[`${m.toFixed(1)} × 10${sup(e+1)}`,`${m.toFixed(1)} × 10${sup(e-1)}`,`${(m*10).toFixed(0)} × 10${sup(e)}`,`${m.toFixed(1)} × 10${sup(-e)}`],
+      s:`One non-zero digit goes in front: ${m.toFixed(1)}, and the point moved ${e} places → 10${sup(e)}.`};},
+  ()=>{const x=R(1,8),y=R(1,8);const s1=x+y,s2=2*x-y;
+    return{t:"Simultaneous equations",q:`x + y = ${s1} and 2x − y = ${s2}. What is x?`,a:x,w:[y,s1,x+y,x+1],s:`Add the equations: 3x = ${s1+s2}, so x = ${x} (and y = ${y}).`};},
+  ()=>{const r=R(2,8),h=R(2,10);return{t:"Cylinder volume",q:`A cylinder has radius ${r} and height ${h}. What is its volume?`,a:`${r*r*h}π`,w:[`${2*r*h}π`,`${r*h}π`,`${r*r}π`,`${r*r*h*2}π`],s:`V = πr²h = π × ${r*r} × ${h} = ${r*r*h}π.`};},
+  ()=>{const n=P([8,27,64,125,216,343]);const c=Math.round(Math.cbrt(n));
+    return{t:"Cube roots",q:`What is the cube root of ${n}?`,a:c,w:[c+1,c-1,n/c,c*c],s:`${c} × ${c} × ${c} = ${n}.`};},
+  ()=>{const x=R(-6,6),y=R(-6,6);const ax=P(["x-axis","y-axis"]);
+    const res = ax==="x-axis" ? `(${x}, ${-y})` : `(${-x}, ${y})`;
+    return{t:"Reflections",q:`Reflect the point (${x}, ${y}) in the ${ax}. Where does it land?`,a:res,
+      w:[`(${-x}, ${-y})`,`(${x}, ${y})`,`(${y}, ${x})`,`(${-x}, ${y})`].filter(v=>v!==res),
+      s:`Reflecting in the ${ax} flips the sign of the ${ax==="x-axis"?"y":"x"}-coordinate → ${res}.`};},
+  ()=>{const n=R(5,7);const arr=SH(Array.from({length:n},()=>R(1,30)));
+    const sorted=arr.slice().sort((a,b)=>a-b);const med=n%2?sorted[(n-1)/2]:(sorted[n/2-1]+sorted[n/2])/2;
+    return{t:"Median",q:`Find the median of ${arr.join(", ")}.`,a:N(med),w:[N(arr[0]),N(Math.max(...arr)),N(Math.round(arr.reduce((a,b)=>a+b,0)/n*10)/10),N(Math.min(...arr))].filter(v=>v!==N(med)),
+      s:`In order: ${sorted.join(", ")}. The middle value is ${med}.`};},
+  ()=>{const m=R(2,6),c=R(1,9),x=R(2,7);
+    return{t:"Linear functions",q:`A line has slope ${m} and passes through (0, ${c}). What is y when x = ${x}?`,a:m*x+c,w:[m+x+c,m*x,m*x-c,m*(x+c)],s:`y = ${m}x + ${c}, so y = ${m}(${x}) + ${c} = ${m*x+c}.`};}
+]},
+
+/* ---------------- 9. Grade 9 — Algebra I ---------------- */
+{name:"Grade 9", note:"Algebra I", gens:[
+  ()=>{const r1=R(-7,7)||1,r2=R(-7,7)||2;const b=-(r1+r2),c=r1*r2;
+    const lo=Math.min(r1,r2),hi=Math.max(r1,r2);
+    return{t:"Quadratic roots",q:`Solve:  x² ${signed(b)}x ${signed(c)} = 0`,a:`x = ${lo}, ${hi}`,
+      w:[`x = ${-lo}, ${-hi}`,`x = ${lo}, ${-hi}`,`x = ${lo+1}, ${hi}`,`x = ${b}, ${c}`],
+      s:`It factorises as (x ${signed(-r1)})(x ${signed(-r2)}) = 0, so x = ${lo} or x = ${hi}.`};},
+  ()=>{const n=P([8,12,18,20,27,32,45,48,50,72,75,98]);
+    let k=1,m=n; for(let i=2;i*i<=m;i++){ while(m%(i*i)===0){k*=i;m/=i*i;} }
+    return{t:"Simplifying radicals",q:`Simplify √${n}.`,a:(k===1?"":k)+"√"+m,w:[`${k+1}√${m}`,`${m}√${k}`,`√${n}`,`${k}√${m+1}`],
+      s:`${n} = ${k*k} × ${m}, and √${k*k} = ${k}, so √${n} = ${k}√${m}.`};},
+  ()=>{const a=R(1,4),b=R(-9,9),c=R(-9,9);const D=b*b-4*a*c;
+    return{t:"Discriminant",q:`Find the discriminant of ${a===1?"":a}x² ${signed(b)}x ${signed(c)}.`,a:D,w:[D+4*a*c,b*b+4*a*c,-D,b*b],
+      s:`Δ = b² − 4ac = ${b*b} − ${4*a*c} = ${D}.`};},
+  ()=>{const x=R(2,9),a=R(2,6),b=R(1,12);const rhs=a*x-b;
+    return{t:"Inequalities",q:`Solve for x:  ${a}x − ${b} > ${rhs-a}`,a:`x > ${x-1}`,w:[`x < ${x-1}`,`x > ${x}`,`x > ${rhs}`,`x ≥ ${x-1}`],
+      s:`Add ${b}: ${a}x > ${rhs-a+b}. Divide by ${a} → x > ${x-1}.`};},
+  ()=>{const m=R(-4,5)||2,c=R(-8,8),x=R(-4,6);
+    return{t:"Functions",q:`f(x) = ${m===1?"":m===-1?"−":m}x ${signed(c)}. Find f(${x}).`,a:m*x+c,w:[m+x+c,m*x-c,m*(x+c),m*x+c+m],s:`f(${x}) = ${m<0?"("+m+")":m}(${x}) ${signed(c)} = ${m*x} ${signed(c)} = ${m*x+c}.`};},
+  ()=>{const a=R(2,6),b=R(2,8);
+    return{t:"Expanding",q:`Expand:  (x + ${a})(x + ${b})`,a:`x² ${signed(a+b)}x ${signed(a*b)}`,
+      w:[`x² ${signed(a*b)}x ${signed(a+b)}`,`x² ${signed(a+b)}x ${signed(a+b)}`,`x² ${signed(a*b)}`,`2x ${signed(a+b)}`],
+      s:`Outer + inner give ${a}x + ${b}x = ${a+b}x; last terms give ${a}×${b} = ${a*b}.`};},
+  ()=>{const k=R(2,9);return{t:"Difference of squares",q:`Factorise:  x² − ${k*k}`,a:`(x + ${k})(x − ${k})`,
+    w:[`(x − ${k})²`,`(x + ${k})²`,`(x + ${k*k})(x − 1)`,`x(x − ${k*k})`],s:`a² − b² = (a + b)(a − b), with b = ${k}.`};},
+  ()=>{const x=R(2,9),y=R(2,9);const s=x+y,d=x-y;
+    return{t:"Substitution",q:`x + y = ${s} and x − y = ${d}. What is y?`,a:y,w:[x,s,d,y+1],s:`Subtract the second from the first: 2y = ${s-d}, so y = ${y}.`};},
+  ()=>{const c=R(2,9),k=R(3,12);
+    return{t:"Absolute value",q:`Solve:  |x − ${c}| = ${k}`,a:`x = ${c-k}, ${c+k}`,w:[`x = ${k-c}, ${c+k}`,`x = ${c+k}`,`x = ${c-k}`,`x = ${c}, ${k}`],
+      s:`Either x − ${c} = ${k} or x − ${c} = −${k}, giving ${c+k} and ${c-k}.`};},
+  ()=>{const a=R(1,3),h=R(-5,5),k=R(-9,9);const b=-2*a*h,c=a*h*h+k;
+    return{t:"Vertex of a parabola",q:`Find the x-coordinate of the vertex of ${a===1?"":a}x² ${signed(b)}x ${signed(c)}.`,a:h,
+      w:[-h,b,h+1,Math.round(b/a)],s:`x = −b/(2a) = ${-b}/${2*a} = ${h}.`};},
+  ()=>{const a=R(2,6),b=R(2,6),c=R(1,9),d=R(1,9);
+    return{t:"Polynomial subtraction",q:`Simplify:  (${a}x² + ${c}x) − (${b}x² + ${d}x)`,
+      a:`${a-b===1?"":a-b===-1?"−":a-b}x² ${signed(c-d)}x`.replace(/^0x² /,""),
+      w:[`${a+b}x² ${signed(c+d)}x`,`${a-b}x² ${signed(d-c)}x`,`${a-b}x ${signed(c-d)}`,`${a*b}x² ${signed(c*d)}x`],
+      s:`Subtract like terms: (${a} − ${b})x² = ${a-b}x², and (${c} − ${d})x = ${c-d}x.`};}
+]},
+
+/* ---------------- 10. Grade 10 — Geometry ---------------- */
+{name:"Grade 10", note:"Geometry & trig", gens:[
+  ()=>{const n=R(5,12);return{t:"Polygon angles",q:`What is the sum of the interior angles of a ${n}-sided polygon?`,a:(n-2)*180+"°",
+    w:[n*180+"°",(n-2)*360+"°",((n-2)*180+180)+"°","360°"],s:`Sum = (n − 2) × 180° = ${(n-2)*180}°.`};},
+  ()=>{const h=P([10,14,20,24,30]);return{t:"Special triangles",q:`In a right triangle the hypotenuse is ${h} and one angle is 30°. How long is the side opposite the 30° angle?`,
+    a:h/2,w:[h*Math.sqrt(3)/2,h,h/Math.sqrt(2),h/3].map(v=>N(Math.round(v*100)/100)),
+    s:`sin 30° = ½, so opposite = ${h} × ½ = ${h/2}.`};},
+  ()=>{const x1=R(-6,2),y1=R(-6,2),[dx,dy]=P([[3,4],[6,8],[5,12],[8,6],[9,12]]);
+    return{t:"Distance formula",q:`Find the distance between (${x1}, ${y1}) and (${x1+dx}, ${y1+dy}).`,a:Math.hypot(dx,dy),
+      w:[dx+dy,Math.abs(dx-dy),Math.hypot(dx,dy)+1,dx*dy],s:`d = √(${dx*dx} + ${dy*dy}) = √${dx*dx+dy*dy} = ${Math.hypot(dx,dy)}.`};},
+  ()=>{const arc=R(3,17)*10;return{t:"Circle theorems",q:`An inscribed angle subtends an arc of ${arc}°. What is the angle?`,a:arc/2+"°",
+    w:[arc+"°",(arc*2)+"°",(180-arc)+"°",(arc/2+10)+"°"],s:`An inscribed angle is half its arc: ${arc/2}°.`};},
+  ()=>{const k=R(2,5),a=R(3,8),b=R(3,8);
+    return{t:"Similar triangles",q:`Two similar triangles have corresponding sides ${a} and ${a*k}. If another side of the small one is ${b}, what is the matching side of the large one?`,
+      a:b*k,w:[b+k,b*k+k,a*k,b*(k+1)],s:`Scale factor = ${k}. So ${b} × ${k} = ${b*k}.`};},
+  ()=>{const r=R(3,10),ang=P([60,90,120,180]);const v=Math.round(Math.PI*r*r*ang/360*100)/100;
+    return{t:"Sectors",q:`A circle of radius ${r} has a ${ang}° sector. What is the sector's area? (2 d.p.)`,a:N(v),
+      w:[N(Math.round(Math.PI*r*r*100)/100),N(Math.round(v*2*100)/100),N(Math.round(2*Math.PI*r*ang/360*100)/100),N(Math.round(v/2*100)/100)],
+      s:`Area = (${ang}/360) × π × ${r*r} = ${v}.`};},
+  ()=>{const x1=R(-8,8),y1=R(-8,8),x2=x1+2*R(1,6),y2=y1+2*R(1,6);
+    return{t:"Midpoint",q:`Find the midpoint of (${x1}, ${y1}) and (${x2}, ${y2}).`,a:`(${(x1+x2)/2}, ${(y1+y2)/2})`,
+      w:[`(${x2-x1}, ${y2-y1})`,`(${x1+x2}, ${y1+y2})`,`(${(x1+x2)/2}, ${y1+y2})`,`(${y1}, ${x1})`],
+      s:`Average each coordinate: ((${x1}+${x2})/2, (${y1}+${y2})/2) = (${(x1+x2)/2}, ${(y1+y2)/2}).`};},
+  ()=>{const r=R(2,9);const v=Math.round(4/3*Math.PI*r*r*r*100)/100;
+    return{t:"Sphere volume",q:`A sphere has radius ${r}. What is its volume? (2 d.p.)`,a:N(v),
+      w:[N(Math.round(4*Math.PI*r*r*100)/100),N(Math.round(Math.PI*r*r*r*100)/100),N(Math.round(v/2*100)/100),N(Math.round(v*2*100)/100)],
+      s:`V = (4/3)πr³ = (4/3)π(${r*r*r}) = ${v}.`};},
+  ()=>{const h=R(-8,8),k=R(-8,8),r=R(2,9);
+    return{t:"Equation of a circle",q:`A circle is centred at (${h}, ${k}) with radius ${r}. What is its equation?`,
+      a:`(x ${signed(-h)})² + (y ${signed(-k)})² = ${r*r}`,
+      w:[`(x ${signed(h)})² + (y ${signed(k)})² = ${r*r}`,`(x ${signed(-h)})² + (y ${signed(-k)})² = ${r}`,
+         `x² + y² = ${r*r}`,`(x ${signed(-h)})² − (y ${signed(-k)})² = ${r*r}`],
+      s:`(x − h)² + (y − k)² = r², with h = ${h}, k = ${k}, r² = ${r*r}.`};},
+  ()=>{const dy=R(1,6),dx=R(1,6);const m=frac(dy,dx),perp=frac(-dx,dy);
+    return{t:"Perpendicular slopes",q:`A line has slope ${m}. What is the slope of a line perpendicular to it?`,a:perp,
+      w:[m,frac(dx,dy),frac(-dy,dx),frac(dy+1,dx)].filter(v=>v!==perp),s:`Perpendicular slopes are negative reciprocals: −1 ÷ (${m}) = ${perp}.`};},
+  ()=>{const a=R(3,10),b=R(3,10),h=R(2,9);const v=(a+b)*h/2;
+    return{t:"Area of a trapezium",q:`A trapezium has parallel sides ${a} and ${b}, and height ${h}. What is its area?`,a:N(v),
+      w:[N(a*b*h),N((a+b)*h),N(a+b+h),N(v+h)],s:`Area = ½(a + b)h = ½(${a+b})(${h}) = ${v}.`};}
+]},
+
+/* ---------------- 11. Grade 11 — Algebra II / Precalc ---------------- */
+{name:"Grade 11", note:"logs, complex, series", gens:[
+  ()=>{const b=P([2,3,5,10]),n=R(2,5);const sub={2:"₂",3:"₃",5:"₅",10:"₁₀"}[b];
+    return{t:"Logarithms",q:`Solve:  log${sub}(x) = ${n}`,a:Math.pow(b,n),w:[b*n,n*b+b,Math.pow(n,b),Math.pow(b,n)+b],s:`x = ${b}${sup(n)} = ${Math.pow(b,n)}.`};},
+  ()=>{const b=P([2,3,5]),n=R(2,6);return{t:"Exponential equations",q:`Solve:  ${b}ˣ = ${Math.pow(b,n)}`,
+    a:n,w:[n+1,n-1,Math.pow(b,n)/b,b*n],s:`${b}${sup(n)} = ${Math.pow(b,n)}, so x = ${n}.`};},
+  ()=>{const a=R(1,5),b=R(1,5),c=R(1,5),d=R(1,5);const re=a*c-b*d,im=a*d+b*c;
+    return{t:"Complex numbers",q:`Multiply:  (${cplx(a,b)})(${cplx(c,d)})`,a:cplx(re,im),
+      w:[cplx(a*c+b*d,im),cplx(re,a*d-b*c),cplx(a*c,b*d),cplx(im,re)],
+      s:`FOIL, then use i² = −1: real part ${a*c} − ${b*d} = ${re}, imaginary part ${a*d} + ${b*c} = ${im}.`};},
+  ()=>{const a1=R(2,9),d=R(2,9),n=R(6,14);const v=a1+(n-1)*d;
+    return{t:"Arithmetic sequences",q:`An arithmetic sequence starts at ${a1} with common difference ${d}. What is term ${n}?`,
+      a:v,w:[a1+n*d,a1*Math.pow(d,n-1),v-d,v+d],s:`aₙ = a₁ + (n−1)d = ${a1} + ${(n-1)*d} = ${v}.`};},
+  ()=>{const a1=R(2,5),r=P([2,3]),n=R(4,7);const v=a1*Math.pow(r,n-1);
+    return{t:"Geometric sequences",q:`A geometric sequence starts at ${a1} with ratio ${r}. What is term ${n}?`,
+      a:v,w:[a1*Math.pow(r,n),a1+(n-1)*r,v/r,v*r],s:`aₙ = a₁r^(n−1) = ${a1} × ${r}${sup(n-1)} = ${v}.`};},
+  ()=>{const a=R(-5,5)||2,p=R(1,4),q=R(-9,9);const v=p*p*p+a*p+q;
+    return{t:"Remainder theorem",q:`Find the remainder when x³ ${signed(a)}x ${signed(q)} is divided by (x − ${p}).`,
+      a:v,w:[v+p,v-p,-v,p*p*p],s:`Substitute x = ${p}: ${p*p*p} ${signed(a*p)} ${signed(q)} = ${v}.`};},
+  ()=>{const a=R(2,9),b=R(2,9);
+    return{t:"Log laws",q:`Write as a single logarithm:  log(${a}) + log(${b})`,a:`log(${a*b})`,
+      w:[`log(${a+b})`,`log(${a})log(${b})`,`log(${a/b===Math.floor(a/b)?a/b:a-b})`,`2log(${a*b})`],
+      s:`log A + log B = log(AB) = log(${a*b}).`};},
+  ()=>{const a=R(1,7),b=R(1,7);const mod=Math.round(Math.hypot(a,b)*1000)/1000;
+    return{t:"Complex modulus",q:`Find |${cplx(a,b)}|. (3 d.p. if needed)`,a:N(mod),w:[N(a+b),N(a*b),N(Math.round((a*a+b*b)*1000)/1000),N(Math.abs(a-b))].filter(v=>v!==N(mod)),
+      s:`|a + bi| = √(a² + b²) = √${a*a+b*b} = ${mod}.`};},
+  ()=>{const a1=R(1,9),d=R(2,7),n=R(5,12);const sum=n*(2*a1+(n-1)*d)/2;
+    return{t:"Series sums",q:`Sum the first ${n} terms of the arithmetic sequence starting at ${a1} with difference ${d}.`,a:sum,
+      w:[a1+(n-1)*d,sum-d,n*a1,Math.round(sum/2)],s:`Sₙ = (n/2)(2a₁ + (n−1)d) = (${n}/2)(${2*a1} + ${(n-1)*d}) = ${sum}.`};},
+  ()=>{const m=R(2,7),c=R(1,12);const y=R(2,9);
+    return{t:"Inverse functions",q:`f(x) = ${m}x + ${c}. What is f⁻¹(${m*y+c})?`,a:y,w:[m*y+c,y+c,m*y,Math.round((m*y+c)/m)+1].filter(v=>v!==y),
+      s:`f⁻¹(y) = (y − ${c})/${m}. With y = ${m*y+c}: (${m*y+c} − ${c})/${m} = ${y}.`};},
+  ()=>{const ang=P([[30,"1/2"],[90,"1"],[150,"1/2"],[180,"0"],[210,"−1/2"],[270,"−1"]]);
+    return{t:"Trig values",q:`What is sin ${ang[0]}°?`,a:ang[1],w:["0","1","−1","1/2","√3/2","−1/2"].filter(v=>v!==ang[1]).slice(0,4),
+      s:`Read it off the unit circle: sin ${ang[0]}° = ${ang[1]}.`};}
+]},
+
+/* ---------------- 12. Grade 12 — Calculus ---------------- */
+{name:"Grade 12", note:"Calculus", gens:[
+  ()=>{const a=R(2,6),b=R(2,9),c=R(1,9),x=R(1,4);const v=3*a*x*x+2*b*x+c;
+    return{t:"Derivatives",q:`f(x) = ${a}x³ + ${b}x² + ${c}x. Find f′(${x}).`,a:v,
+      w:[a*x*x*x+b*x*x+c*x,3*a*x*x+b*x+c,6*a*x+2*b,v+c],
+      s:`f′(x) = ${3*a}x² + ${2*b}x + ${c}. At x = ${x} that is ${v}.`};},
+  ()=>{const a=R(2,5),n=R(2,4),b=R(1,6);const pw=k=>k===1?"":sup(k);
+    return{t:"Chain rule",q:`Differentiate:  (${a}x + ${b})${sup(n)}`,a:`${n*a}(${a}x + ${b})${pw(n-1)}`,
+      w:[`${n}(${a}x + ${b})${pw(n-1)}`,`${n*a}(${a}x + ${b})${sup(n)}`,`${a}(${a}x + ${b})${pw(n-1)}`,`${n*a}(${a}x + ${b})${sup(n+1)}`],
+      s:`Bring the power down and multiply by the inner derivative ${a}: ${n}×${a} = ${n*a}, power drops to ${n-1}.`};},
+  ()=>{const a=R(2,6),b=R(2,6),u=R(2,4);const par=t=>t==="1"?"":t.includes("/")?"("+t+")":t;
+    const F=x=>a*x*x*x/3+b*x*x/2;const v=Math.round((F(u)-F(0))*1000)/1000;
+    return{t:"Definite integrals",q:`Evaluate:  ∫₀${sup(u)} (${a}x² + ${b}x) dx`,a:N(v),
+      w:[N(a*u*u*u+b*u*u),N(Math.round((v+u)*1000)/1000),N(Math.round(v/2*1000)/1000),N(2*a*u+b)],
+      s:`The antiderivative is ${par(frac(a,3))}x³ + ${par(frac(b,2))}x². At x = ${u} it gives ${v}; at 0 it gives 0.`};},
+  ()=>{const r=R(2,7);return{t:"Limits",q:`Evaluate:  lim(x→${r}) (x² − ${r*r}) / (x − ${r})`,a:2*r,w:[0,r,r*r,"undefined"],
+    s:`Factor the top as (x − ${r})(x + ${r}), cancel, then substitute: ${r} + ${r} = ${2*r}.`};},
+  ()=>{const k=R(2,7);return{t:"Trig derivatives",q:`Differentiate:  sin(${k}x)`,a:`${k}cos(${k}x)`,
+    w:[`cos(${k}x)`,`−${k}cos(${k}x)`,`${k}sin(${k}x)`,`${k*k}cos(${k}x)`],s:`d/dx sin(u) = cos(u)·u′, and u′ = ${k}.`};},
+  ()=>{const a=R(2,6),b=R(2,8);
+    return{t:"Stationary points",q:`f(x) = x² − ${2*a}x + ${b}. At what x is f stationary?`,a:a,
+      w:[2*a,-a,b,a+1],s:`f′(x) = 2x − ${2*a}, which is zero at x = ${a}.`};},
+  ()=>{const a=R(2,6),b=R(2,9),x=R(1,5);const v=6*a*x+2*b;
+    return{t:"Second derivatives",q:`f(x) = ${a}x³ + ${b}x². Find f″(${x}).`,a:v,w:[3*a*x*x+2*b*x,6*a+2*b,v+x,6*a*x],
+      s:`f′(x) = ${3*a}x² + ${2*b}x, so f″(x) = ${6*a}x + ${2*b}. At x = ${x}: ${v}.`};},
+  ()=>{const a=R(2,5),b=R(1,6),x=R(1,4);
+    /* f = (ax+b)·x²  →  f' = a·x² + (ax+b)·2x */
+    const v=a*x*x+(a*x+b)*2*x;
+    return{t:"Product rule",q:`f(x) = (${a}x + ${b})x². Find f′(${x}).`,a:v,w:[(a*x+b)*2*x,a*x*x,v+a,2*a*x+b],
+      s:`f′ = ${a}·x² + (${a}x + ${b})·2x. At x = ${x}: ${a*x*x} + ${(a*x+b)*2*x} = ${v}.`};},
+  ()=>{const k=R(2,8);return{t:"Exponential derivatives",q:`Differentiate:  e^(${k}x)`,a:`${k}e^(${k}x)`,
+    w:[`e^(${k}x)`,`${k}e^(${k-1}x)`,`e^(${k}x)/${k}`,`${k*k}e^(${k}x)`],s:`d/dx e^(u) = e^(u)·u′, and u′ = ${k}.`};},
+  ()=>{const a=R(2,6),b=R(2,6);const v=Math.round(a/b*1000)/1000;
+    return{t:"L'Hôpital",q:`Evaluate:  lim(x→0) sin(${a}x) / (${b}x)`,a:N(v),w:[N(b/a),"0","1",N(a*b)].filter(x=>x!==N(v)),
+      s:`Differentiate top and bottom: ${a}cos(${a}x)/${b}, which at x = 0 is ${a}/${b} = ${v}.`};},
+  ()=>{const a=R(2,6),n=R(2,4);const v=Math.round(Math.pow(a,n+1)/(n+1)*1000)/1000;
+    return{t:"Power rule integration",q:`Evaluate:  ∫₀${sup(a)} x${sup(n)} dx`,a:N(v),
+      w:[N(Math.pow(a,n)),N(Math.round(Math.pow(a,n+1)*1000)/1000),N(Math.round(v*(n+1)*1000)/1000),N(n*Math.pow(a,n-1))].filter(x=>x!==N(v)),
+      s:`∫xⁿ dx = x^(n+1)/(n+1), so we get ${a}${sup(n+1)}/${n+1} = ${v}.`};}
+]},
+
+/* ---------------- 13. College — Engineering ---------------- */
+{name:"College", note:"multivar, matrices, ODEs", gens:[
+  ()=>{const a=R(2,6),b=R(2,6),x=R(1,4),y=R(1,4);const v=2*a*x*y+b*y*y;
+    return{t:"Partial derivatives",q:`f(x,y) = ${a}x²y + ${b}xy². Find ∂f/∂x at (${x}, ${y}).`,a:v,
+      w:[a*x*x+2*b*x*y,2*a*x*y,b*y*y,v+x],s:`∂f/∂x = ${2*a}xy + ${b}y². At (${x}, ${y}) that is ${v}.`};},
+  ()=>{const a=R(1,6),b=R(1,6),c=R(1,6),d=R(1,6);const det=a*d-b*c;
+    return{t:"Determinants",q:`Find the determinant of [[${a}, ${b}], [${c}, ${d}]].`,a:det,w:[a*d+b*c,a*b-c*d,-det,a+d],
+      s:`det = ad − bc = ${a*d} − ${b*c} = ${det}.`};},
+  ()=>{const a=R(1,5),b=R(1,5),c=R(1,5),d=R(1,5),e=R(1,5),f=R(1,5);const v=a*e+b*f;
+    return{t:"Matrix multiplication",q:`For A = [[${a}, ${b}], [${c}, ${d}]] and B = [[${e}], [${f}]], what is the top entry of AB?`,
+      a:v,w:[c*e+d*f,a*e-b*f,a*f+b*e,a*e],s:`Row 1 · column 1 = ${a*e} + ${b*f} = ${v}.`};},
+  ()=>{const k=R(2,6),y0=R(2,9);
+    return{t:"First-order ODEs",q:`Solve  dy/dx = ${k}y  with y(0) = ${y0}.`,a:`y = ${y0}e^(${k}x)`,
+      w:[`y = ${y0}e^(−${k}x)`,`y = ${k}e^(${y0}x)`,`y = ${y0} + ${k}x`,`y = ${y0}x^${k}`],
+      s:`Separating gives y = Ae^(${k}x); y(0) = ${y0} fixes A = ${y0}.`};},
+  ()=>{const a=[R(1,5),R(1,5),R(1,5)],b=[R(1,5),R(1,5),R(1,5)];
+    const dot=a[0]*b[0]+a[1]*b[1]+a[2]*b[2];
+    return{t:"Dot product",q:`Find the dot product of (${a.join(", ")}) and (${b.join(", ")}).`,a:dot,
+      w:[a[0]*b[0],dot+a[0],dot-b[2],a.reduce((x,y)=>x+y,0)].filter(v=>v!==dot),
+      s:`${a[0]*b[0]} + ${a[1]*b[1]} + ${a[2]*b[2]} = ${dot}.`};},
+  ()=>{const n=R(2,4);const fact=[1,1,2,6,24,120][n];
+    return{t:"Taylor series",q:`In the Maclaurin series for e^x, what is the coefficient of x${sup(n)}?`,a:frac(1,fact),
+      w:[frac(1,n),String(fact),frac(1,fact*n),"1"],s:`e^x = Σ xⁿ/n!, so the coefficient is 1/${n}! = 1/${fact}.`};},
+  ()=>{const a=R(2,5),b=R(2,5);
+    return{t:"Double integrals",q:`Evaluate  ∫₀${sup(a)}∫₀${sup(b)} xy dy dx.`,a:N(a*a*b*b/4),
+      w:[N(a*b),N(a*a*b*b/2),N(a*b/4),N(a*a*b*b)],s:`Inner gives ${b*b/2}x; then ∫₀${sup(a)} ${b*b/2}x dx = ${b*b/2} × ${a*a/2} = ${a*a*b*b/4}.`};},
+  ()=>{const a=[R(1,4),R(1,4),R(1,4)],b=[R(1,4),R(1,4),R(1,4)];
+    const cx=a[1]*b[2]-a[2]*b[1];
+    return{t:"Cross product",q:`For a = (${a.join(", ")}) and b = (${b.join(", ")}), what is the i-component of a × b?`,
+      a:cx,w:[a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0],a[0]*b[0],-cx].filter(v=>v!==cx),
+      s:`The i-component is a₂b₃ − a₃b₂ = ${a[1]*b[2]} − ${a[2]*b[1]} = ${cx}.`};},
+  ()=>{const a=R(2,6),b=R(2,6),c=R(2,6);
+    return{t:"Divergence",q:`Find ∇·F for F = (${a}x, ${b}y, ${c}z).`,a:a+b+c,w:[a*b*c,a+b,a-b+c,0],
+      s:`∇·F = ∂/∂x(${a}x) + ∂/∂y(${b}y) + ∂/∂z(${c}z) = ${a} + ${b} + ${c} = ${a+b+c}.`};},
+  ()=>{const r1=R(1,6),r2=R(1,6)+6;const b=-(r1+r2),c=r1*r2;
+    return{t:"Second-order ODEs",q:`Solve the auxiliary equation for  y″ ${signed(b)}y′ ${signed(c)}y = 0.`,
+      a:`m = ${r1}, ${r2}`,w:[`m = ${-r1}, ${-r2}`,`m = ${b}, ${c}`,`m = ${r1}, ${-r2}`,`m = ${r1+r2}, ${r1*r2}`],
+      s:`m² ${signed(b)}m ${signed(c)} = 0 factorises as (m − ${r1})(m − ${r2}) = 0.`};},
+  ()=>{const a=R(2,9),den=P([2,3,4,5]);const sum=Math.round(a/(1-1/den)*1000)/1000;
+    return{t:"Geometric series",q:`Find the sum to infinity of a geometric series with first term ${a} and ratio 1/${den}.`,a:N(sum),
+      w:[N(a*den),N(Math.round(a/(1+1/den)*1000)/1000),N(a),N(a*den-a)].filter(v=>v!==N(sum)),
+      s:`S = a/(1 − r) = ${a}/(1 − 1/${den}) = ${sum}.`};}
+]},
+
+/* ---------------- 14. Masters — Engineering ---------------- */
+{name:"Masters", note:"transforms, systems", gens:[
+  ()=>{const n=R(2,5);const fact=[1,1,2,6,24,120][n];
+    return{t:"Laplace transforms",q:`What is the Laplace transform of t${sup(n)}?`,a:`${fact}/s${sup(n+1)}`,
+      w:[`${fact}/s${sup(n)}`,`1/s${sup(n+1)}`,`${n}/s${sup(n+1)}`,`s${sup(n+1)}/${fact}`],
+      s:`L{tⁿ} = n!/s^(n+1), and ${n}! = ${fact}.`};},
+  ()=>{const l1=R(1,6),l2=R(1,6)+6;
+    return{t:"Eigenvalues",q:`Find the eigenvalues of [[${l1}, 0], [${R(1,4)}, ${l2}]].`,a:`${l1}, ${l2}`,
+      w:[`${l1+l2}, ${l1*l2}`,`${-l1}, ${-l2}`,`${l1+1}, ${l2}`,`${l1*l2}, 0`],
+      s:`The matrix is lower-triangular, so the eigenvalues are the diagonal entries ${l1} and ${l2}.`};},
+  ()=>{const w=P([2,4,5,8,10]);const T=Math.round(2*Math.PI/w*1000)/1000;
+    return{t:"Periodicity",q:`What is the fundamental period of sin(${w}t)? (3 d.p.)`,a:N(T),
+      w:[N(Math.round(2*Math.PI*w*1000)/1000),N(Math.round(Math.PI/w*1000)/1000),N(w),N(Math.round(1/w*1000)/1000)],
+      s:`T = 2π/ω = 2π/${w} = ${T}.`};},
+  ()=>{const wn=P([2,4,5,10]),z=P([0.2,0.5,0.8]);const c=Math.round(2*z*wn*100)/100;
+    return{t:"Damping ratio",q:`For s² + ${c}s + ${wn*wn}, find the damping ratio ζ.`,a:N(z),
+      w:[N(c),N(wn),N(Math.round(z*2*100)/100),N(Math.round(z/2*100)/100)],
+      s:`Compare with s² + 2ζωₙs + ωₙ²: ωₙ = ${wn}, and 2ζ(${wn}) = ${c}, so ζ = ${z}.`};},
+  ()=>{const k=R(2,9),p=R(1,6);
+    return{t:"Final value theorem",q:`A system has step response Y(s) = ${k} / (s(s + ${p})). Find the steady-state value.`,
+      a:N(Math.round(k/p*1000)/1000),w:[N(k),N(p),N(Math.round(p/k*1000)/1000),"0"],
+      s:`lim(s→0) sY(s) = ${k}/${p} = ${Math.round(k/p*1000)/1000}.`};},
+  ()=>{const n=R(3,8),p=P([0.2,0.25,0.5]);const v=Math.round(n*p*(1-p)*1000)/1000;
+    return{t:"Binomial variance",q:`X ~ Binomial(n = ${n}, p = ${p}). What is Var(X)?`,a:N(v),
+      w:[N(Math.round(n*p*1000)/1000),N(Math.round(n*p*p*1000)/1000),N(n),N(Math.round(Math.sqrt(v)*1000)/1000)].filter(x=>x!==N(v)),
+      s:`Var = np(1−p) = ${n} × ${p} × ${Math.round((1-p)*100)/100} = ${v}.`};},
+  ()=>{const a=R(1,6),b=R(1,6);
+    return{t:"Inverse Laplace",q:`Find the inverse Laplace transform of ${b}/(s + ${a}).`,a:`${b}e^(−${a}t)`,
+      w:[`${b}e^(${a}t)`,`${a}e^(−${b}t)`,`${b}t e^(−${a}t)`,`${b}cos(${a}t)`],
+      s:`L⁻¹{1/(s + a)} = e^(−at), and the constant ${b} carries through.`};},
+  ()=>{const k=R(2,9),a=R(1,6),b=R(1,6);const dc=Math.round(k/(a*b)*1000)/1000;
+    return{t:"DC gain",q:`Find the DC gain of G(s) = ${k} / ((s + ${a})(s + ${b})).`,a:N(dc),
+      w:[N(k),N(Math.round(k/(a+b)*1000)/1000),N(a*b),N(Math.round(a*b/k*1000)/1000)].filter(v=>v!==N(dc)),
+      s:`DC gain = G(0) = ${k}/(${a} × ${b}) = ${dc}.`};},
+  ()=>{const g=P([10,100,1000,0.1,0.01]);const db=Math.round(20*Math.log10(g)*10)/10;
+    return{t:"Decibels",q:`A system has gain ${g}. What is that in dB?`,a:N(db)+" dB",
+      w:[N(Math.round(10*Math.log10(g)*10)/10)+" dB",N(g)+" dB",N(-db)+" dB",N(Math.round(20*g*10)/10)+" dB"].filter(v=>v!==N(db)+" dB"),
+      s:`dB = 20 log₁₀(gain) = 20 × ${Math.round(Math.log10(g)*10)/10} = ${db} dB.`};},
+  ()=>{const L=R(1,6);const lam=Math.round(Math.pow(Math.PI/L,2)*1000)/1000;
+    return{t:"PDE separation",q:`For u″ + λu = 0 on [0, ${L}] with u(0) = u(${L}) = 0, what is the smallest eigenvalue λ₁? (3 d.p.)`,
+      a:N(lam),w:[N(Math.round(Math.PI/L*1000)/1000),N(Math.round(Math.pow(Math.PI*2/L,2)*1000)/1000),N(L),N(Math.round(Math.PI*Math.PI*1000)/1000)].filter(v=>v!==N(lam)),
+      s:`λₙ = (nπ/L)². For n = 1 and L = ${L}: (π/${L})² = ${lam}.`};},
+  ()=>{const p=P([0.2,0.25,0.4,0.5]),q=P([0.3,0.5,0.6]);const pi1=Math.round(q/(p+q)*1000)/1000;
+    return{t:"Markov chains",q:`A two-state chain moves A→B with probability ${p} and B→A with probability ${q}. What fraction of time is spent in A?`,
+      a:N(pi1),w:[N(Math.round(p/(p+q)*1000)/1000),N(p),N(q),"0.5"].filter(v=>v!==N(pi1)),
+      s:`Balance gives π_A·${p} = π_B·${q}, so π_A = ${q}/(${p} + ${q}) = ${pi1}.`};}
+]},
+
+/* ---------------- 15. PhD in Engineering ---------------- */
+{name:"PhD", note:"Engineering", gens:[
+  ()=>{const a=R(2,6),b=R(3,9);const lim=a*b;
+    return{t:"Routh–Hurwitz",q:`For s³ + ${a}s² + ${b}s + K, for which K is the system stable?`,
+      a:`0 < K < ${lim}`,w:[`K > ${lim}`,`0 < K < ${a+b}`,`K < ${a}`,"K > 0 always"],
+      s:`The Routh array needs (${a}·${b} − K)/${a} > 0, i.e. K < ${lim}, together with K > 0.`};},
+  ()=>{const rho=P([1000,998,1.2]),v=P([0.5,1,2,5]),D=P([0.01,0.05,0.1]),mu=P([0.001,0.0000181]);
+    const Re=Math.round(rho*v*D/mu);
+    return{t:"Reynolds number",q:`ρ = ${rho} kg/m³, v = ${v} m/s, D = ${D} m, μ = ${mu} Pa·s. Find Re.`,
+      a:Re.toLocaleString("en-US"),w:[Math.round(Re/10).toLocaleString("en-US"),Math.round(Re*10).toLocaleString("en-US"),
+        Math.round(Re/rho).toLocaleString("en-US"),Math.round(rho*v/D).toLocaleString("en-US")],
+      s:`Re = ρvD/μ ≈ ${Re.toLocaleString("en-US")}.`};},
+  ()=>{const n=R(3,6),r=R(1,n-1);
+    return{t:"Rank–nullity",q:`A linear map acts on ℝ${sup(n)} and has rank ${r}. What is the dimension of its kernel?`,
+      a:n-r,w:[r,n,n+r,n-r+1],s:`rank + nullity = ${n}, so nullity = ${n-r}.`};},
+  ()=>{const c=2*R(1,5);
+    return{t:"Constrained optimisation",q:`Minimise x² + y² subject to x + y = ${c}. What is the minimum?`,
+      a:N(c*c/2),w:[N(c*c),N(c),N(c*c/4),"0"],
+      s:`Lagrange gives x = y = ${c/2}, so the minimum is 2 × ${c/2}² = ${c*c/2}.`};},
+  ()=>{const a=R(2,6);
+    return{t:"Fourier transform",q:`What is the Fourier transform of δ(t − ${a})?`,a:`e^(−jω·${a})`,
+      w:[`e^(jω·${a})`,`${a}·e^(−jω)`,"1",`2πδ(ω − ${a})`],
+      s:`F{δ(t)} = 1, and a delay of ${a} multiplies the transform by e^(−jω${a}).`};},
+  ()=>{const k=R(2,9),m=R(1,6);const wn=Math.round(Math.sqrt(k/m)*1000)/1000;
+    return{t:"Natural frequency",q:`A mass–spring system has k = ${k} N/m and m = ${m} kg. Find ωₙ in rad/s. (3 d.p.)`,
+      a:N(wn),w:[N(Math.round(k/m*1000)/1000),N(Math.round(Math.sqrt(m/k)*1000)/1000),N(k*m),N(Math.round(wn/(2*Math.PI)*1000)/1000)].filter(v=>v!==N(wn)),
+      s:`ωₙ = √(k/m) = √(${k}/${m}) = ${wn} rad/s.`};},
+  ()=>{const a=R(1,5);
+    return{t:"Convolution",q:`What is x(t) ∗ δ(t − ${a})?`,a:`x(t − ${a})`,
+      w:[`x(t + ${a})`,`${a}·x(t)`,`x(${a}t)`,`x(t)·δ(t)`],
+      s:`Convolving with a shifted delta shifts the signal by ${a}.`};},
+  ()=>{const s1=R(2,6),s2=R(2,6);
+    return{t:"Variance of sums",q:`Independent X and Y have Var(X) = ${s1} and Var(Y) = ${s2}. Find Var(2X − Y).`,
+      a:4*s1+s2,w:[2*s1-s2,4*s1-s2,2*s1+s2,s1+s2].filter(v=>v!==4*s1+s2),
+      s:`Var(aX + bY) = a²Var(X) + b²Var(Y) = 4(${s1}) + 1(${s2}) = ${4*s1+s2}.`};},
+  ()=>{const vars=R(5,8),dims=R(2,4);
+    return{t:"Buckingham Pi",q:`A problem has ${vars} variables and ${dims} independent dimensions. How many dimensionless groups are there?`,
+      a:vars-dims,w:[vars,dims,vars+dims,vars-dims+1],s:`Buckingham Pi: groups = n − k = ${vars} − ${dims} = ${vars-dims}.`};},
+  ()=>{const h=P([10,25,50,100]),L=P([0.01,0.05,0.1]),k=P([0.5,1,2,20]);
+    const Bi=Math.round(h*L/k*1000)/1000;
+    return{t:"Biot number",q:`h = ${h} W/m²K, characteristic length ${L} m, k = ${k} W/mK. Find the Biot number. (3 d.p.)`,
+      a:N(Bi),w:[N(Math.round(k/(h*L)*1000)/1000),N(Math.round(h*k*L*1000)/1000),N(h*L),N(Math.round(h/k*1000)/1000)].filter(v=>v!==N(Bi)),
+      s:`Bi = hL/k = ${h} × ${L} / ${k} = ${Bi}.`};},
+  ()=>{const a=R(2,8);const r=Math.round(1/a*1000)/1000;
+    return{t:"Z-transform",q:`Where is the pole of the Z-transform of the sequence (1/${a})ⁿ u[n]?`,
+      a:`z = ${N(r)}`,w:[`z = ${a}`,`z = ${N(-r)}`,"z = 1","z = 0"],
+      s:`Z{aⁿu[n]} = z/(z − a), so the pole sits at z = a = 1/${a} = ${r}.`};},
+  ()=>{const n=R(2,4);const full=n;
+    return{t:"Controllability",q:`A system has ${n} states. What rank must the controllability matrix have for the system to be fully controllable?`,
+      a:full,w:[full-1,full+1,2*full,1].filter(v=>v!==full),
+      s:`Full controllability requires rank([B AB … Aⁿ⁻¹B]) = n = ${n}.`};}
+]}
+];
+
+/* =====================================================================
+   HINTS — a method reminder that never contains the answer.
+   ===================================================================== */
+const HINTS = {
+"Addition":"Count on from the bigger number.",
+"Subtraction":"Count back, or ask what you add to the smaller number to reach the bigger one.",
+"Counting on":"Start at the first number and step forward.",
+"Making ten":"A ten plus some ones keeps those ones in the ones column.",
+"Three numbers":"Add the first two, then add the third to that.",
+"Tens and ones":"Split the number into one ten plus the leftovers.",
+"Doubles":"Add the number to itself.",
+"Number bonds":"Ask what you add to reach ten.",
+"Comparing":"The bigger number is the one you say later when counting.",
+"Shapes":"Picture the shape and count its edges.",
+"Taking away":"Start from what you had and count backwards.",
+"2-digit addition":"Add the tens together, then the ones, then combine.",
+"2-digit subtraction":"Subtract the tens first, then the ones — borrow if you need to.",
+"Skip counting":"Count up in steps of the first number.",
+"Missing addend":"Subtract what you already have from the total.",
+"Doubling":"Add the number to itself.",
+"Even or odd":"Only the ones digit matters.",
+"Place value":"Each column is worth ten times the one to its right.",
+"Arrays":"Rows times columns.",
+"Telling time":"Sixty minutes make an hour — watch for rolling past the hour.",
+"Money":"Work out each coin type separately, then add.",
+"Comparing numbers":"Compare the leftmost digits first.",
+"Times tables":"Think of it as repeated addition.",
+"Division":"Ask how many of the smaller number fit inside the bigger one.",
+"Fraction of a set":"Split the whole into that many equal groups.",
+"Perimeter":"Add every side, all the way round.",
+"Multiply then add":"Multiplication happens before addition.",
+"Rounding":"Look at the digit to the right of the place you are rounding to.",
+"Missing factor":"Divide the product by the factor you know.",
+"Comparing fractions":"With the same numerator, more pieces means smaller pieces.",
+"Multiplication problems":"Equal groups means multiply.",
+"Sharing equally":"Equal sharing means divide.",
+"Area of a square":"Side times side.",
+"Multi-digit ×":"Multiply each place value separately, then add the parts.",
+"Remainders":"Find the biggest multiple that fits, then see what is left over.",
+"Equivalent fractions":"Whatever you do to the bottom, do to the top.",
+"Area":"Length times width.",
+"Factors":"Test each number from 1 upward and pair them off.",
+"Order of operations":"Brackets, then × and ÷, then + and −.",
+"Long division":"Ask how many times the divisor fits.",
+"Mixed numbers":"Turn the whole part into fraction pieces, then add the rest.",
+"Decimal place value":"After the point comes tenths, then hundredths.",
+"Multiples":"List multiples of each and look for the first one they share.",
+"Angles":"Complementary angles add to 90°; supplementary add to 180°.",
+"Decimal addition":"Line up the decimal points before you add.",
+"Decimal ×":"Ignore the point, multiply, then put it back — count the decimal places.",
+"Adding fractions":"Find a common denominator first.",
+"Volume":"Length times width times height.",
+"Fraction to decimal":"Divide the top by the bottom.",
+"Multiplying fractions":"Tops together, bottoms together.",
+"Dividing decimals":"Divide as normal and keep track of the point.",
+"Percent":"Per cent means out of a hundred.",
+"Simplifying fractions":"Divide top and bottom by their common factor.",
+"Coordinates":"The signs of x and y tell you the quadrant.",
+"Simplifying ratios":"Divide both sides by their common factor.",
+"Adding integers":"Moving right is positive, left is negative.",
+"Multiplying integers":"Different signs give a negative; same signs give a positive.",
+"Mean":"Add them all up, then divide by how many there are.",
+"Evaluating expressions":"Substitute the value, then follow the order of operations.",
+"Unit rate":"Divide the total by how many items.",
+"Greatest common factor":"Find the biggest number dividing both.",
+"Exponents":"The exponent counts how many times you multiply the base by itself.",
+"Area of a triangle":"Half of base times height.",
+"One-step equations":"Undo whatever is being done to x.",
+"Two-step equations":"Undo the addition first, then the multiplication.",
+"Percent increase":"Find the increase, then add it to the original.",
+"Circle area":"A = πr².",
+"Circumference":"C = 2πr.",
+"Proportion":"Whatever scales the bottom scales the top.",
+"Distributing":"Either expand the bracket or divide both sides first.",
+"Probability":"Favourable outcomes over total outcomes.",
+"Surface area":"Add the areas of all six faces.",
+"Scale drawings":"Multiply the map distance by the scale.",
+"Simple interest":"Principal × rate × time.",
+"Angle relationships":"Supplementary angles add to 180°.",
+"Variables both sides":"Collect the x terms on one side, numbers on the other.",
+"Slope":"Rise over run: change in y divided by change in x.",
+"Pythagoras":"a² + b² = c², with c the hypotenuse.",
+"Exponent laws":"Multiplying powers of the same base adds the exponents.",
+"Scientific notation":"One non-zero digit before the point; count how far the point moved.",
+"Simultaneous equations":"Add or subtract the equations to eliminate one variable.",
+"Cylinder volume":"V = πr²h.",
+"Cube roots":"Find the number that, cubed, gives this.",
+"Reflections":"Reflecting in an axis flips the sign of the other coordinate.",
+"Median":"Sort them, then take the middle one.",
+"Linear functions":"y = mx + c.",
+"Quadratic roots":"Find two numbers multiplying to c and adding to b.",
+"Simplifying radicals":"Pull out the largest perfect square factor.",
+"Discriminant":"Δ = b² − 4ac — watch the signs.",
+"Inequalities":"Treat it like an equation, but flip the sign if you divide by a negative.",
+"Functions":"Substitute the value in place of x.",
+"Expanding":"Multiply every term in the first bracket by every term in the second.",
+"Difference of squares":"a² − b² = (a + b)(a − b).",
+"Substitution":"Combine the two equations to eliminate one unknown.",
+"Absolute value":"The inside can be positive or negative — two cases.",
+"Vertex of a parabola":"x = −b/(2a).",
+"Polynomial subtraction":"Subtract like terms only, and watch the signs inside the bracket.",
+"Polygon angles":"(n − 2) × 180°.",
+"Special triangles":"Remember sin 30° = ½ and cos 30° = √3/2.",
+"Distance formula":"Pythagoras on the differences in x and y.",
+"Circle theorems":"An inscribed angle is half its arc.",
+"Similar triangles":"Find the scale factor, then apply it.",
+"Sectors":"Take the fraction of the full circle that the angle represents.",
+"Midpoint":"Average the x values and average the y values.",
+"Sphere volume":"V = (4/3)πr³.",
+"Equation of a circle":"(x − h)² + (y − k)² = r² — note the minus signs.",
+"Perpendicular slopes":"Negative reciprocal.",
+"Area of a trapezium":"Half the sum of the parallel sides, times the height.",
+"Logarithms":"A log asks: what power of the base gives this?",
+"Exponential equations":"Write both sides as powers of the same base.",
+"Complex numbers":"FOIL it out and remember i² = −1.",
+"Arithmetic sequences":"aₙ = a₁ + (n − 1)d.",
+"Geometric sequences":"aₙ = a₁r^(n−1).",
+"Remainder theorem":"Substitute the root of the divisor into the polynomial.",
+"Log laws":"Adding logs multiplies their arguments.",
+"Complex modulus":"√(real² + imaginary²).",
+"Series sums":"Sₙ = (n/2)(2a₁ + (n − 1)d).",
+"Inverse functions":"Undo each operation in reverse order.",
+"Trig values":"Place the angle on the unit circle and read off the height.",
+"Derivatives":"Bring the power down, then reduce it by one.",
+"Chain rule":"Differentiate the outside, then multiply by the derivative of the inside.",
+"Definite integrals":"Antidifferentiate, then evaluate at the limits and subtract.",
+"Limits":"Factor and cancel before you substitute.",
+"Trig derivatives":"d/dx sin(u) = cos(u)·u′.",
+"Stationary points":"Set the first derivative to zero.",
+"Second derivatives":"Differentiate twice.",
+"Product rule":"(uv)′ = u′v + uv′.",
+"Exponential derivatives":"d/dx e^u = e^u · u′.",
+"L'Hôpital":"Differentiate the top and the bottom separately, then substitute.",
+"Power rule integration":"∫xⁿ dx = x^(n+1)/(n + 1).",
+"Partial derivatives":"Treat every other variable as a constant.",
+"Determinants":"ad − bc.",
+"Matrix multiplication":"Row of the first times column of the second.",
+"First-order ODEs":"Separate the variables and integrate both sides.",
+"Dot product":"Multiply matching components, then add.",
+"Taylor series":"The coefficient of xⁿ in e^x is 1/n!.",
+"Double integrals":"Do the inner integral first, treating the outer variable as constant.",
+"Cross product":"The i-component is a₂b₃ − a₃b₂.",
+"Divergence":"Add the partial derivative of each component with respect to its own variable.",
+"Second-order ODEs":"Write the auxiliary equation in m and factorise it.",
+"Geometric series":"S = a/(1 − r) when |r| < 1.",
+"Laplace transforms":"L{tⁿ} = n!/s^(n+1).",
+"Eigenvalues":"For a triangular matrix, look at the diagonal.",
+"Periodicity":"T = 2π/ω.",
+"Damping ratio":"Match the denominator to s² + 2ζωₙs + ωₙ².",
+"Final value theorem":"Multiply by s and let s → 0.",
+"Binomial variance":"np(1 − p).",
+"Inverse Laplace":"1/(s + a) comes back as a decaying exponential.",
+"DC gain":"Set s = 0 in the transfer function.",
+"Decibels":"dB = 20 log₁₀(gain) for an amplitude ratio.",
+"PDE separation":"The eigenvalues are (nπ/L)².",
+"Markov chains":"Set the two flows between states equal to each other.",
+"Routh–Hurwitz":"Build the Routh array and require every first-column entry to be positive.",
+"Reynolds number":"Re = ρvD/μ.",
+"Rank–nullity":"rank + nullity = the dimension of the domain.",
+"Constrained optimisation":"Use symmetry, or set ∇f = λ∇g.",
+"Fourier transform":"A time shift becomes a phase factor.",
+"Natural frequency":"ωₙ = √(k/m).",
+"Convolution":"Convolving with a shifted delta shifts the signal.",
+"Variance of sums":"Coefficients get squared; independent variances add.",
+"Buckingham Pi":"Variables minus independent dimensions.",
+"Biot number":"Bi = hL/k.",
+"Z-transform":"Z{aⁿu[n]} = z/(z − a).",
+"Controllability":"Full controllability needs the matrix to reach the number of states."
+};
+
+/* ---------- build a multiple-choice problem ---------- */
+function makeProblem(levelIdx, genIdx){
+  const lvl = BANK[Math.max(0,Math.min(BANK.length-1,levelIdx))];
+  const gen = (genIdx===undefined) ? P(lvl.gens) : lvl.gens[genIdx % lvl.gens.length];
+  const p = gen();
+  const ans = String(p.a);
+  const out = [ans];
+  for(const w of SH(p.w.map(String))){ if(out.length<4 && !out.includes(w) && w!=="") out.push(w); }
+  let guard=0;
+  while(out.length<4 && guard++<40){
+    const n = parseFloat(ans);
+    const c = isNaN(n) ? ans+" "+"·".repeat(out.length) : N(n + P([1,-1,2,-2,3,-3,5,10]));
+    if(!out.includes(c)) out.push(c);
+  }
+  return {topic:p.t, question:p.q, answer:ans, steps:p.s,
+          hint:HINTS[p.t]||"Work through it one step at a time.", choices:SH(out)};
+}
+/* =====================================================================
+   WORLDS — the house is only the first one.
+   Each world has ten named rooms drawn from a shared kit of themed parts.
+   ===================================================================== */
+const K = {
+  tree:(x,y,s,c)=>`<g transform="translate(${x},${y}) scale(${s})" fill="${c||"#0b120c"}">
+    <path d="M-6 0 h12 l-3 -70 h-6Z"/>
+    <path d="M0 -58 q-26 -10 -40 -34 q22 12 40 14Z"/><path d="M0 -50 q26 -12 42 -32 q-22 12 -42 16Z"/>
+    <path d="M0 -40 q-22 -6 -34 -24 q18 10 34 12Z"/><path d="M0 -30 q20 -6 32 -22 q-16 10 -32 14Z"/>
+    <path d="M0 -70 q-12 -12 -14 -26 q10 12 14 18Z"/><path d="M0 -70 q12 -14 16 -28 q-8 14 -16 20Z"/></g>`,
+  pine:(x,y,s,c)=>`<g transform="translate(${x},${y}) scale(${s})" fill="${c||"#0a1410"}">
+    <rect x="-4" y="-14" width="8" height="14"/>
+    <path d="M0 -84 l-22 34 h44Z"/><path d="M0 -62 l-27 38 h54Z"/><path d="M0 -38 l-32 30 h64Z"/></g>`,
+  grave:(x,y,s,k)=>{const c="#5c6168";
+    if(k===1) return `<g transform="translate(${x},${y}) scale(${s})"><path d="M-16 0 v-34 a16 16 0 0 1 32 0 V0Z" fill="${c}"/>
+      <path d="M-3 -40 h6 v-10 h-6Z" fill="${c}"/><path d="M-9 -44 h18 v6 h-18Z" fill="${c}"/>
+      <path d="M-9 -14 h18 M-7 -22 h14" stroke="#3a3e44" stroke-width="2"/></g>`;
+    if(k===2) return `<g transform="translate(${x},${y}) scale(${s})"><path d="M-4 0 v-46 h8 V0Z" fill="${c}"/>
+      <path d="M-16 -34 h32 v8 h-32Z" fill="${c}"/><circle cx="0" cy="-50" r="7" fill="${c}"/></g>`;
+    return `<g transform="translate(${x},${y}) scale(${s})"><path d="M-14 0 v-30 l14 -8 14 8 V0Z" fill="${c}"/>
+      <path d="M-8 -12 h16 M-8 -20 h16" stroke="#3a3e44" stroke-width="2"/></g>`;},
+  rock:(x,y,s,c)=>`<path transform="translate(${x},${y}) scale(${s})" d="M-30 0 l8 -20 14 -8 16 6 8 22Z" fill="${c||"#1d222b"}"/>`,
+  boulder:(x,y,s,c)=>`<g transform="translate(${x},${y}) scale(${s})"><ellipse cx="0" cy="-16" rx="34" ry="24" fill="${c||"#232936"}"/>
+    <path d="M-22 -26 q14 -10 30 -2" stroke="#39414f" stroke-width="2" fill="none"/></g>`,
+  peak:(x,y,w,h,c,snow)=>`<g><path d="M${x-w} ${y} L${x} ${y-h} L${x+w} ${y}Z" fill="${c}"/>
+    ${snow?`<path d="M${x-w*0.34} ${y-h*0.64} L${x} ${y-h} L${x+w*0.34} ${y-h*0.64} q-${w*0.12} ${h*0.1} -${w*0.2} 0 q-${w*0.1} ${h*0.08} -${w*0.14} 0Z" fill="#8fa2b8" opacity=".45"/>`:""}</g>`,
+  stal:(x,y,l,c,up)=>`<path d="M${x-7} ${y} L${x} ${up?y+l:y+l} L${x+7} ${y}Z" fill="${c||"#241d2c"}" transform="${up?`rotate(180 ${x} ${y+l/2})`:""}"/>`,
+  crystal:(x,y,s,c)=>`<g transform="translate(${x},${y}) scale(${s})">
+    <path d="M0 -40 L10 -12 L4 0 L-4 0 L-10 -12Z" fill="${c}" opacity=".85"/>
+    <path d="M0 -40 L-10 -12 L-4 0Z" fill="#fff" opacity=".18"/></g>`,
+  torch:(x,y,s)=>`<g transform="translate(${x},${y}) scale(${s||1})">
+    <rect x="-3" y="0" width="6" height="26" fill="#3a2a18"/><rect x="-7" y="-4" width="14" height="8" rx="3" fill="#584228"/>
+    <path d="M0 -30 q-11 12 0 26 q11 -14 0 -26Z" fill="#ff8a1f" class="flick"/>
+    <path d="M0 -22 q-6 8 0 16 q6 -8 0 -16Z" fill="#ffd469" class="flick"/>
+    <circle cx="0" cy="-16" r="34" fill="url(#halo)"/></g>`,
+  bars:(x,y,w,h)=>`<g stroke="#2e2a26" stroke-width="7">
+    ${Array.from({length:Math.floor(w/26)+1},(_,k)=>`<path d="M${x+k*26} ${y} v${h}"/>`).join("")}
+    <path d="M${x} ${y+8} h${w}"/><path d="M${x} ${y+h-8} h${w}"/></g>`,
+  arch:(x,y,w,h,c)=>`<path d="M${x-w/2} ${y} v${-h} a${w/2} ${w/2} 0 0 1 ${w} 0 v${h}Z" fill="${c||"#0b0810"}"/>`,
+  pillar:(x,y,h,c)=>`<g fill="${c||"#241c2c"}"><rect x="${x-16}" y="${y-h}" width="32" height="${h}"/>
+    <rect x="${x-22}" y="${y-h-12}" width="44" height="14" rx="3"/><rect x="${x-22}" y="${y-12}" width="44" height="12" rx="3"/></g>`,
+  bones:(x,y,s)=>`<g transform="translate(${x},${y}) scale(${s})" fill="#d8d2c2" opacity=".82">
+    <path d="M-20 0 h34 a5 5 0 0 0 0 -7 h-34 a5 5 0 0 0 0 7Z"/>
+    <circle cx="-24" cy="-4" r="5"/><circle cx="-24" cy="3" r="5"/><circle cx="18" cy="-4" r="5"/><circle cx="18" cy="3" r="5"/></g>`,
+  skull:(x,y,s)=>`<g transform="translate(${x},${y}) scale(${s})" fill="#ded8c6">
+    <path d="M0 -22 c-11 0-17 8-17 15 0 6 4 9 7 11 h20 c3-2 7-5 7-11 0-7-6-15-17-15Z"/>
+    <circle cx="-6" cy="-9" r="4.4" fill="#100d14"/><circle cx="6" cy="-9" r="4.4" fill="#100d14"/>
+    <path d="M0 -3 l-2.4 4h4.8Z" fill="#100d14"/><rect x="-7" y="4" width="14" height="4" rx="1.6"/></g>`,
+  coffin:(x,y,s,open)=>`<g transform="translate(${x},${y}) scale(${s})">
+    <path d="M-14 0 l-6 -40 8 -26 24 0 8 26 -6 40Z" fill="${open?"#0a0709":"#3a2a1c"}" stroke="#53402c" stroke-width="2"/>
+    ${open?"":`<path d="M-2 -52 h4 v10 h6 v4 h-6 v10 h-4 v-10 h-6 v-4 h6Z" fill="#7a6242"/>`}</g>`,
+  fence:(x,y,w)=>`<g stroke="#161b22" stroke-width="6">
+    ${Array.from({length:Math.floor(w/34)+1},(_,k)=>`<path d="M${x+k*34} ${y} v-46"/><path d="M${x+k*34} ${y-46} l-4 6 M${x+k*34} ${y-46} l4 6"/>`).join("")}
+    <path d="M${x} ${y-16} h${w}"/><path d="M${x} ${y-34} h${w}"/></g>`,
+  mushroom:(x,y,s,c)=>`<g transform="translate(${x},${y}) scale(${s})">
+    <rect x="-3" y="-14" width="6" height="14" fill="#c9bfa6"/>
+    <path d="M-15 -14 a15 12 0 0 1 30 0Z" fill="${c}"/>
+    <circle cx="-5" cy="-19" r="2.4" fill="#f4eede" opacity=".8"/><circle cx="5" cy="-22" r="2" fill="#f4eede" opacity=".8"/></g>`,
+  chain:(x,y,l)=>`<g stroke="#4a4a52" stroke-width="3" fill="none">
+    ${Array.from({length:Math.floor(l/12)},(_,k)=>`<ellipse cx="${x}" cy="${y+k*12+6}" rx="4.5" ry="6"/>`).join("")}</g>`,
+  banner:(x,y,w,h,c)=>`<g><rect x="${x-w/2}" y="${y}" width="${w}" height="${h}" fill="${c}"/>
+    <path d="M${x-w/2} ${y+h} L${x} ${y+h-16} L${x+w/2} ${y+h}Z" fill="${c}"/>
+    <path d="M${x-w/2-6} ${y-6} h${w+12} v8 h-${w+12}Z" fill="#2a2028"/>
+    <circle cx="${x}" cy="${y+h*0.4}" r="${w*0.22}" fill="#0f0a12" opacity=".55"/></g>`,
+  cauldron:(x,y,s)=>`<g transform="translate(${x},${y}) scale(${s})">
+    <ellipse cx="0" cy="-16" rx="28" ry="22" fill="#15161c"/><ellipse cx="0" cy="-32" rx="28" ry="9" fill="#26282f"/>
+    <ellipse cx="0" cy="-32" rx="22" ry="6" fill="#6fd39a" opacity=".65" class="flick"/>
+    <circle cx="0" cy="-34" r="38" fill="url(#halo2)"/></g>`,
+  throne:(x,y,s)=>`<g transform="translate(${x},${y}) scale(${s})">
+    <path d="M-34 0 v-52 h68 V0Z" fill="#241826"/><path d="M-34 -52 l10 -50 h48 l10 50Z" fill="#2e1e30"/>
+    <path d="M-24 -52 h48 v-40 h-48Z" fill="#5c1520"/>
+    <circle cx="0" cy="-104" r="8" fill="#c4121f"/></g>`,
+  water:(x,y,w,c)=>`<g><ellipse cx="${x}" cy="${y}" rx="${w}" ry="${w*0.22}" fill="${c}" opacity=".85"/>
+    <path d="M${x-w*0.6} ${y-4} q${w*0.3} -6 ${w*0.6} 0" stroke="#fff" stroke-width="1.4" fill="none" opacity=".16"/>
+    <path d="M${x-w*0.4} ${y+6} q${w*0.2} -5 ${w*0.4} 0" stroke="#fff" stroke-width="1.2" fill="none" opacity=".12"/></g>`,
+  bridge:(x,y,w)=>`<g><path d="M${x-w/2} ${y} q${w/2} 40 ${w} 0" stroke="#4a3723" stroke-width="7" fill="none"/>
+    <path d="M${x-w/2} ${y-34} q${w/2} 40 ${w} 0" stroke="#3a2a1a" stroke-width="4" fill="none"/>
+    ${Array.from({length:8},(_,k)=>`<path d="M${x-w/2+k*w/7} ${y+Math.sin(k/7*Math.PI)*36} v-34" stroke="#3a2a1a" stroke-width="2.4"/>`).join("")}</g>`,
+  ice:(x,y,w,h)=>`<g fill="#6f87a3" opacity=".42">${Array.from({length:6},(_,k)=>
+    `<path d="M${x+k*w/6} ${y} l${w/13} ${h*(0.5+Math.random()*0.6)} l${w/13} ${-h*0.2}Z"/>`).join("")}</g>`,
+  cage:(x,y,s)=>`<g transform="translate(${x},${y}) scale(${s})" stroke="#33302c" stroke-width="3" fill="none">
+    <path d="M-20 0 a20 26 0 0 1 40 0Z"/><path d="M0 -26 v26 M-12 -22 v22 M12 -22 v22"/>
+    <path d="M-20 0 h40"/><path d="M0 -26 v-14"/></g>`,
+  altar:(x,y,s)=>`<g transform="translate(${x},${y}) scale(${s})">
+    <rect x="-40" y="-16" width="80" height="16" fill="#2b2530"/><rect x="-30" y="-46" width="60" height="30" fill="#221d28"/>
+    <ellipse cx="0" cy="-48" rx="22" ry="6" fill="#6b1420" opacity=".8"/></g>`
+};
+const lightAt=(x,y,r)=>`<circle cx="${x}" cy="${y}" r="${r}" fill="url(#halo)"/>`;
+const coldLight=(x,y,r)=>`<circle cx="${x}" cy="${y}" r="${r}" fill="url(#halo2)"/>`;
+const rnd=(a,b)=>R(a,b);
+
+/* --- background styles shared by the outdoor worlds --- */
+function stars(n,maxY){ let s=""; for(let i=0;i<n;i++)
+  s+=`<circle cx="${R(0,800)}" cy="${R(0,maxY||240)}" r="${(Math.random()*1.1+0.3).toFixed(1)}" fill="#f2ecd4" opacity="${(Math.random()*.7+.2).toFixed(2)}"/>`;
+  return s; }
+function moon(x,y,r){ return `<circle cx="${x}" cy="${y}" r="${r*2.6}" fill="url(#moong2)"/>
+  <circle cx="${x}" cy="${y}" r="${r}" fill="#f2ecd2"/><circle cx="${x+r*0.3}" cy="${y+r*0.25}" r="${r*0.17}" fill="#ded8bc" opacity=".6"/>`; }
+
+const WORLDS = [
+/* ---------------- 0. THE HOUSE (hand drawn, keeps its own props) -------------- */
+{ id:"house", name:"The House", icon:"🏚️", indoor:true,
+  rooms:["The Rotting Porch","The Cold Foyer","The Weeping Parlour","The Whispering Library","The Scullery",
+         "The Wet Cellar","The Groaning Stair","The Child's Bedroom","The Wrong Laboratory","The Attic of Teeth"],
+  pal:[["#15192e","#07090f"],["#241726","#100a14"],["#2b1a22","#150d13"],["#241b28","#110c16"],["#17211f","#0a1010"],
+       ["#12141c","#06070b"],["#26182e","#120a18"],["#2d1926","#170c13"],["#101e22","#070f11"],["#2e1a0f","#140b06"]],
+  floor:["#231b2b","#2f231d","#34211a","#2f2118","#2e271f","#1b1d24","#312121","#332219","#1b2630","#2e2112"],
+  props:i=>houseProps(i),
+  out:{line:"The door does not open again tonight.", build:()=>houseOutside()} },
+
+/* ---------------- 1. THE GRAVEYARD -------------- */
+{ id:"graveyard", name:"The Graveyard", icon:"🪦",
+  rooms:["The Iron Gate","The Sunken Path","The Family Plot","The Cracked Tomb","The Yew Tree",
+         "The Open Grave","The Bone Pile","The Chapel Ruin","The Gravedigger's Shed","The Last Marker"],
+  pal:Array(10).fill(["#151d30","#070a12"]), floor:Array(10).fill("#1b221d"),
+  props:i=>{
+    const bg = stars(46)+moon(660,74,40)+
+      `<path d="M0 316 q150 -26 320 -10 q180 16 480 -10 V460 H0Z" fill="#101710"/>`;
+    const mist=`<ellipse cx="400" cy="342" rx="420" ry="26" fill="#6fd39a" opacity=".07"/>`;
+    const g=[];
+    switch(i){
+      case 0: g.push(K.fence(20,330,300), K.fence(500,330,280),
+        `<g stroke="#161b22" stroke-width="9"><path d="M340 330 v-96 M460 330 v-96"/><path d="M340 234 q60 -30 120 0"/></g>`,
+        K.grave(150,340,1,1), K.grave(640,338,.9,3), K.torch(320,300,1.1)); break;
+      case 1: g.push(`<path d="M0 420 q200 -70 420 -66 q220 4 380 -30" stroke="#232a22" stroke-width="34" fill="none" opacity=".7"/>`,
+        K.grave(110,352,1.1,3), K.grave(230,344,.9,1), K.grave(600,350,1,2), K.tree(720,336,1,"#0d1410"), lightAt(400,300,120)); break;
+      case 2: g.push(K.grave(120,352,1.2,1),K.grave(230,348,1,2),K.grave(330,354,1.1,3),
+        K.grave(470,350,1,1),K.grave(580,346,1.2,2),K.grave(690,352,.95,3),
+        `<path d="M60 358 h700" stroke="#0e140e" stroke-width="5"/>`); break;
+      case 3: g.push(`<g><rect x="430" y="196" width="290" height="140" fill="#1c212a"/>
+        <path d="M418 200 L575 122 L732 200Z" fill="#222833"/>
+        <path d="M520 336 v-92 h70 v92Z" fill="#05070a"/>
+        <path d="M470 250 l40 70 M600 214 l-30 60" stroke="#0a0d12" stroke-width="4"/></g>`,
+        K.skull(300,344,1.3), K.torch(390,320,1), K.grave(170,350,1,2)); break;
+      case 4: g.push(K.tree(250,344,2.1,"#0a1008"), K.tree(560,340,1.5,"#0c1209"),
+        K.grave(400,352,1,1), K.grave(680,348,.9,3),
+        `<g stroke="#1c2418" stroke-width="2" opacity=".5"><path d="M250 160 q40 40 90 44 M250 170 q-50 30 -80 60"/></g>`); break;
+      case 5: g.push(`<g><ellipse cx="400" cy="366" rx="104" ry="26" fill="#05070a"/>
+        <path d="M300 360 q100 -22 200 0 l-8 14 q-92 -18 -184 0Z" fill="#241d16"/></g>`,
+        `<rect x="470" y="300" width="14" height="70" fill="#3a2a18" transform="rotate(16 477 335)"/>`,
+        `<path d="M462 306 l34 -14 6 14 -34 14Z" fill="#59606b"/>`,
+        K.grave(150,350,1.1,2), K.grave(660,348,1,1), lightAt(400,330,130)); break;
+      case 6: g.push(K.bones(220,352,1.6),K.bones(300,344,1.2),K.skull(380,348,1.5),
+        K.bones(470,352,1.4),K.skull(560,342,1.1),K.bones(640,350,1.3),
+        `<ellipse cx="420" cy="356" rx="270" ry="24" fill="#0a0d0a"/>`); break;
+      case 7: g.push(`<g fill="#1a1f27"><path d="M180 336 V150 h60 v186Z"/><path d="M520 336 V172 h58 v164Z"/>
+        <path d="M240 200 h280 v26 h-280Z"/></g>`,
+        K.arch(360,336,150,130,"#070a0e"),
+        `<path d="M300 210 a60 60 0 0 1 120 0" stroke="#2a3038" stroke-width="5" fill="none"/>`,
+        K.torch(210,290,1.1), K.torch(548,300,1), K.grave(680,350,1,3)); break;
+      case 8: g.push(`<g><rect x="440" y="214" width="230" height="122" fill="#241c14"/>
+        <path d="M428 218 L555 156 L682 218Z" fill="#2e2418"/>
+        <rect x="520" y="258" width="60" height="78" fill="#0a0806"/>
+        <rect x="600" y="248" width="44" height="38" fill="#0e1410"/></g>`,
+        `<g transform="translate(300,300)"><rect x="-4" y="-60" width="8" height="60" fill="#4a3723"/>
+         <path d="M-18 -66 l18 -14 18 14 -6 12 h-24Z" fill="#5c636e"/></g>`,
+        K.skull(200,346,1.2), lightAt(555,270,90)); break;
+      case 9: g.push(K.grave(400,356,2.4,1),
+        `<text x="400" y="316" text-anchor="middle" font-family="Georgia,serif" font-size="19" fill="#2a2e34">HERE</text>`,
+        K.tree(120,340,1.3,"#0b1109"), K.tree(700,344,1.1,"#0b1109"), K.torch(250,310,1), K.torch(560,312,1)); break;
+    }
+    return bg+g.join("")+mist;
+  },
+  out:{line:"The gate swings shut behind you and locks itself.", build:()=>outsideKit("graveyard")} },
+
+/* ---------------- 2. THE FOREST -------------- */
+{ id:"forest", name:"The Forest", icon:"🌲",
+  rooms:["The Treeline","The Crooked Path","The Mushroom Ring","The Hollow Trunk","The Black Pond",
+         "The Hanging Moss","The Scarecrow Field","The Thicket","The Witch's Clearing","The Far Edge"],
+  pal:Array(10).fill(["#1b3226","#0c1d14"]), floor:Array(10).fill("#091205"),
+  props:i=>{
+    const bg = stars(30,180)+`<path d="M0 300 q160 -40 340 -18 q190 22 460 -16 V460 H0Z" fill="#0a1508"/>`;
+    const haze=`<ellipse cx="400" cy="330" rx="430" ry="30" fill="#8fbf5f" opacity=".05"/>`;
+    const g=[];
+    switch(i){
+      case 0: g.push(K.pine(80,330,1.3,"#050e08"),K.pine(200,336,1.6),K.pine(330,330,1.2),
+        K.pine(520,336,1.7),K.pine(660,330,1.3),K.pine(760,338,1.5), coldLight(420,240,130)); break;
+      case 1: g.push(`<path d="M120 460 q120 -80 260 -96 q160 -18 300 -50" stroke="#1c2416" stroke-width="40" fill="none" opacity=".75"/>`,
+        K.tree(180,344,1.5,"#040a04"),K.tree(620,340,1.7,"#040a04"),K.mushroom(420,352,1.1,"#8a2230")); break;
+      case 2: g.push(...[0,1,2,3,4,5,6].map(k=>K.mushroom(200+k*66,352-(k%2)*6,1.1+((k%3)*0.25),P(["#8a2230","#b8482a","#6a2f7a"]))),
+        `<ellipse cx="430" cy="356" rx="230" ry="22" fill="#060e06" opacity=".8"/>`, coldLight(430,320,150)); break;
+      case 3: g.push(`<g transform="translate(400,340)"><path d="M-70 0 q-6 -110 70 -120 q76 10 70 120Z" fill="#050d05"/>
+        <path d="M-34 0 q-4 -72 34 -78 q38 6 34 78Z" fill="#03060a"/>
+        <path d="M-70 -70 q-40 -14 -56 -46 q34 20 56 26Z" fill="#050d05"/>
+        <path d="M70 -76 q42 -16 58 -48 q-34 22 -58 28Z" fill="#050d05"/></g>`,
+        `<g class="eyes"><ellipse cx="386" cy="286" rx="5" ry="3.4" fill="#c4ff4f"/><ellipse cx="410" cy="286" rx="5" ry="3.4" fill="#c4ff4f"/></g>`,
+        K.pine(120,340,1.2),K.pine(700,338,1.3)); break;
+      case 4: g.push(K.water(400,372,240,"#060d12"),
+        `<path d="M300 356 q100 -12 200 0" stroke="#1b3a2a" stroke-width="3" fill="none" opacity=".5"/>`,
+        K.tree(140,344,1.6,"#040a04"),K.pine(680,340,1.4),
+        `<g opacity=".5">${moon(400,120,26)}</g>`,
+        `<ellipse cx="400" cy="372" rx="26" ry="7" fill="#f2ecd2" opacity=".2"/>`); break;
+      case 5: g.push(K.tree(200,344,2,"#040a04"),K.tree(560,340,1.9,"#040a04"),
+        `<g stroke="#2c4a2c" stroke-width="3" opacity=".65">${Array.from({length:14},(_,k)=>
+          `<path d="M${90+k*48} 130 q6 ${40+Math.random()*90} -4 ${70+Math.random()*110}"/>`).join("")}</g>`,
+        coldLight(400,200,120)); break;
+      case 6: g.push(`<g>${Array.from({length:22},(_,k)=>`<path d="M${40+k*34} 356 q4 -28 8 -34" stroke="#3c4420" stroke-width="3" fill="none"/>`).join("")}</g>`,
+        `<g transform="translate(420,342) scale(1.5)"><rect x="-3" y="-52" width="6" height="52" fill="#57431f"/>
+         <path d="M-34 -40 h68" stroke="#57431f" stroke-width="5"/>
+         <path d="M-18 -44 q18 -8 36 0 l-5 30 H-13Z" fill="#6e5522"/>
+         <circle cx="0" cy="-58" r="13" fill="#b08a3c"/>
+         <path d="M-14 -68 q14 -10 28 0 l-3 3 q-11 -7 -22 0Z" fill="#3f2f14"/>
+         <path d="M-5 -60 l4 3 -4 3Z" fill="#1a1208"/><path d="M5 -60 l-4 3 4 3Z" fill="#1a1208"/></g>`,
+        K.pine(90,336,1.2),K.pine(720,338,1.1)); break;
+      case 7: g.push(...[0,1,2,3,4,5,6,7,8].map(k=>K.tree(50+k*92,340+(k%3)*6,1+(k%4)*0.22,"#030803")),
+        `<g stroke="#131c10" stroke-width="3">${Array.from({length:20},(_,k)=>
+          `<path d="M${R(20,780)} ${R(240,350)} q30 ${R(-40,40)} 60 ${R(-20,30)}"/>`).join("")}</g>`); break;
+      case 8: g.push(`<ellipse cx="400" cy="358" rx="250" ry="34" fill="#0e1509"/>`,
+        K.cauldron(400,348,1.5), K.pine(120,336,1.3),K.pine(690,340,1.4),
+        ...[0,1,2,3,4,5].map(k=>`<path d="M${250+k*60} 352 l0 -12" stroke="#5c6168" stroke-width="3"/>`),
+        `<g stroke="#6fd39a" stroke-width="1.6" fill="none" opacity=".5"><path d="M400 300 q-20 -30 6 -56 M400 300 q22 -34 -4 -64"/></g>`); break;
+      case 9: g.push(K.pine(60,336,1.5),K.pine(160,340,1.2),
+        `<path d="M300 300 q90 -20 200 0 v60 H300Z" fill="#040a04" opacity=".0"/>`,
+        moon(470,120,44), `<ellipse cx="470" cy="360" rx="180" ry="22" fill="#f2ecd2" opacity=".07"/>`,
+        coldLight(470,140,170)); break;
+    }
+    return bg+g.join("")+haze;
+  },
+  out:{line:"The trees stop, all at once, and let you go.", build:()=>outsideKit("forest")} },
+
+/* ---------------- 3. THE MOUNTAIN -------------- */
+{ id:"mountain", name:"The Mountain", icon:"⛰️",
+  rooms:["The Foothills","The Scree Slope","The Rope Bridge","The Wind Ledge","The Frozen Falls",
+         "The Cairn","The Eagle's Nest","The Ice Field","The Knife Ridge","The Summit"],
+  pal:Array(10).fill(["#1a2038","#080c18"]), floor:Array(10).fill("#242a38"),
+  props:i=>{
+    const bg = stars(60,220)+moon(120,80,34)+
+      K.peak(150,316,180,200,"#0e1426",true)+K.peak(420,316,220,250,"#0b1020",true)+K.peak(700,316,190,190,"#0e1426",true);
+    const snow=`<g fill="#dce6f2" opacity=".5">${Array.from({length:26},(_,k)=>
+      `<circle cx="${R(0,800)}" cy="${R(20,440)}" r="${(Math.random()*1.6+0.6).toFixed(1)}" class="mote"/>`).join("")}</g>`;
+    const g=[];
+    switch(i){
+      case 0: g.push(K.boulder(180,352,1.1),K.rock(320,356,1.3),K.pine(600,344,1.1,"#0c1620"),K.pine(700,348,.9,"#0c1620")); break;
+      case 1: g.push(`<path d="M0 360 L800 300 V460 H0Z" fill="#1b2130"/>`,
+        ...Array.from({length:16},(_,k)=>K.rock(40+k*50,352-k*3,0.5+Math.random()*0.5,"#222a3a"))); break;
+      case 2: g.push(`<path d="M0 340 h180 v120 H0Z" fill="#101624"/><path d="M620 340 h180 v120 H620Z" fill="#101624"/>`,
+        K.bridge(400,344,440), `<rect width="800" height="60" y="400" fill="#05070f" opacity=".6"/>`); break;
+      case 3: g.push(`<path d="M0 352 h520 l-40 108 H0Z" fill="#141a2a"/>`,
+        K.rock(120,350,1.2,"#1e2434"), K.boulder(430,348,.9,"#1e2434"),
+        `<g stroke="#9fb4d0" stroke-width="2" opacity=".35">${Array.from({length:9},(_,k)=>
+          `<path d="M${520+k*32} ${150+k*18} q40 -12 80 0"/>`).join("")}</g>`); break;
+      case 4: g.push(`<g><path d="M300 120 q40 100 20 230 h100 q-24 -130 16 -230Z" fill="#6f87a3" opacity=".3"/>
+        <path d="M330 130 q22 110 10 220 M420 130 q-20 110 -8 220" stroke="#8fa6bd" stroke-width="3" fill="none" opacity=".35"/></g>`,
+        K.ice(280,340,240,40), K.rock(650,352,1.1,"#1e2434"), coldLight(370,240,150)); break;
+      case 5: g.push(`<g transform="translate(400,352)">${[0,1,2,3,4,5].map(k=>
+        `<ellipse cx="${(k%2?6:-6)}" cy="${-k*22}" rx="${34-k*4.5}" ry="${13-k*1.3}" fill="#2a3040"/>`).join("")}</g>`,
+        K.rock(160,354,1,"#1e2434"),K.rock(640,352,1.2,"#1e2434"), coldLight(400,260,120)); break;
+      case 6: g.push(`<path d="M0 352 h340 l-30 108 H0Z" fill="#141a2a"/>`,
+        `<g transform="translate(560,300)"><ellipse cx="0" cy="0" rx="72" ry="28" fill="#3a2d1c"/>
+         <ellipse cx="0" cy="-8" rx="58" ry="20" fill="#241a10"/>
+         ${[0,1,2,3,4,5,6,7].map(k=>`<path d="M${-64+k*18} ${-4} q14 -14 30 -4" stroke="#4a3a24" stroke-width="3" fill="none"/>`).join("")}
+         <ellipse cx="-16" cy="-12" rx="12" ry="14" fill="#e8e2cc"/><ellipse cx="14" cy="-12" rx="12" ry="14" fill="#e8e2cc"/></g>`,
+        `<path d="M480 300 h160 v160 H480Z" fill="#101624" opacity="0"/>`); break;
+      case 7: g.push(`<path d="M0 330 q200 -20 400 0 q200 20 400 0 V460 H0Z" fill="#7f93ab" opacity=".16"/>`,
+        K.ice(80,336,180,52),K.ice(420,340,200,44),
+        `<g fill="#0a0e18">${Array.from({length:5},(_,k)=>`<path d="M${120+k*150} 350 l10 -34 10 34Z"/>`).join("")}</g>`); break;
+      case 8: g.push(`<path d="M0 460 L280 300 L400 344 L520 296 L800 460Z" fill="#141a2a"/>`,
+        `<path d="M280 300 L400 344 L520 296" stroke="#5c6f8c" stroke-width="3" fill="none"/>`,
+        `<rect width="800" height="90" y="370" fill="#05070f" opacity=".5"/>`, K.rock(400,344,.7,"#222a3a")); break;
+      case 9: g.push(`<path d="M120 460 L400 130 L680 460Z" fill="#131928"/>`,
+        `<path d="M300 300 L400 130 L500 300 q-52 22 -100 0 q-48 22 -100 0Z" fill="#7f93ab" opacity=".5"/>`,
+        `<g transform="translate(400,140)"><rect x="-2" y="-46" width="4" height="46" fill="#5c4a2c"/>
+         <path d="M2 -46 l34 10 -34 10Z" fill="#c4121f"/></g>`, coldLight(400,170,180)); break;
+    }
+    return bg+g.join("")+snow;
+  },
+  out:{line:"The wind drops. You are below the treeline again.", build:()=>outsideKit("mountain")} },
+
+/* ---------------- 4. THE CAVE -------------- */
+{ id:"cave", name:"The Cave", icon:"🕳️",
+  rooms:["The Mouth","The Dripping Hall","The Bat Roost","The Crystal Seam","The Narrow Squeeze",
+         "The Underground Lake","The Bone Chamber","The Lava Vent","The Deep Dark","The Way Up"],
+  pal:Array(10).fill(["#0e0b14","#030207"]), floor:Array(10).fill("#171320"),
+  props:i=>{
+    const roof=`<path d="M0 0 h800 v70 q-180 44 -400 8 q-220 -36 -400 6Z" fill="#070510"/>`+
+      Array.from({length:16},(_,k)=>K.stal(30+k*50,66,R(18,62),"#120e1a")).join("");
+    const floorbits=Array.from({length:7},(_,k)=>K.rock(60+k*118,356,0.6+Math.random()*0.5,"#191524")).join("");
+    const g=[];
+    switch(i){
+      case 0: g.push(`<path d="M80 340 q40 -220 320 -220 q280 0 320 220Z" fill="#0a0812"/>`,
+        `<path d="M170 340 q34 -160 230 -160 q196 0 230 160Z" fill="#1a2030" opacity=".5"/>`,
+        stars(20,130), coldLight(400,180,190)); break;
+      case 1: g.push(...Array.from({length:9},(_,k)=>K.stal(80+k*82,70,R(50,110),"#161120")),
+        K.water(400,374,200,"#0b1018"),
+        `<g stroke="#7fd7ff" stroke-width="1.4" opacity=".35">${[0,1,2,3].map(k=>`<path d="M${180+k*150} 150 v70"/>`).join("")}</g>`); break;
+      case 2: g.push(...Array.from({length:14},(_,k)=>`<g transform="translate(${60+k*54},${R(60,140)}) scale(${(0.6+Math.random()*0.7).toFixed(2)})" class="flick">
+        <path d="M0 0 q-12 -8 -24 -2 q10 3 12 9 q7 -5 12 -7 q5 2 12 7 q2 -6 12 -9 q-12 -6 -24 2Z" fill="#0b0712"/></g>`),
+        K.bones(300,354,1.2), coldLight(420,240,110)); break;
+      case 3: g.push(...[[140,352,1.5,"#7fd7ff"],[220,346,1.1,"#9f7fff"],[300,354,1.3,"#7fd7ff"],
+        [520,350,1.6,"#5fffc8"],[610,346,1.2,"#7fd7ff"],[690,352,1.4,"#9f7fff"]].map(c=>K.crystal(c[0],c[1],c[2],c[3])),
+        `<circle cx="400" cy="300" r="170" fill="url(#halo2)"/>`); break;
+      case 4: g.push(`<path d="M0 0 h800 v180 q-200 60 -360 30 q-160 -30 -440 40Z" fill="#0a0812"/>`,
+        `<path d="M0 460 h800 v-140 q-220 -60 -420 -20 q-200 40 -380 -10Z" fill="#0a0812"/>`,
+        coldLight(400,250,110)); break;
+      case 5: g.push(K.water(400,382,330,"#060a14"),
+        `<ellipse cx="400" cy="382" rx="330" ry="72" fill="#0a1424" opacity=".8"/>`,
+        ...Array.from({length:6},(_,k)=>K.stal(120+k*112,66,R(40,90),"#161120")),
+        `<g opacity=".25">${Array.from({length:6},(_,k)=>K.crystal(120+k*112,374,0.6,"#7fd7ff")).join("")}</g>`,
+        coldLight(400,300,180)); break;
+      case 6: g.push(K.skull(180,350,1.8),K.bones(270,354,1.5),K.skull(360,346,1.3),
+        K.bones(450,352,1.6),K.skull(560,350,1.6),K.bones(650,354,1.3),
+        `<ellipse cx="410" cy="358" rx="290" ry="26" fill="#0b0810"/>`, K.torch(90,320,1.1)); break;
+      case 7: g.push(`<ellipse cx="420" cy="380" rx="260" ry="42" fill="#ff5a12" opacity=".7" class="flick"/>`,
+        `<ellipse cx="420" cy="380" rx="180" ry="26" fill="#ffca4a" opacity=".8" class="flick"/>`,
+        `<circle cx="420" cy="360" r="220" fill="url(#halo)"/>`,
+        ...Array.from({length:5},(_,k)=>K.rock(80+k*170,352,0.8,"#221420"))); break;
+      case 8: g.push(`<rect width="800" height="460" fill="#030207"/>`,
+        `<g class="eyes"><ellipse cx="520" cy="250" rx="6" ry="4" fill="#ff3b2f"/><ellipse cx="546" cy="250" rx="6" ry="4" fill="#ff3b2f"/></g>`,
+        `<g class="eyes" style="animation-delay:2.4s"><ellipse cx="660" cy="300" rx="5" ry="3.4" fill="#ffcf5c"/><ellipse cx="682" cy="300" rx="5" ry="3.4" fill="#ffcf5c"/></g>`,
+        `<circle cx="180" cy="330" r="150" fill="url(#halo)"/>`, K.torch(170,340,1.2)); break;
+      case 9: g.push(`<path d="M300 0 h190 v340 h-190Z" fill="#0a0812"/>`,
+        `<path d="M330 340 L400 40 L470 340Z" fill="#141c2c" opacity=".7"/>`,
+        `<circle cx="400" cy="50" r="130" fill="url(#halo2)"/>`, stars(14,80),
+        ...Array.from({length:5},(_,k)=>K.rock(80+k*150,354,0.7,"#191524"))); break;
+    }
+    return roof+g.join("")+floorbits;
+  },
+  out:{line:"Daylight, or something close to it.", build:()=>outsideKit("cave")} },
+
+/* ---------------- 5. THE DUNGEON -------------- */
+{ id:"dungeon", name:"The Dungeon", icon:"⛓️",
+  rooms:["The Guardroom","The Cell Row","The Rack Room","The Oubliette","The Rat Run",
+         "The Chain Hall","The Flooded Stair","The Bone Cage","The Warden's Desk","The Iron Door"],
+  pal:Array(10).fill(["#17130f","#070504"]), floor:Array(10).fill("#241d16"),
+  props:i=>{
+    const brick=`<g opacity=".5">${Array.from({length:9},(_,r)=>Array.from({length:12},(_,c)=>
+      `<rect x="${(r%2?-34:0)+c*70}" y="${r*38}" width="66" height="34" fill="none" stroke="#0d0a08" stroke-width="2"/>`).join("")).join("")}</g>`;
+    const g=[];
+    switch(i){
+      case 0: g.push(K.torch(120,260,1.2),K.torch(680,260,1.2),
+        `<rect x="330" y="200" width="140" height="140" fill="#0a0806"/>`,
+        `<path d="M340 340 v-120 h120 v120" stroke="#3a2f22" stroke-width="5" fill="none"/>`,
+        `<g transform="translate(560,300)"><rect x="-40" y="0" width="80" height="40" fill="#2e2418"/>
+         <path d="M-30 0 v-30 h60 v30Z" fill="#241c12"/></g>`); break;
+      case 1: g.push(K.bars(60,180,180,160),K.bars(320,180,170,160),K.bars(570,180,180,160),
+        `<g fill="#050403"><rect x="60" y="180" width="180" height="160"/><rect x="320" y="180" width="170" height="160"/>
+         <rect x="570" y="180" width="180" height="160"/></g>`,
+        K.bars(60,180,180,160),K.bars(320,180,170,160),K.bars(570,180,180,160),
+        `<g class="eyes"><ellipse cx="380" cy="270" rx="5" ry="3.4" fill="#ffcf5c"/><ellipse cx="400" cy="270" rx="5" ry="3.4" fill="#ffcf5c"/></g>`,
+        K.torch(270,250,1)); break;
+      case 2: g.push(`<g transform="translate(400,330)"><rect x="-120" y="-30" width="240" height="26" rx="4" fill="#3a2c1c"/>
+        <rect x="-110" y="-4" width="16" height="34" fill="#2a2014"/><rect x="94" y="-4" width="16" height="34" fill="#2a2014"/>
+        <circle cx="-120" cy="-17" r="16" fill="#241a10" stroke="#4a3a24" stroke-width="3"/>
+        <circle cx="120" cy="-17" r="16" fill="#241a10" stroke="#4a3a24" stroke-width="3"/></g>`,
+        K.chain(220,120,140),K.chain(580,120,120), K.torch(110,270,1.1), K.skull(660,348,1.2)); break;
+      case 3: g.push(`<ellipse cx="400" cy="384" rx="140" ry="40" fill="#030203"/>`,
+        `<path d="M260 380 a140 40 0 0 1 280 0" stroke="#33291d" stroke-width="7" fill="none"/>`,
+        K.chain(400,60,250), `<circle cx="400" cy="320" r="120" fill="url(#halo)" opacity=".5"/>`,
+        K.torch(140,270,1), K.torch(660,270,1)); break;
+      case 4: g.push(`<path d="M0 340 h800 v20 H0Z" fill="#1a150f"/>`,
+        ...Array.from({length:7},(_,k)=>`<g transform="translate(${90+k*100},352) scale(${(0.7+Math.random()*0.5).toFixed(2)})">
+          <ellipse cx="0" cy="0" rx="14" ry="7" fill="#2b2118"/><circle cx="-12" cy="-4" r="5" fill="#2b2118"/>
+          <circle cx="-15" cy="-7" r="2" fill="#ff5a4a"/><path d="M14 0 q16 -6 24 4" stroke="#2b2118" stroke-width="2" fill="none"/></g>`),
+        K.bars(300,160,200,170), K.torch(620,270,1)); break;
+      case 5: g.push(...Array.from({length:9},(_,k)=>K.chain(70+k*84,40,R(90,220))),
+        `<g fill="#2a2018">${[0,1,2].map(k=>`<rect x="${140+k*230}" y="290" width="60" height="50" rx="6"/>`).join("")}</g>`,
+        K.torch(400,250,1.3), K.skull(250,350,1.1)); break;
+      case 6: g.push(`<g fill="#141b22">${Array.from({length:9},(_,k)=>`<rect x="${-20+k*100}" y="${340-k*4}" width="120" height="${120+k*4}"/>`).join("")}</g>`,
+        K.water(400,368,300,"#0c1620"),
+        `<path d="M200 460 L280 340 h240 l80 120Z" fill="#221a12"/>`,
+        `<g stroke="#3a2f22" stroke-width="4">${[0,1,2,3].map(k=>`<path d="M${268+k*10} ${330-k*0} h${204-k*20}"/>`).join("")}</g>`,
+        K.torch(120,260,1)); break;
+      case 7: g.push(K.cage(400,310,2.6), K.chain(400,60,200),
+        K.skull(398,300,1.1), `<circle cx="400" cy="300" r="120" fill="url(#halo)" opacity=".45"/>`,
+        K.bones(180,354,1.4),K.bones(640,352,1.3), K.torch(90,270,1)); break;
+      case 8: g.push(`<g transform="translate(520,336)"><rect x="-90" y="-26" width="180" height="26" fill="#3a2c1c"/>
+        <rect x="-80" y="0" width="14" height="34" fill="#2a2014"/><rect x="66" y="0" width="14" height="34" fill="#2a2014"/>
+        <rect x="-50" y="-40" width="56" height="14" fill="#c9bfa0"/><rect x="14" y="-36" width="34" height="10" fill="#c9bfa0"/>
+        <circle cx="-66" cy="-34" r="7" fill="#ffb347" class="flick"/></g>`,
+        `<circle cx="454" cy="302" r="90" fill="url(#halo)"/>`,
+        K.bars(80,180,170,160), K.chain(300,80,110)); break;
+      case 9: g.push(`<rect x="300" y="150" width="200" height="190" rx="8" fill="#2a2620"/>`,
+        `<g fill="#4a443c">${[0,1,2,3].map(r=>[0,1,2].map(c=>`<circle cx="${332+c*68}" cy="${182+r*46}" r="6"/>`).join("")).join("")}</g>`,
+        `<circle cx="470" cy="260" r="12" fill="#1a1712"/>`,
+        `<path d="M300 150 h200 v190 h-200Z" fill="none" stroke="#5c564c" stroke-width="5"/>`,
+        K.torch(180,260,1.2),K.torch(620,260,1.2)); break;
+    }
+    return brick+g.join("");
+  },
+  out:{line:"The last bolt draws back. Nobody stops you.", build:()=>outsideKit("dungeon")} },
+
+/* ---------------- 6. THE CASTLE -------------- */
+{ id:"castle", name:"The Castle", icon:"🏰",
+  rooms:["The Drawbridge","The Great Hall","The Armoury","The Banquet","The Spiral Stair",
+         "The Chapel","The Queen's Chamber","The Rookery","The Throne Room","The Tower Top"],
+  pal:Array(10).fill(["#1d1628","#090612"]), floor:Array(10).fill("#2a2030"),
+  props:i=>{
+    const stone=`<g opacity=".45">${Array.from({length:9},(_,r)=>Array.from({length:10},(_,c)=>
+      `<rect x="${(r%2?-40:0)+c*82}" y="${r*40}" width="78" height="36" fill="none" stroke="#120d1a" stroke-width="2"/>`).join("")).join("")}</g>`;
+    const g=[];
+    switch(i){
+      case 0: g.push(`<rect width="800" height="460" fill="#0c1020"/>`, stars(40,200), moon(150,80,34),
+        `<g fill="#0a0712"><rect x="430" y="120" width="330" height="220"/>
+         <rect x="410" y="80" width="46" height="260"/><rect x="730" y="80" width="46" height="260"/>
+         ${[0,1,2,3,4,5,6,7].map(k=>`<rect x="${412+k*46}" y="66" width="26" height="20"/>`).join("")}</g>`,
+        K.arch(560,340,120,150,"#05030a"),
+        `<path d="M120 340 h300 l-40 100 H120Z" fill="#241a2c"/>`,
+        K.chain(430,120,130),K.chain(700,120,130), K.torch(470,290,1.1),K.torch(660,290,1.1)); break;
+      case 1: g.push(K.pillar(120,340,240),K.pillar(280,340,240),K.pillar(520,340,240),K.pillar(680,340,240),
+        K.banner(200,110,64,110,"#5c1520"),K.banner(600,110,64,110,"#1b2f5c"),
+        `<path d="M340 340 v-160 h120 v160Z" fill="#06040c"/>`, K.torch(400,280,1.2)); break;
+      case 2: g.push(...[0,1,2,3,4].map(k=>`<g transform="translate(${130+k*140},300)">
+        <path d="M-22 0 q0 -46 22 -54 q22 8 22 54 q-22 12 -44 0Z" fill="#3c4450"/>
+        <rect x="-4" y="-54" width="8" height="-10" fill="#3c4450"/>
+        <path d="M-14 -34 h28" stroke="#161a20" stroke-width="3"/>
+        <path d="M-9 -26 l5 6 M9 -26 l-5 6" stroke="#161a20" stroke-width="2.4"/></g>`),
+        `<g stroke="#5c6472" stroke-width="4">${[0,1,2,3].map(k=>`<path d="M${180+k*150} 340 v-44"/><path d="M${170+k*150} 296 h20"/>`).join("")}</g>`,
+        K.torch(60,270,1)); break;
+      case 3: g.push(`<g transform="translate(400,330)"><rect x="-260" y="-30" width="520" height="26" rx="4" fill="#4a2f1c"/>
+        <rect x="-250" y="-4" width="20" height="34" fill="#33210f"/><rect x="230" y="-4" width="20" height="34" fill="#33210f"/></g>`,
+        ...[0,1,2,3,4,5,6].map(k=>`<g transform="translate(${180+k*74},300)">
+          <path d="M-9 0 q-4 -16 9 -16 q13 0 9 16Z" fill="#b8a86c"/><rect x="-2" y="-24" width="4" height="8" fill="#b8a86c"/></g>`),
+        K.skull(540,300,0.9), `<circle cx="400" cy="270" r="180" fill="url(#halo)" opacity=".5"/>`,
+        K.banner(120,90,56,100,"#5c1520")); break;
+      case 4: g.push(`<g fill="#2a2030">${Array.from({length:11},(_,k)=>
+        `<path d="M${320+k*14} ${340-k*30} h${150-k*9} v14 h-${150-k*9}Z"/>`).join("")}</g>`,
+        `<path d="M300 340 q40 -320 190 -300" stroke="#3c3048" stroke-width="7" fill="none"/>`,
+        K.torch(180,260,1.1), `<path d="M120 340 h140 v120 H120Z" fill="#241a2c" opacity="0"/>`); break;
+      case 5: g.push(`<path d="M400 60 v280 M320 140 h160" stroke="#3c3048" stroke-width="10"/>`,
+        K.arch(400,340,180,190,"#0a0714"),
+        `<g opacity=".6">${[["#8a1b2a",300],["#1b3f8a",360],["#8a6f1b",440],["#2a8a4a",500]].map(c=>
+          `<path d="M${c[1]} 200 a24 40 0 0 1 48 0 v70 h-48Z" fill="${c[0]}"/>`).join("")}</g>`,
+        K.altar(400,330,1.2), K.torch(190,280,1),K.torch(610,280,1)); break;
+      case 6: g.push(`<rect x="420" y="170" width="320" height="170" rx="8" fill="#3a2038"/>`,
+        `<rect x="436" y="190" width="288" height="60" rx="6" fill="#5c2b4e"/>`,
+        `<path d="M420 170 q160 -60 320 0Z" fill="#4a2442"/>`,
+        `<g stroke="#6b3a5e" stroke-width="3">${[0,1,2,3].map(k=>`<path d="M${440+k*80} 170 v-70"/>`).join("")}</g>`,
+        `<g transform="translate(180,300)"><ellipse cx="0" cy="0" rx="46" ry="54" fill="#2a2030"/>
+         <ellipse cx="0" cy="0" rx="38" ry="46" fill="#5a6270" opacity=".35"/>
+         <path d="M-20 -20 q20 26 30 44" stroke="#c9d6e8" stroke-width="2" fill="none" opacity=".3"/></g>`,
+        K.torch(330,280,1)); break;
+      case 7: g.push(`<path d="M0 0 h800 v120 q-200 40 -400 10 q-200 -30 -400 10Z" fill="#0a0712"/>`,
+        ...Array.from({length:11},(_,k)=>`<g transform="translate(${60+k*70},${R(96,150)}) scale(${(0.7+Math.random()*0.5).toFixed(2)})">
+          <ellipse cx="0" cy="0" rx="13" ry="9" fill="#0d0a12"/><circle cx="11" cy="-5" r="6" fill="#0d0a12"/>
+          <circle cx="13" cy="-6" r="1.6" fill="#ffcf5c"/><path d="M-12 -2 q-14 -10 -24 0 q12 2 24 2Z" fill="#0d0a12"/></g>`),
+        `<g fill="#241a2c">${[0,1,2,3].map(k=>`<rect x="${110+k*180}" y="200" width="120" height="140"/>`).join("")}</g>`,
+        K.bones(400,352,1.2), K.torch(640,280,1)); break;
+      case 8: g.push(`<path d="M330 340 v-240 h140 v240Z" fill="#0a0714"/>`,
+        K.banner(240,86,70,130,"#5c1520"),K.banner(560,86,70,130,"#5c1520"),
+        K.pillar(120,340,250),K.pillar(680,340,250),
+        `<path d="M300 340 h200 l-20 -26 h-160Z" fill="#3a2a3e"/>`,
+        K.throne(400,314,1.05), K.torch(200,270,1.1),K.torch(600,270,1.1),
+        `<circle cx="400" cy="240" r="190" fill="url(#halo)" opacity=".4"/>`); break;
+      case 9: g.push(`<rect width="800" height="460" fill="#0a0e1e"/>`, stars(70,260), moon(650,90,44),
+        `<path d="M120 340 h560 v120 H120Z" fill="#241a2c"/>`,
+        `<g fill="#2e2236">${Array.from({length:9},(_,k)=>`<rect x="${120+k*66}" y="300" width="42" height="42"/>`).join("")}</g>`,
+        `<path d="M120 342 h560" stroke="#3c3048" stroke-width="6"/>`,
+        K.banner(400,120,80,140,"#5c1520"), lightAt(400,220,200)); break;
+    }
+    return stone+g.join("");
+  },
+  out:{line:"You walk out over the bridge. Nothing follows.", build:()=>outsideKit("castle")} }
+];
+
+/* the outside-the-world escape backdrop, per world */
+function outsideKit(id){
+  const back = {
+    graveyard:`<g fill="#060a12"><path d="M430 320 V180 h240 v140Z"/><path d="M418 186 L550 110 L682 186Z"/></g>
+      <rect x="520" y="228" width="52" height="52" fill="#ff9a2e" opacity=".5" class="flick"/>
+      ${K.fence(380,326,380)}${K.grave(360,330,1,1)}`,
+    forest:`${K.pine(470,330,2.2,"#070f07")}${K.pine(590,326,2.6,"#070f07")}${K.pine(700,332,2,"#070f07")}
+      ${K.tree(400,330,1.6,"#030803")}`,
+    mountain:`${K.peak(560,320,220,240,"#0b1020",true)}${K.peak(760,320,160,170,"#0e1426",true)}`,
+    cave:`<path d="M420 320 q30 -190 250 -190 q220 0 250 190Z" fill="#090712"/>
+      <path d="M470 320 q26 -140 200 -140 q174 0 200 140Z" fill="#141a28" opacity=".55"/>`,
+    dungeon:`<g fill="#0a0806"><rect x="430" y="160" width="300" height="160"/>
+      ${Array.from({length:7},(_,k)=>`<rect x="${432+k*44}" y="142" width="26" height="20"/>`).join("")}</g>
+      <rect x="540" y="216" width="70" height="104" rx="6" fill="#2a2620"/>`,
+    castle:`<g fill="#080612"><rect x="420" y="130" width="330" height="190"/>
+      <rect x="400" y="86" width="46" height="234"/><rect x="722" y="86" width="46" height="234"/>
+      ${Array.from({length:8},(_,k)=>`<rect x="${402+k*46}" y="72" width="26" height="20"/>`).join("")}</g>
+      <rect x="546" y="200" width="56" height="60" fill="#ff9a2e" opacity=".45" class="flick"/>`
+  }[id] || "";
+  return back;
+}
+/* =====================================================================
+   GAME LAYER
+   ===================================================================== */
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+
+/* Precompute the topic label of every generator, so a run can pick ten
+   genuinely different problem types. */
+const TOPIC = BANK.map(l => l.gens.map(g => { try { return g().t; } catch(e){ return "?"; } }));
+
+/* The hardest problem types within each grade — used for the chest and the
+   hatch, so a challenge is harder without leaving the player's grade. */
+const HARD = [
+  [4,7,10],        /* 1  */ [1,3,8,9],      /* 2  */ [2,4,6,7],      /* 3  */
+  [0,1,4,7,9],     /* 4  */ [2,3,6,7],      /* 5  */ [1,4,7,8],      /* 6  */
+  [0,1,5,7,9],     /* 7  */ [0,4,5,6,8],    /* 8  */ [0,2,8,9,10],   /* 9  */
+  [1,5,7,8,9],     /* 10 */ [2,5,8,9],      /* 11 */ [1,2,7,9],      /* 12 */
+  [0,6,7,9,10],    /* C  */ [3,7,9,10],     /* M  */ [0,1,3,9,10]    /* PhD */
+];
+/* A challenge: a hard type from the player's own grade. `tight` replaces the
+   distractors with near misses, so only an exact answer gets through. */
+function challengeProblem(level, tight){
+  const pool = HARD[level] || BANK[level].gens.map((_,i)=>i);
+  const p = makeProblem(level, P(pool));
+  if(tight && /^-?\d+$/.test(p.answer)){
+    const a = parseInt(p.answer,10);
+    const near = SH([a+1,a-1,a+2,a-2,a+10,a-10]).filter(v=>v!==a);
+    p.choices = SH([p.answer, ...near.slice(0,3).map(String)]);
+  }
+  return p;
+}
+
+/* ---------- difficulty tiers: the more you play a grade, the nastier it gets ---------- */
+const TIERS = [
+  {name:"Restless", blurb:"all ten rooms at your grade",              mix:[0,0,0,0,0,0,0,0,0,0]},
+  {name:"Haunted",  blurb:"two rooms pulled from the grade above",    mix:[0,0,0,0,0,0,0,0,1,1]},
+  {name:"Cursed",   blurb:"four rooms from the grade above",          mix:[0,0,0,0,0,0,1,1,1,1]},
+  {name:"Damned",   blurb:"five rooms above, two of them two grades up", mix:[0,0,0,1,1,1,1,1,2,2]}
+];
+function tierFor(level){ const r=(save.prog&&save.prog[level])||0; return r>=12?3:r>=6?2:r>=2?1:0; }
+
+/* ---------- avatars ---------- */
+const AVATARS = [
+ {id:"witch",name:"Witch",svg:`
+   <path d="M32 6 L46 30 H18 Z" fill="#3b1f5c"/><ellipse cx="32" cy="31" rx="19" ry="4.5" fill="#2b1444"/>
+   <rect x="24" y="30" width="16" height="6" fill="#8a5bd0" opacity=".5"/>
+   <circle cx="32" cy="42" r="10" fill="#a9cf9e"/>
+   <circle cx="28.5" cy="41" r="2" fill="#14121c"/><circle cx="35.5" cy="41" r="2" fill="#14121c"/>
+   <path d="M28 48 q4 -3 8 0" stroke="#14121c" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+   <path d="M20 52 h24 l5 20 H15 Z" fill="#512c7d"/><path d="M24 52 h16 l2 20 H22 Z" fill="#6b3ba3"/>`},
+ {id:"vampire",name:"Vampire",svg:`
+   <path d="M14 52 L32 46 L50 52 L54 74 H10 Z" fill="#161620"/>
+   <path d="M20 50 L32 46 L44 50 L40 74 H24 Z" fill="#7d0f1c"/>
+   <circle cx="32" cy="34" r="12" fill="#e2d3c6"/>
+   <path d="M20 28 q6 -8 12 -3 q6 -5 12 3 l-4 2 H24 Z" fill="#111016"/>
+   <circle cx="27.5" cy="34" r="2" fill="#b4111f"/><circle cx="36.5" cy="34" r="2" fill="#b4111f"/>
+   <path d="M28 41 h8 l-2 5 -2-4 -2 4 Z" fill="#fff"/>`},
+ {id:"ghost",name:"Ghost kid",svg:`
+   <path d="M32 12 C18 12 13 24 13 36 v28 l6-6 6 6 7-6 7 6 6-6 6 6 V36 C51 24 46 12 32 12 Z" fill="#d3e4f5" opacity=".92"/>
+   <ellipse cx="26" cy="36" rx="3.4" ry="4" fill="#15121f"/><ellipse cx="38" cy="36" rx="3.4" ry="4" fill="#15121f"/>
+   <ellipse cx="32" cy="48" rx="4.5" ry="6" fill="#15121f"/>`},
+ {id:"skeleton",name:"Skeleton",svg:`
+   <rect x="29" y="44" width="6" height="10" fill="#ddd9cf"/>
+   <path d="M32 12 c-11 0-17 8-17 18 0 7 4 11 7 13 h20 c3-2 7-6 7-13 0-10-6-18-17-18Z" fill="#ece8de"/>
+   <circle cx="25" cy="30" r="5" fill="#0e0c14"/><circle cx="39" cy="30" r="5" fill="#0e0c14"/>
+   <path d="M32 36 l-2.6 5h5.2Z" fill="#0e0c14"/>
+   <path d="M25 43 h14 M27 43 v3 M31 43 v3 M35 43 v3" stroke="#0e0c14" stroke-width="1.3"/>
+   <rect x="20" y="54" width="24" height="18" rx="4" fill="#ddd9cf"/>
+   <rect x="22" y="58" width="20" height="2" fill="#a9a496"/><rect x="22" y="63" width="20" height="2" fill="#a9a496"/>`},
+ {id:"cat",name:"Black cat",svg:`
+   <path d="M16 74 q0 -26 16 -26 q16 0 16 26 Z" fill="#141019"/>
+   <circle cx="32" cy="38" r="15" fill="#141019"/>
+   <path d="M18 28 l1 -14 11 8Z" fill="#141019"/><path d="M46 28 l-1 -14 -11 8Z" fill="#141019"/>
+   <path d="M20 26 l.6 -8 6 4.6Z" fill="#5a3468"/><path d="M44 26 l-.6 -8 -6 4.6Z" fill="#5a3468"/>
+   <ellipse cx="26" cy="38" rx="3.4" ry="5" fill="#c4ff4f"/><ellipse cx="38" cy="38" rx="3.4" ry="5" fill="#c4ff4f"/>
+   <ellipse cx="26" cy="38" rx="1.1" ry="4.6" fill="#0d0a12"/><ellipse cx="38" cy="38" rx="1.1" ry="4.6" fill="#0d0a12"/>
+   <path d="M30 47 h4 l-2 2.4Z" fill="#c76a86"/>`},
+ {id:"astro",name:"Astronaut",svg:`
+   <rect x="17" y="50" width="30" height="24" rx="8" fill="#dbe0ea"/>
+   <rect x="27" y="56" width="10" height="7" rx="2" fill="#6a9ae8"/>
+   <circle cx="32" cy="32" r="18" fill="#dbe0ea"/>
+   <path d="M32 18 a14 14 0 0 1 14 14 a14 14 0 0 1 -28 0 a14 14 0 0 1 14 -14Z" fill="#101a30"/>
+   <path d="M22 28 q6 -7 14 -5 l-2 4 q-6 -1 -10 4Z" fill="#6a9ae8" opacity=".75"/>
+   <rect x="12" y="52" width="6" height="14" rx="3" fill="#b4bccb"/><rect x="46" y="52" width="6" height="14" rx="3" fill="#b4bccb"/>`},
+ {id:"mummy",name:"Mummy",svg:`
+   <rect x="19" y="50" width="26" height="24" rx="5" fill="#cfc6ae"/>
+   <circle cx="32" cy="32" r="16" fill="#ded5bd"/>
+   <g stroke="#a99d80" stroke-width="1.4">
+     <path d="M17 24 h30 M16 30 h32 M17 38 h30 M19 44 h26 M20 56 h24 M20 62 h24 M20 68 h24"/></g>
+   <path d="M22 28 h9 v7 h-9Z" fill="#0d0b10"/><circle cx="26.5" cy="31.5" r="2" fill="#ffca6b"/>
+   <path d="M38 33 h8 v6 h-8Z" fill="#0d0b10"/><circle cx="42" cy="36" r="1.8" fill="#ffca6b"/>
+   <path d="M45 44 l9 12 -4 3 -8 -12Z" fill="#cfc6ae"/>`},
+ {id:"wolf",name:"Werewolf",svg:`
+   <path d="M14 74 q2 -24 18 -24 q16 0 18 24Z" fill="#3a3038"/>
+   <path d="M17 32 l-3 -16 12 8Z" fill="#4a3f48"/><path d="M47 32 l3 -16 -12 8Z" fill="#4a3f48"/>
+   <ellipse cx="32" cy="36" rx="17" ry="15" fill="#4a3f48"/>
+   <path d="M24 44 q8 12 16 0 q-8 6 -16 0Z" fill="#241d24"/>
+   <ellipse cx="32" cy="46" rx="9" ry="7" fill="#5b4e58"/><ellipse cx="32" cy="43" rx="3.4" ry="2.6" fill="#141014"/>
+   <path d="M27 49 l1.6 4 1.6 -4Z" fill="#fff"/><path d="M34 49 l1.6 4 1.6 -4Z" fill="#fff"/>
+   <ellipse cx="25" cy="33" rx="3" ry="2.4" fill="#ffd43a"/><ellipse cx="39" cy="33" rx="3" ry="2.4" fill="#ffd43a"/>
+   <circle cx="25" cy="33" r="1.1" fill="#120f12"/><circle cx="39" cy="33" r="1.1" fill="#120f12"/>`},
+ {id:"reaper",name:"Reaper",svg:`
+   <path d="M32 10 C18 10 12 22 12 36 v38 h40 V36 C52 22 46 10 32 10Z" fill="#191423"/>
+   <ellipse cx="32" cy="34" rx="12" ry="14" fill="#07060a"/>
+   <ellipse cx="27" cy="33" rx="2.6" ry="3.4" fill="#ff3b2f"/><ellipse cx="37" cy="33" rx="2.6" ry="3.4" fill="#ff3b2f"/>
+   <path d="M12 40 q20 8 40 0" stroke="#2a2135" stroke-width="2" fill="none"/>
+   <rect x="52" y="4" width="3" height="70" fill="#4a3a28"/>
+   <path d="M53 6 q14 2 12 16 q-6 -10 -12 -8Z" fill="#b9c3cc"/>`},
+ {id:"frank",name:"The Creature",svg:`
+   <rect x="18" y="50" width="28" height="24" rx="3" fill="#2f3a2a"/>
+   <rect x="12" y="54" width="6" height="7" rx="2" fill="#7fa06a"/><rect x="46" y="54" width="6" height="7" rx="2" fill="#7fa06a"/>
+   <rect x="18" y="20" width="28" height="30" rx="4" fill="#7fa06a"/>
+   <rect x="16" y="16" width="32" height="8" rx="2" fill="#241c18"/>
+   <rect x="13" y="32" width="5" height="8" rx="2" fill="#b8b8b8"/><rect x="46" y="32" width="5" height="8" rx="2" fill="#b8b8b8"/>
+   <circle cx="26" cy="32" r="2.6" fill="#141414"/><circle cx="38" cy="32" r="2.6" fill="#141414"/>
+   <path d="M24 42 h16" stroke="#2c3a24" stroke-width="2"/>
+   <path d="M28 42 v3 M32 42 v3 M36 42 v3" stroke="#2c3a24" stroke-width="1.4"/>
+   <path d="M20 24 l4 4 -4 4" stroke="#4e6540" stroke-width="1.4" fill="none"/>`},
+ {id:"zombie",name:"Zombie",svg:`
+   <path d="M18 52 h28 l3 22 H15Z" fill="#3c4a3a"/>
+   <path d="M18 52 l6 10 6 -8 5 9 6 -11" stroke="#2a3529" stroke-width="2" fill="none"/>
+   <circle cx="32" cy="34" r="15" fill="#8fae7d"/>
+   <path d="M17 30 q8 -12 22 -6 l-3 4 q-9 -3 -15 4Z" fill="#4a3a2a"/>
+   <circle cx="26" cy="35" r="3.4" fill="#f2f2e6"/><circle cx="26.8" cy="35.6" r="1.5" fill="#121212"/>
+   <ellipse cx="38" cy="36" rx="2" ry="2.6" fill="#1d2a1a"/>
+   <path d="M24 44 q8 5 15 -1" stroke="#33421f" stroke-width="2" fill="none"/>
+   <path d="M27 44 v4 M31 45 v4 M35 44 v4" stroke="#e8e6d0" stroke-width="1.4"/>
+   <path d="M40 24 l6 -4" stroke="#6b3a3a" stroke-width="2"/>`},
+ {id:"scarecrow",name:"Scarecrow",svg:`
+   <rect x="29" y="48" width="6" height="26" fill="#6b5433"/>
+   <path d="M10 56 h44" stroke="#6b5433" stroke-width="5"/>
+   <path d="M18 50 q14 -6 28 0 l-4 24 H22Z" fill="#7a5f33"/>
+   <circle cx="32" cy="32" r="15" fill="#c79a4a"/>
+   <path d="M14 22 q18 -12 36 0 l-4 3 q-14 -8 -28 0Z" fill="#4a3720"/>
+   <path d="M12 25 h40 l-2 4 H14Z" fill="#3a2b18"/>
+   <path d="M25 30 l6 4 -6 4Z" fill="#21150b"/><path d="M39 30 l-6 4 6 4Z" fill="#21150b"/>
+   <path d="M24 44 l3 -3 3 3 3 -3 3 3 3 -3" stroke="#21150b" stroke-width="2" fill="none"/>
+   <path d="M18 47 q-5 4 -8 3 M46 47 q5 4 8 3" stroke="#8a6d3a" stroke-width="2" fill="none"/>`}
+];
+const avSVG = (id,size)=>{const a=AVATARS.find(v=>v.id===id)||AVATARS[0];
+  return `<svg width="${size}" height="${size}" viewBox="0 0 64 80">${a.svg}</svg>`;};
+
+const KING_BODY = `
+  <path d="M12 72 q4 -14 20 -14 q16 0 20 14 Z" fill="#1a0a22"/>
+  <ellipse cx="32" cy="34" rx="22" ry="19" fill="#e8620f"/>
+  <ellipse cx="32" cy="34" rx="8" ry="19" fill="#ff9333" opacity=".45"/>
+  <path d="M30 14 q2 -8 7 -9 l-1 5 q-3 1 -3 4Z" fill="#3d6b22"/>
+  <path d="M18 29 l10 5 -10 5Z" fill="#1a0602"/><path d="M46 29 l-10 5 10 5Z" fill="#1a0602"/>
+  <ellipse cx="23" cy="33" rx="2" ry="2.6" fill="#ffe08a"/><ellipse cx="41" cy="33" rx="2" ry="2.6" fill="#ffe08a"/>
+  <path d="M19 44 l5 -4 4 4 4 -4 4 4 5 -4 2 6 q-12 7 -24 0Z" fill="#1a0602"/>
+  <path d="M12 23 L12 9 L20 17 L26 3 L32 13 L38 3 L44 17 L52 9 L52 23 Z" fill="#ffc83d"/>
+  <path d="M12 23 L12 9 L20 17 L26 3 L32 13 L32 23 Z" fill="#e0a416"/>
+  <rect x="11" y="21" width="42" height="7" rx="2.5" fill="#ffd869"/>
+  <rect x="11" y="25" width="42" height="3" rx="1.5" fill="#c98d0d"/>
+  <circle cx="26" cy="5" r="2.4" fill="#c4121f"/><circle cx="38" cy="5" r="2.4" fill="#c4121f"/>
+  <circle cx="32" cy="15" r="2.2" fill="#4fbf7a"/>
+  <circle cx="19" cy="24.5" r="2.2" fill="#c4121f"/><circle cx="32" cy="24.5" r="2.4" fill="#5f96e0"/>
+  <circle cx="45" cy="24.5" r="2.2" fill="#c4121f"/>`;
+const KING_SVG = size=>`<svg width="${size}" height="${size}" viewBox="0 0 64 80">${KING_BODY}</svg>`;
+
+/* the house seen from the lawn, for its escape scene */
+function houseOutside(){ return `
+  <g fill="#060a14">
+    <path d="M430 320 V150 h250 v170Z"/><path d="M414 156 L555 52 L696 156Z"/>
+    <path d="M700 320 v-96 h44 v96Z"/></g>
+  <rect x="470" y="196" width="46" height="52" fill="#3a2410"/>
+  <rect x="596" y="196" width="52" height="52" fill="#ff9a2e" opacity=".55" class="flick"/>
+  <rect x="540" y="252" width="34" height="68" fill="#2a1a0c"/>
+  <g stroke="#0d1420" stroke-width="7" fill="none">
+    <path d="M40 330 V262 M96 332 V264 M152 330 V262 M208 332 V264 M264 330 V262"/>
+    <path d="M20 266 H286"/></g>
+  <path d="M300 326 q30 -8 44 -26" stroke="#0d1420" stroke-width="7" fill="none"/>`; }
+
+/* the world you are in right now */
+const W = ()=>WORLDS[S.world]||WORLDS[0];
+
+
+/* the house's own hand-drawn furniture */
+function houseProps(i){
+  switch(i){
+    case 0: return `
+      <circle cx="668" cy="72" r="44" fill="#e8e2c8" opacity=".85"/>
+      <circle cx="652" cy="62" r="42" fill="#07090f" opacity=".72"/>
+      <path d="M0 320 q120 -70 260 -30 q140 40 260 -20 q140 -60 280 20 V460 H0Z" fill="#0c1020"/>
+      <g fill="#05070e"><path d="M290 320 V150 h220 v170Z"/><path d="M278 156 L400 62 L522 156Z"/>
+        <path d="M322 320 v-74 h54 v74Z"/></g>
+      <rect x="430" y="196" width="46" height="46" fill="#ff9a2e" opacity=".8" class="flick"/>
+      <rect x="443" y="196" width="4" height="46" fill="#1a0f06"/><rect x="430" y="216" width="46" height="4" fill="#1a0f06"/>
+      <rect x="336" y="256" width="30" height="64" fill="#3a2210"/>
+      <g stroke="#131a2c" stroke-width="7"><path d="M40 320 V246 M96 320 V246 M152 320 V246 M208 320 V246"/><path d="M20 248 H228"/></g>
+      <g fill="#0a0d18"><path d="M120 320 l-8 -34 h16Z"/><path d="M150 320 l-7 -28 h14Z"/></g>
+      <ellipse cx="620" cy="336" rx="48" ry="16" fill="#080b14"/>
+      <g transform="translate(594,292)"><ellipse cx="26" cy="26" rx="28" ry="23" fill="#a9540d"/>
+        <path d="M15 21 l10 5 -10 5Z" fill="#120802"/><path d="M37 21 l-10 5 10 5Z" fill="#120802"/>
+        <path d="M13 33 q13 10 26 0Z" fill="#120802"/></g>`;
+    case 1: return `
+      <rect x="0" y="0" width="800" height="320" fill="url(#wallpaper)"/>
+      <path d="M330 320 V110 h140 v210Z" fill="#150c14"/>
+      <g stroke="#5a3a1e" stroke-width="6" fill="none"><rect x="344" y="124" width="112" height="186"/></g>
+      <path d="M400 124 V310" stroke="#5a3a1e" stroke-width="4"/>
+      <circle cx="400" cy="54" r="11" fill="#ffb347" class="flick"/>
+      <path d="M400 0 V44" stroke="#3d2c1c" stroke-width="3"/>
+      <circle cx="400" cy="54" r="64" fill="url(#halo)"/>
+      <path d="M400 62 L320 320 H480Z" fill="url(#glow)" class="flick"/>
+      <rect x="48" y="188" width="128" height="132" fill="#1d1218"/><rect x="62" y="204" width="100" height="44" fill="#0a060a"/>
+      <g fill="#c8b9a0" opacity=".75"><ellipse cx="90" cy="226" rx="5" ry="7"/><ellipse cx="112" cy="226" rx="5" ry="7"/></g>
+      <rect x="620" y="140" width="116" height="162" fill="#1e1119"/>
+      <g stroke="#6b4a2c" stroke-width="5" fill="none"><rect x="632" y="152" width="92" height="138"/></g>
+      <path d="M632 152 L724 290 M724 152 L632 290" stroke="#6b4a2c" stroke-width="2" opacity=".45"/>`;
+    case 2: return `
+      <rect x="510" y="106" width="250" height="214" fill="#1b0f14"/>
+      <path d="M510 106 h250 v24 h-250Z" fill="#3c2415"/>
+      <rect x="552" y="194" width="166" height="126" fill="#0d0609"/>
+      <g class="flick"><path d="M572 320 q58 -92 122 0Z" fill="#c2450b" opacity=".8"/>
+        <path d="M596 320 q40 -62 78 0Z" fill="#ffb347" opacity=".85"/></g>
+      <ellipse cx="635" cy="300" rx="120" ry="34" fill="url(#halo)"/>
+      <rect x="56" y="214" width="204" height="26" rx="9" fill="#3d2129"/>
+      <rect x="70" y="240" width="20" height="80" fill="#241319"/><rect x="228" y="240" width="20" height="80" fill="#241319"/>
+      <path d="M56 216 q102 -50 204 0Z" fill="#5a2c39"/>
+      <path d="M96 216 q20 -18 46 -6" stroke="#7d4050" stroke-width="2" fill="none" opacity=".6"/>
+      <rect x="310" y="262" width="130" height="15" rx="5" fill="#3a2718"/>
+      <rect x="366" y="277" width="17" height="43" fill="#2a1a10"/>
+      <rect x="342" y="228" width="13" height="34" fill="#e4d8bc"/><circle cx="348" cy="224" r="7" fill="#ffb347" class="flick"/>
+      <circle cx="348" cy="224" r="34" fill="url(#halo)"/>`;
+    case 3: {
+      let sh="",bk="";
+      for(let k=0;k<4;k++){
+        sh+=`<rect x="${34+k*192}" y="76" width="164" height="244" fill="#1d1209"/>`;
+        for(let row=0;row<3;row++){
+          sh+=`<rect x="${34+k*192}" y="${148+row*74}" width="164" height="8" fill="#0f0905"/>`;
+          for(let j=0;j<9;j++){
+            const h=R(28,44),c=P(["#5e2432","#2d4450","#57481f","#37264a","#452a17"]);
+            bk+=`<rect x="${42+k*192+j*17}" y="${148+row*74-h}" width="13" height="${h}" fill="${c}"/>`;
+          }
+        }
+      }
+      return sh+bk+`
+      <rect x="352" y="268" width="96" height="52" fill="#2b1f14"/>
+      <circle cx="400" cy="256" r="9" fill="#ffb347" class="flick"/>
+      <circle cx="400" cy="256" r="50" fill="url(#halo)"/>
+      <path d="M400 262 L348 460 H452Z" fill="url(#glow)" class="flick"/>
+      <g fill="#0b0710"><path d="M160 320 l-7 -30 h14Z"/><path d="M640 320 l-6 -24 h12Z"/></g>`;
+    }
+    case 4: return `
+      <rect x="0" y="112" width="800" height="15" fill="#2f2718"/>
+      <g fill="#9d9683">${[0,1,2,3,4,5,6].map(k=>`<path d="M${74+k*46} 129 v44 a11 11 0 0 0 22 0 v-44Z" opacity=".75"/>`).join("")}</g>
+      <rect x="470" y="146" width="256" height="174" fill="#161d18"/>
+      <rect x="490" y="176" width="96" height="116" fill="#080c0a"/>
+      <rect x="606" y="176" width="96" height="116" fill="#080c0a"/>
+      <circle cx="538" cy="234" r="22" fill="#c2450b" opacity=".5" class="flick"/>
+      <rect x="44" y="236" width="322" height="20" rx="4" fill="#3f3322"/>
+      <rect x="58" y="256" width="18" height="64" fill="#291f14"/><rect x="334" y="256" width="18" height="64" fill="#291f14"/>
+      <ellipse cx="146" cy="230" rx="38" ry="13" fill="#1e2723"/><ellipse cx="146" cy="222" rx="38" ry="13" fill="#31423a"/>
+      <path d="M146 208 q-7 -18 7 -30" stroke="#7e968a" stroke-width="3" fill="none" opacity=".45"/>
+      <path d="M252 208 q-7 -18 7 -30" stroke="#7e968a" stroke-width="3" fill="none" opacity=".3"/>
+      <g stroke="#6b5f4a" stroke-width="2"><path d="M300 127 v42 M318 127 v54 M336 127 v36"/></g>
+      <path d="M296 169 l4 8 4 -8Z" fill="#8a2a2a"/>`;
+    case 5: return `
+      <g stroke="#070910" stroke-width="18" opacity=".85"><path d="M110 0 V320 M400 0 V320 M690 0 V320"/></g>
+      <rect x="0" y="304" width="800" height="16" fill="#12141c"/>
+      <g fill="#1d1710">${[0,1,2].map(k=>`<ellipse cx="${166+k*116}" cy="288" rx="30" ry="32"/>
+        <rect x="${151+k*116}" y="258" width="30" height="14" fill="#2b2317"/>`).join("")}</g>
+      <path d="M0 0 h800 v44 q-200 34 -400 0 q-200 -34 -400 0Z" fill="#05060b"/>
+      <g stroke="#9fb3cc" stroke-width="1" opacity=".18">
+        <path d="M600 44 q44 44 88 22 M644 44 q-22 54 22 76 M706 44 q11 66 -33 88"/>
+        <path d="M600 44 q40 30 106 66"/></g>
+      <circle cx="662" cy="136" r="10" fill="#15181f"/>
+      <g stroke="#4a5162" stroke-width="1" opacity=".45"><path d="M662 136 v-92 M620 94 h84 M632 168 l62 -62"/></g>
+      <ellipse cx="400" cy="320" rx="132" ry="22" fill="#05060b" opacity=".85"/>
+      <path d="M300 300 q100 -26 200 0" stroke="#1d2430" stroke-width="3" fill="none"/>`;
+    case 6: return `
+      <g fill="#3b2221">${Array.from({length:9},(_,k)=>`<rect x="${288+k*25}" y="${310-k*27}" width="232" height="15"/>
+        <rect x="${288+k*25}" y="${325-k*27}" width="232" height="15" fill="#261615"/>`).join("")}</g>
+      <g stroke="#563627" stroke-width="5">${Array.from({length:9},(_,k)=>`<path d="M${288+k*25} ${310-k*27} v-48"/>`).join("")}</g>
+      <rect x="104" y="52" width="96" height="150" fill="#16101d"/>
+      <g stroke="#6b4a2c" stroke-width="5" fill="none"><rect x="114" y="62" width="76" height="130"/></g>
+      <circle cx="152" cy="108" r="24" fill="#7f93b0" opacity=".28"/>
+      <path d="M140 100 q12 10 24 0" stroke="#0c0a12" stroke-width="2" fill="none" opacity=".7"/>
+      <circle cx="648" cy="62" r="13" fill="#ffb347" class="flick"/>
+      <circle cx="648" cy="62" r="56" fill="url(#halo)"/>
+      <path d="M648 70 L572 320 H724Z" fill="url(#glow)" class="flick"/>`;
+    case 7: return `
+      <rect x="0" y="0" width="800" height="320" fill="url(#wallpaper)"/>
+      <rect x="430" y="146" width="316" height="174" rx="10" fill="#2c1823"/>
+      <rect x="444" y="112" width="64" height="76" rx="8" fill="#3d2131"/>
+      <rect x="430" y="198" width="316" height="66" rx="6" fill="#553144"/>
+      <path d="M430 198 q158 -38 316 0Z" fill="#6b3d55" opacity=".8"/>
+      <path d="M470 264 q40 -14 80 0" stroke="#3a2030" stroke-width="3" fill="none"/>
+      <rect x="58" y="134" width="138" height="170" fill="#20121b"/>
+      <g stroke="#6b4a2c" stroke-width="5" fill="none"><rect x="70" y="146" width="114" height="146"/></g>
+      <path d="M70 146 L184 292" stroke="#6b4a2c" stroke-width="2" opacity=".45"/>
+      <rect x="260" y="254" width="96" height="13" rx="4" fill="#3a2718"/>
+      <rect x="298" y="267" width="15" height="53" fill="#2a1a10"/>
+      <rect x="294" y="220" width="13" height="34" fill="#e4d8bc"/><circle cx="300" cy="216" r="7" fill="#ffb347" class="flick"/>
+      <circle cx="300" cy="216" r="38" fill="url(#halo)"/>
+      <g fill="#7a5a70" opacity=".5"><circle cx="620" cy="130" r="4"/><circle cx="660" cy="118" r="3"/></g>`;
+    case 8: return `
+      <rect x="34" y="208" width="392" height="20" rx="4" fill="#233039"/>
+      <rect x="48" y="228" width="18" height="92" fill="#18222a"/><rect x="396" y="228" width="18" height="92" fill="#18222a"/>
+      <g>${[0,1,2,3].map(k=>{const c=P(["#4fbf7a","#5f96e0","#e8620f","#c0407a"]);
+        return `<path d="M${86+k*82} 208 v-36 a20 24 0 1 0 0 0Z" fill="none" stroke="#7c98a6" stroke-width="3"/>
+                <ellipse cx="${86+k*82}" cy="184" rx="16" ry="19" fill="${c}" opacity=".55" class="flick"/>`;}).join("")}</g>
+      <g stroke="#7c98a6" stroke-width="3" fill="none" opacity=".65">
+        <path d="M470 320 v-86 h64 v-44 h64 v64 h64 v66"/></g>
+      <g fill="#5f96e0" opacity=".45"><circle cx="534" cy="186" r="6"/><circle cx="598" cy="230" r="6"/><circle cx="662" cy="252" r="6"/></g>
+      <rect x="492" y="82" width="232" height="76" rx="8" fill="#08151a" stroke="#223d47" stroke-width="3"/>
+      <path d="M504 126 l22 -22 19 28 23 -42 21 36 19 -19 21 23 23 -32 19 28" stroke="#4fbf7a" stroke-width="2.5" fill="none"/>
+      <ellipse cx="240" cy="300" rx="70" ry="14" fill="#0a1216"/>
+      <path d="M210 300 q30 -22 60 0Z" fill="#16232a"/>`;
+    case 9: return `
+      <path d="M0 320 L400 14 L800 320Z" fill="#150b06"/>
+      <g stroke="#38230f" stroke-width="11"><path d="M400 24 V320 M172 158 L628 158 M112 234 L688 234"/></g>
+      <circle cx="400" cy="116" r="52" fill="url(#halo)"/>
+      <circle cx="400" cy="116" r="13" fill="#ffc45c" class="flick"/>
+      <g fill="#1e1209">${[0,1,2].map(k=>`<rect x="${114+k*236}" y="256" width="106" height="64" rx="4"/>
+        <rect x="${127+k*236}" y="246" width="80" height="12" fill="#2d1d0f"/>`).join("")}</g>
+      <g stroke="#5a4a34" stroke-width="1.6" opacity=".45"><path d="M54 54 q62 22 42 84 M746 54 q-62 22 -42 84"/></g>
+      <g transform="translate(596,184) scale(1.2)"><ellipse cx="26" cy="26" rx="28" ry="23" fill="#a9540d"/>
+        <path d="M15 21 l10 5 -10 5Z" fill="#120802"/><path d="M37 21 l-10 5 10 5Z" fill="#120802"/>
+        <path d="M11 31 l7 -4 5 4 5 -4 5 4 6 -4 3 6 q-15 8 -31 0Z" fill="#120802"/></g>
+      <g fill="#0b0704"><path d="M240 158 l-9 -34 h18Z"/><path d="M540 234 l-8 -28 h16Z"/></g>`;
+  }
+  return "";
+}
+
+/* cobwebs, watching eyes, dust — the same creeping furniture in every room */
+function dressing(){
+  const eyes = [];
+  for(let k=0;k<2;k++){
+    const x=P([70,150,250,560,680,730]), y=R(120,240);
+    eyes.push(`<g class="eyes" style="animation-delay:${(Math.random()*6).toFixed(1)}s">
+      <ellipse cx="${x}" cy="${y}" rx="4.5" ry="3" fill="#ffcf5c"/>
+      <ellipse cx="${x+15}" cy="${y}" rx="4.5" ry="3" fill="#ffcf5c"/>
+      <circle cx="${x}" cy="${y}" r="1.6" fill="#1a0c00"/><circle cx="${x+15}" cy="${y}" r="1.6" fill="#1a0c00"/></g>`);
+  }
+  const web = (tx,ty,sc,flip)=>`<g transform="translate(${tx},${ty}) scale(${flip?-sc:sc},${sc})" opacity=".3">
+    <path d="M0 0 L120 0 M0 0 L110 40 M0 0 L84 84 M0 0 L40 110 M0 0 L0 120" stroke="#c9d6e8" stroke-width="1.4" fill="none"/>
+    <path d="M30 0 q-6 14 -21 21 q-12 8 -21 24" stroke="#c9d6e8" stroke-width="1.1" fill="none"/>
+    <path d="M62 0 q-14 28 -44 44 q-12 8 -18 18" stroke="#c9d6e8" stroke-width="1.1" fill="none"/>
+    <path d="M96 0 q-22 44 -68 68 q-14 10 -28 28" stroke="#c9d6e8" stroke-width="1" fill="none"/></g>`;
+  let dust="";
+  for(let k=0;k<22;k++) dust+=`<circle cx="${R(20,780)}" cy="${R(30,400)}" r="${(Math.random()*1.3+0.4).toFixed(1)}"
+      fill="#e8dcc8" opacity="${(Math.random()*0.22+0.05).toFixed(2)}" class="mote" style="animation-delay:${(Math.random()*9).toFixed(1)}s"/>`;
+  return eyes.join("")+web(0,0,1.15,false)+web(800,0,1.15,true)+web(0,460,.8,false)+dust;
+}
+
+function dressingOutdoor(){
+  let d="";
+  for(let k=0;k<2;k++){ const x=P([80,180,600,700,740]), y=R(150,250);
+    d+=`<g class="eyes" style="animation-delay:${(Math.random()*6).toFixed(1)}s">
+      <ellipse cx="${x}" cy="${y}" rx="4.5" ry="3" fill="#ffcf5c"/>
+      <ellipse cx="${x+15}" cy="${y}" rx="4.5" ry="3" fill="#ffcf5c"/></g>`; }
+  for(let k=0;k<18;k++) d+=`<circle cx="${R(20,780)}" cy="${R(40,420)}" r="${(Math.random()*1.2+0.4).toFixed(1)}"
+      fill="#e8dcc8" opacity="${(Math.random()*0.2+0.05).toFixed(2)}" class="mote" style="animation-delay:${(Math.random()*9).toFixed(1)}s"/>`;
+  return d;
+}
+function sceneSVG(i, avatarId){
+  const w = W(), r = {wall:w.pal[i], floor:w.floor[i]};
+  const av = (AVATARS.find(a=>a.id===avatarId)||AVATARS[0]).svg;
+  return `
+  <defs>
+    <linearGradient id="wallg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="${r.wall[0]}"/><stop offset="1" stop-color="${r.wall[1]}"/></linearGradient>
+    <linearGradient id="floorg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="${r.floor}"/><stop offset="1" stop-color="#040306"/></linearGradient>
+    <pattern id="wallpaper" width="60" height="60" patternUnits="userSpaceOnUse">
+      <rect width="60" height="60" fill="url(#wallg)"/>
+      <path d="M30 12 q10 14 0 22 q-10 -8 0 -22Z" fill="#fff" opacity=".035"/>
+      <path d="M0 42 q10 14 0 22 M60 42 q-10 14 0 22" fill="#fff" opacity=".028"/>
+    </pattern>
+    <linearGradient id="glow" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffb347" stop-opacity=".26"/><stop offset="1" stop-color="#ffb347" stop-opacity="0"/></linearGradient>
+    <radialGradient id="halo"><stop offset="0" stop-color="#ffb347" stop-opacity=".42"/>
+      <stop offset="1" stop-color="#ffb347" stop-opacity="0"/></radialGradient>
+    <radialGradient id="halo2"><stop offset="0" stop-color="#7fd7ff" stop-opacity=".38"/>
+      <stop offset="1" stop-color="#7fd7ff" stop-opacity="0"/></radialGradient>
+    <radialGradient id="moong2"><stop offset="0" stop-color="#fff7d8" stop-opacity=".45"/>
+      <stop offset="1" stop-color="#fff7d8" stop-opacity="0"/></radialGradient>
+    <radialGradient id="vig" cx="50%" cy="54%" r="70%">
+      <stop offset="42%" stop-color="#000" stop-opacity="0"/><stop offset="100%" stop-color="#000" stop-opacity=".93"/></radialGradient>
+    <filter id="dread" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="2.2" result="b"/>
+      <feColorMatrix in="b" type="matrix" values="1.3 0 0 0 0  0 .5 0 0 0  0 0 .4 0 0  0 0 0 1 0" result="c"/>
+      <feMerge><feMergeNode in="c"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <linearGradient id="fogg" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#9c8cbd" stop-opacity="0"/><stop offset="50%" stop-color="#9c8cbd" stop-opacity=".15"/>
+      <stop offset="1" stop-color="#9c8cbd" stop-opacity="0"/></linearGradient>
+  </defs>
+  <rect width="800" height="460" fill="url(#wallg)"/>
+  <rect y="320" width="800" height="140" fill="url(#floorg)"/>
+  ${w.props(i)}
+  ${w.indoor?dressing():dressingOutdoor()}
+  <g id="kingInRoom"><g class="kingglow"><ellipse cx="32" cy="76" rx="26" ry="7" fill="#000" opacity=".55"/>
+    ${KING_BODY}</g></g>
+  <ellipse cx="150" cy="430" rx="56" ry="13" fill="#000" opacity=".5"/>
+  <g transform="translate(92,300) scale(1.85)">${av}</g>
+  <rect y="352" width="800" height="56" fill="url(#fogg)" class="fogdrift"/>
+  <rect y="392" width="800" height="48" fill="url(#fogg)" class="fogdrift2"/>
+  <rect width="800" height="460" fill="url(#vig)"/>`;
+}
+
+/* =====================================================================
+   AUDIO — effects and a very quiet, very unpleasant score.
+   ===================================================================== */
+let AC=null, sfxOn=true, musicOn=true;
+function ac(){ if(AC===null){ try{ AC=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){ AC=false; } }
+  if(AC && AC.state==="suspended") AC.resume(); return AC||null; }
+
+function tone(freq,dur,type,vol,delay,glideTo){
+  if(!sfxOn) return; const c=ac(); if(!c) return;
+  const t0=c.currentTime+(delay||0), o=c.createOscillator(), g=c.createGain();
+  o.type=type||"sine"; o.frequency.setValueAtTime(freq,t0);
+  if(glideTo) o.frequency.exponentialRampToValueAtTime(Math.max(20,glideTo),t0+dur);
+  g.gain.setValueAtTime(0.0001,t0);
+  g.gain.exponentialRampToValueAtTime(vol||0.12,t0+0.015);
+  g.gain.exponentialRampToValueAtTime(0.0001,t0+dur);
+  o.connect(g).connect(c.destination); o.start(t0); o.stop(t0+dur+0.05);
+}
+function noise(dur,vol,filt){
+  if(!sfxOn) return; const c=ac(); if(!c) return;
+  const n=Math.floor(c.sampleRate*dur), buf=c.createBuffer(1,n,c.sampleRate), d=buf.getChannelData(0);
+  for(let i=0;i<n;i++) d[i]=(Math.random()*2-1)*(1-i/n);
+  const src=c.createBufferSource(); src.buffer=buf;
+  const bp=c.createBiquadFilter(); bp.type="bandpass"; bp.frequency.value=filt||700; bp.Q.value=1.1;
+  const g=c.createGain(); g.gain.value=vol||0.08;
+  src.connect(bp).connect(g).connect(c.destination); src.start();
+}
+const SFX={
+  right(){ tone(392,.12,"triangle",.11,0); tone(587,.15,"triangle",.1,.09); tone(784,.3,"triangle",.09,.18); },
+  wrong(){ tone(196,.4,"sawtooth",.09,0,70); noise(.3,.045,300); tone(207,.5,"sawtooth",.05,.05,66); },
+  door(){ noise(.7,.07,260); tone(80,.7,"sine",.09,0,48); tone(118,.5,"sawtooth",.03,.1,70); },
+  chest(){ [622,830,988,1245].forEach((f,i)=>tone(f,.22,"triangle",.08,i*0.07)); },
+  hatch(){ noise(.9,.07,180); tone(60,1.1,"sine",.1,0,36); },
+  king(){ tone(58,1.1,"sawtooth",.11,0,36); noise(.8,.045,150); },
+  win(){ [392,494,587,784,988].forEach((f,i)=>tone(f,.45,"triangle",.1,i*0.14)); },
+  lose(){ [294,233,175,117].forEach((f,i)=>tone(f,.6,"sawtooth",.12,i*0.22,f*0.55)); noise(1.3,.055,120); },
+  click(){ tone(330,.05,"square",.04,0); }
+};
+
+/* =====================================================================
+   THE SCORE — a written piece, not a drone. A slow minor-key waltz in
+   A harmonic minor: walking bass on the downbeat, oom-pah-pah chords,
+   and a music-box melody over eight bars that resolves and loops.
+   ===================================================================== */
+const MUSIC={started:false, master:null, mel:null, harm:null, air:null, loop:null, beat:null, nextAt:0};
+
+const SEMI={C:0,"C#":1,D:2,"D#":3,E:4,F:5,"F#":6,G:7,"G#":8,A:9,"A#":10,B:11};
+function hz(n){
+  const name=n.replace(/[0-9]/g,""), oct=parseInt(n.match(/[0-9]+/)[0],10);
+  return 440*Math.pow(2, ((oct+1)*12 + SEMI[name] - 69)/12);
+}
+
+const BPM=92, BEAT=60/BPM, BAR=3*BEAT, LOOP=8*BAR;   /* 3/4 time, eight bars */
+
+/* i — i — iv — iv — V7 — V7 — i — V7, in A minor */
+const CHORDS=[
+  {bass:"A2", notes:["A3","C4","E4"]},
+  {bass:"A2", notes:["A3","C4","E4"]},
+  {bass:"D3", notes:["D4","F4","A4"]},
+  {bass:"D3", notes:["D4","F4","A4"]},
+  {bass:"E3", notes:["E4","G#4","B4"]},
+  {bass:"E3", notes:["E4","G#4","D5"]},
+  {bass:"A2", notes:["A3","C4","E4"]},
+  {bass:"E3", notes:["E4","G#4","B4"]}
+];
+/* the tune: [note, beats] — twenty-four beats, eight bars of three */
+const MELODY=[
+  ["E5",1],["A5",1],["C6",1],
+  ["B5",1.5],["A5",0.5],["G#5",1],
+  ["A5",1],["D6",1],["F6",1],
+  ["E6",2],["D6",1],
+  ["C6",1],["B5",1],["A5",1],
+  ["G#5",2],["B5",1],
+  ["A5",1],["C6",1],["E6",1],
+  ["B5",2],[null,1]
+];
+
+/* a struck music-box note: bright attack, long ringing decay */
+function mbox(f,t0,dur,vol){
+  const c=AC; if(!c) return;
+  const o=c.createOscillator(), h=c.createOscillator(), g=c.createGain(), hg=c.createGain();
+  o.type="triangle"; o.frequency.value=f;
+  h.type="sine";     h.frequency.value=f*2.006;      /* a hair sharp, so it shimmers */
+  hg.gain.value=0.26;
+  g.gain.setValueAtTime(0.0001,t0);
+  g.gain.exponentialRampToValueAtTime(vol,t0+0.010);
+  g.gain.exponentialRampToValueAtTime(0.0001,t0+dur);
+  o.connect(g); h.connect(hg); hg.connect(g); g.connect(MUSIC.mel);
+  o.start(t0); o.stop(t0+dur+0.05); h.start(t0); h.stop(t0+dur+0.05);
+}
+/* the waltz accompaniment: soft, short, behind the tune */
+function pluck(f,t0,dur,vol){
+  const c=AC; if(!c) return;
+  const o=c.createOscillator(), g=c.createGain();
+  o.type="triangle"; o.frequency.value=f;
+  g.gain.setValueAtTime(0.0001,t0);
+  g.gain.exponentialRampToValueAtTime(vol,t0+0.02);
+  g.gain.exponentialRampToValueAtTime(0.0001,t0+dur);
+  o.connect(g).connect(MUSIC.harm); o.start(t0); o.stop(t0+dur+0.05);
+}
+function bassNote(f,t0,dur,vol){
+  const c=AC; if(!c) return;
+  const o=c.createOscillator(), g=c.createGain(), lp=c.createBiquadFilter();
+  o.type="sine"; o.frequency.value=f;
+  lp.type="lowpass"; lp.frequency.value=420;
+  g.gain.setValueAtTime(0.0001,t0);
+  g.gain.exponentialRampToValueAtTime(vol,t0+0.03);
+  g.gain.exponentialRampToValueAtTime(0.0001,t0+dur);
+  o.connect(lp).connect(g).connect(MUSIC.harm); o.start(t0); o.stop(t0+dur+0.05);
+}
+
+function scheduleLoop(t0){
+  for(let bar=0; bar<8; bar++){
+    const t=t0+bar*BAR, ch=CHORDS[bar];
+    bassNote(hz(ch.bass), t, BEAT*1.5, 0.20);                       /* oom  */
+    for(const b of [1,2])                                            /* pah-pah */
+      ch.notes.forEach((n,i)=>pluck(hz(n), t+b*BEAT+i*0.006, BEAT*0.75, 0.05));
+  }
+  let t=t0;
+  for(const [n,beats] of MELODY){
+    if(n) mbox(hz(n), t, Math.max(0.6, beats*BEAT*1.7), 0.115);
+    t+=beats*BEAT;
+  }
+}
+
+function musicStart(){
+  const c=ac(); if(!c || MUSIC.started) return; MUSIC.started=true;
+
+  const master=c.createGain(); master.gain.value = musicOn ? 0.075 : 0.0001;
+  master.connect(c.destination); MUSIC.master=master;
+
+  MUSIC.mel=c.createGain();  MUSIC.mel.gain.value=1.0;   MUSIC.mel.connect(master);
+  MUSIC.harm=c.createGain(); MUSIC.harm.gain.value=0.75; MUSIC.harm.connect(master);
+
+  /* a thin, airy hiss well above the bass — atmosphere, not rumble */
+  const len=c.sampleRate*4, buf=c.createBuffer(1,len,c.sampleRate), d=buf.getChannelData(0);
+  for(let i=0;i<len;i++) d[i]=(Math.random()*2-1)*0.5;
+  const src=c.createBufferSource(); src.buffer=buf; src.loop=true;
+  const bp=c.createBiquadFilter(); bp.type="bandpass"; bp.frequency.value=1600; bp.Q.value=0.7;
+  MUSIC.air=c.createGain(); MUSIC.air.gain.value=0.045;
+  src.connect(bp).connect(MUSIC.air).connect(master); src.start();
+
+  /* keep one loop queued ahead of the one playing */
+  MUSIC.nextAt=c.currentTime+0.15;
+  const pump=()=>{
+    const now=ac()?AC.currentTime:0;
+    while(MUSIC.nextAt < now+LOOP){ scheduleLoop(MUSIC.nextAt); MUSIC.nextAt+=LOOP; }
+    MUSIC.loop=setTimeout(pump, LOOP*400);
+  };
+  pump();
+
+  /* the heartbeat is a gameplay cue, and only when it is nearly over */
+  const beat=()=>{
+    const lan=(typeof S!=="undefined")?S.lanterns:3;
+    if(musicOn && MUSIC.master && lan<=1 && !$("#game").classList.contains("hidden")){
+      const c2=ac();
+      if(c2) [0,0.2].forEach((off,i)=>{ const o=c2.createOscillator(), g=c2.createGain();
+        o.type="sine"; o.frequency.setValueAtTime(70,c2.currentTime+off);
+        o.frequency.exponentialRampToValueAtTime(40,c2.currentTime+off+0.15);
+        g.gain.setValueAtTime(0.0001,c2.currentTime+off);
+        g.gain.exponentialRampToValueAtTime(i?0.18:0.3,c2.currentTime+off+0.02);
+        g.gain.exponentialRampToValueAtTime(0.0001,c2.currentTime+off+0.19);
+        o.connect(g).connect(MUSIC.master); o.start(c2.currentTime+off); o.stop(c2.currentTime+off+0.24); });
+    }
+    const l2=(typeof S!=="undefined")?S.lanterns:3;
+    MUSIC.beat=setTimeout(beat, l2<=0.5?800:1300);
+  };
+  MUSIC.beat=setTimeout(beat,1400);
+}
+function musicGain(){ if(MUSIC.master){ const c=ac();
+  MUSIC.master.gain.setTargetAtTime(musicOn?0.075:0.0001, c?c.currentTime:0, 0.4); } }
+
+/* =====================================================================
+   SAVE
+   ===================================================================== */
+const KEY="hauntedhouse.v2";
+const blank=()=>({name:"",avatar:"witch",level:0,world:0,unlock:{},sfx:true,music:true,
+  best:{candy:0,rooms:0},prog:{},totals:{runs:0,rooms:0,correct:0,attempts:0,wins:0,shortcuts:0},topics:{}});
+let save=blank();
+function load(){ try{ const j=JSON.parse(localStorage.getItem(KEY)); if(j&&j.totals) save=Object.assign(blank(),j);}catch(e){}
+  /* older saves kept one ladder for every grade — hand it to the grade they were on */
+  if(!save.unlock || typeof save.unlock!=="object"){ save.unlock={}; }
+  if(typeof save.maxWorld==="number"){ if(save.maxWorld>0) save.unlock[save.level||0]=save.maxWorld; delete save.maxWorld; store(); }
+}
+/* how far this grade has got — every grade opens its own places */
+const unlockFor = lv => Math.max(0, Math.min(WORLDS.length-1, (save.unlock&&save.unlock[lv])||0));
+function store(){ try{ localStorage.setItem(KEY,JSON.stringify(save)); }catch(e){} }
+
+/* =====================================================================
+   STATE
+   ===================================================================== */
+const S={room:0,lanterns:3,candy:0,level:0,world:0,escapeBonus:0,speedCandy:0,avatar:"witch",name:"",tries:0,
+  qStart:0,roomQStart:0,timerId:null,lastTick:99,
+  current:null,bonus:null,shortcut:null,chestUsed:false,hatchUsed:false,hatchShown:false,
+  plan:[],started:0,log:[],jump:0,tier:0};
+
+const TAUNTS=[
+  n=>`“${n}.” The walls say it back.`,
+  n=>`Something upstairs learns your name: ${n}.`,
+  n=>`“Wrong,” he says. “Stay a while, ${n}.”`,
+  n=>`The floor takes half your light.`,
+  n=>`A door you did not open closes.`,
+  n=>`He is not running. He never has to.`,
+  n=>`Your shadow arrives a moment late.`
+];
+
+/* ---------- lanterns ---------- */
+function lanternSVG(fill){
+  const id="lg"+Math.random().toString(36).slice(2,8);
+  const body = fill===0
+    ? `<ellipse cx="12" cy="14" rx="10.5" ry="9" fill="#2e2318"/>`
+    : `<defs><linearGradient id="${id}" x1="0" y1="0" x2="1" y2="0">
+         <stop offset="0" stop-color="#ff9a33"/><stop offset="${fill===0.5?"50%":"100%"}" stop-color="#ff9a33"/>
+         <stop offset="${fill===0.5?"50%":"100%"}" stop-color="#2e2318"/><stop offset="1" stop-color="#2e2318"/>
+       </linearGradient></defs>
+       <ellipse cx="12" cy="14" rx="10.5" ry="9" fill="url(#${id})"/>`;
+  return `<svg width="30" height="32" viewBox="0 0 24 24" style="vertical-align:-7px">
+    ${body}<path d="M11 4 q1 -3 4 -3 l-1 2 q-2 0 -2 2Z" fill="#3d6b22"/>
+    <path d="M8 12 l3 2 -3 2Z" fill="#1a0c04"/><path d="M16 12 l-3 2 3 2Z" fill="#1a0c04"/>
+    <path d="M8 18 q4 3 8 0Z" fill="#1a0c04"/></svg>`;
+}
+function renderLanterns(){
+  let h=""; for(let i=0;i<3;i++){ const rem=S.lanterns-i; h+=lanternSVG(rem>=1?1:(rem>=0.5?0.5:0)); }
+  $("#lanterns").innerHTML=h;
+  document.body.classList.toggle("dying", S.lanterns<=1);
+  renderKing();
+}
+/* He stands in the room, and every half lantern brings him a step nearer. */
+function renderKing(){
+  const g=document.getElementById("kingInRoom"); if(!g) return;
+  const t=Math.max(0,Math.min(1,(3-S.lanterns)/3));
+  const x=742-408*t, y=300+74*t, sc=0.5+1.5*t;
+  g.setAttribute("transform",`translate(${x},${y}) scale(${sc}) translate(-32,-76)`);
+  g.setAttribute("opacity",(0.34+0.66*t).toFixed(2));
+  g.setAttribute("filter", t>0.6 ? "url(#dread)" : "none");
+}
+/* The bar is ten cells, one per room. The hero stands in the cell of the
+   room he is actually in — so a three-room jump through the hatch moves
+   him three cells — and the King trails him by one cell per lantern. */
+function renderChase(){
+  const track=$("#chase").clientWidth||600, cell=track/10;
+  const room=Math.max(0,Math.min(9,S.room));
+  const heroC=(room+0.5)*cell;
+  const kingC=Math.max(cell*0.42, heroC - S.lanterns*cell);
+  $("#hero").style.left=(heroC-23)+"px";
+  $("#king").style.left=(kingC-24)+"px";
+  const cells=$("#chasetrack").children;
+  for(let i=0;i<cells.length;i++) cells[i].classList.toggle("here", i===room);
+}
+
+/* =====================================================================
+   SETUP SCREEN
+   ===================================================================== */
+function tierLine(level){
+  const t=tierFor(level), runs=(save.prog&&save.prog[level])||0;
+  const next=[2,6,12][t], open=unlockFor(level)+1;
+  return `<b style="color:var(--blood)">${TIERS[t].name}</b> — ${TIERS[t].blurb}.
+    ${t<3?`${runs} run${runs===1?"":"s"} at this grade; ${next-runs} more and it gets worse.`:`You have been here ${runs} times. It cannot get worse.`}
+    <br><span style="color:var(--gold)">${open} of ${WORLDS.length} places open at ${BANK[level].name}</span> — every grade has to open its own.`;
+}
+function renderWorlds(){
+  const open = unlockFor(save.level);
+  if((save.world||0)>open){ save.world=open; store(); }          /* a locked place cannot stay selected */
+  $("#worldGrid").innerHTML = WORLDS.map((w,i)=>{
+    const locked = i>open;
+    return `<button class="wld${locked?" locked":""}" data-i="${i}" ${locked?"disabled":""}
+      aria-pressed="${i===(save.world||0)&&!locked}">
+      <span class="wicon">${locked?"🔒":w.icon}</span>${esc(w.name)}
+      <small>${locked?"beat "+esc(WORLDS[i-1].name.replace(/^The /,""))+" at "+esc(BANK[save.level].name):"10 rooms"}</small>
+      </button>`;}).join("");
+  const nm=WORLDS[save.world||0].name.replace(/^The /,"");
+  $("#startBtn").textContent = (save.world||0)===0 ? "Approach the house" : "Go into the "+nm.toLowerCase();
+}
+function buildSetup(){
+  renderWorlds();
+  $("#worldGrid").onclick=e=>{const b=e.target.closest(".wld"); if(!b||b.disabled)return;
+    save.world=+b.dataset.i; store(); SFX.click();
+    [...$("#worldGrid").children].forEach(c=>c.setAttribute("aria-pressed", c===b));
+    const nm=WORLDS[save.world].name.replace(/^The /,"");
+    $("#startBtn").textContent = save.world===0 ? "Approach the house" : "Go into the "+nm.toLowerCase();};
+  $("#levelGrid").innerHTML = BANK.map((b,i)=>{
+    const t=tierFor(i);
+    return `<button class="lvl" data-i="${i}" aria-pressed="${i===save.level}">${b.name}
+      <small>${b.note}</small>${t?`<i class="tierdot" title="${TIERS[t].name}">${"•".repeat(t)}</i>`:""}</button>`;}).join("");
+  $("#avGrid").innerHTML = AVATARS.map(a=>
+    `<button class="av" data-id="${a.id}" aria-pressed="${a.id===save.avatar}">${avSVG(a.id,74)}<span>${a.name}</span></button>`).join("");
+  $("#nameInput").value = save.name||"";
+  $("#tierNote").innerHTML = tierLine(save.level);
+  $("#levelGrid").onclick=e=>{const b=e.target.closest(".lvl"); if(!b)return;
+    save.level=+b.dataset.i; store(); SFX.click();
+    [...$("#levelGrid").children].forEach(c=>c.setAttribute("aria-pressed", c===b));
+    $("#tierNote").innerHTML=tierLine(save.level); renderWorlds();};
+  $("#avGrid").onclick=e=>{const b=e.target.closest(".av"); if(!b)return;
+    save.avatar=b.dataset.id; store(); SFX.click();
+    [...$("#avGrid").children].forEach(c=>c.setAttribute("aria-pressed", c===b));};
+  $("#nameInput").oninput=e=>{ save.name=e.target.value.slice(0,16); store(); };
+  const t=save.totals;
+  $("#saveline").innerHTML = t.runs
+    ? `${t.runs} run${t.runs>1?"s":""} · ${t.wins} escape${t.wins===1?"":"s"} · best 🍬 ${save.best.candy}
+       · lifetime accuracy ${t.attempts?Math.round(t.correct/t.attempts*100):0}%
+       · ${t.shortcuts} shortcut${t.shortcuts===1?"":"s"} taken
+       <br>${Object.keys(save.unlock||{}).filter(k=>save.unlock[k]>0)
+              .map(k=>esc(BANK[k].name)+": "+esc(WORLDS[save.unlock[k]].name.replace(/^The /,"")))
+              .join(" · ")||"no grade has opened a second place yet"}
+       <br><a href="#" id="resetLink">erase everything</a>`
+    : `Nothing is saved anywhere but this browser.`;
+  const rl=$("#resetLink");
+  if(rl) rl.onclick=e=>{e.preventDefault(); if(confirm("Erase every trace of your visits?")){save=blank();store();buildSetup();}};
+  const wn=WORLDS[save.world||0].name.replace(/^The /,"");
+  $("#startBtn").textContent = (save.world||0)===0 ? "Approach the house" : "Go into the "+wn.toLowerCase();
+  $("#sfxBtn").textContent = sfxOn?"Sound: on":"Sound: off";
+  $("#musBtn").textContent = musicOn?"Music: on":"Music: off";
+}
+
+/* =====================================================================
+   RUN
+   ===================================================================== */
+function buildPlan(level){
+  const tier=tierFor(level), mix=SH(TIERS[tier].mix);
+  const pools={}; const plan=[]; const usedTopics=new Set();
+  const poolFor=l=>{ if(!pools[l]) pools[l]=SH(BANK[l].gens.map((_,i)=>i)); return pools[l]; };
+  for(const up of mix){
+    const l=Math.min(BANK.length-1, level+up);
+    let chosen=null;
+    for(const order of [l, Math.min(BANK.length-1,l+1), level]){        /* fall back if a pool runs dry */
+      const pool=poolFor(order);
+      const idx=pool.findIndex(g=>!usedTopics.has(TOPIC[order][g]));
+      if(idx>=0){ const g=pool.splice(idx,1)[0]; chosen={lvl:order,gen:g}; usedTopics.add(TOPIC[order][g]); break; }
+    }
+    if(!chosen){ const pool=poolFor(l); const g=pool.length?pool.pop():R(0,BANK[l].gens.length-1); chosen={lvl:l,gen:g}; }
+    plan.push(chosen);
+  }
+  return plan;
+}
+
+function startGame(){
+  S.level=save.level; S.world=Math.min(save.world||0, unlockFor(save.level)); S.avatar=save.avatar; S.name=(save.name||"").trim()||"the visitor";
+  S.tier=tierFor(S.level); S.plan=buildPlan(S.level);
+  S.room=0; S.lanterns=3; S.candy=0; S.escapeBonus=0; S.speedCandy=0; S.started=Date.now(); S.log=[]; S.jump=0;
+  S.hatchUsed=false;
+  save.totals.runs++; save.prog[S.level]=(save.prog[S.level]||0)+1; store();
+  $("#setup").classList.add("hidden"); $("#game").classList.remove("hidden");
+  $("#king").innerHTML=KING_SVG(48); $("#hero").innerHTML=avSVG(S.avatar,46);
+  $("#chasetrack").innerHTML=Array.from({length:10},(_,i)=>`<i>${i+1}</i>`).join("");
+  $("#tierBadge").textContent=TIERS[S.tier].name;
+  musicStart(); SFX.door();
+  loadRoom();
+}
+
+function loadRoom(){
+  S.tries=0; S.bonus=null; S.shortcut=null; S.chestUsed=false; S.jump=0;
+  S.roomQStart=Date.now();
+  const slot=S.plan[Math.min(S.plan.length-1,S.room)];
+  S.current=makeProblem(slot.lvl, slot.gen);
+  S.current.fromAbove = slot.lvl>S.level ? BANK[slot.lvl].name : null;
+  $("#scene").innerHTML=sceneSVG(S.room,S.avatar);
+  $("#roomtag").textContent=`${S.room+1}. ${W().rooms[S.room]}`;
+  $("#roomnum").textContent=`Room ${S.room+1} / 10`;
+  renderLanterns(); renderChase(); renderKing();
+  $("#candynum").textContent=S.candy;
+
+  const chest = S.lanterns<3 && Math.random()<0.65;
+  $("#chest").classList.toggle("hidden",!chest);
+
+  const hatch = !S.hatchUsed && S.room>=1 && S.room<=5 && Math.random()<0.45;
+  S.hatchShown=hatch;
+  $("#hatch").classList.toggle("hidden",!hatch);
+
+  askQuestion(S.current,"normal");
+}
+
+/* ---------------------------------------------------------------
+   The 30-second candy clock. Running out never costs you anything — it
+   only stops the speed bonus, so a slow thinker is never punished.
+   --------------------------------------------------------------- */
+const QSECS = 30, SPEED_MAX = 5;
+function remaining(){ return Math.max(0, QSECS - (Date.now()-S.qStart)/1000); }
+function speedBonus(){ return Math.round(remaining()/QSECS*SPEED_MAX); }
+function paintTimer(){
+  const r=remaining(), w=$("#timerwrap");
+  $("#timerfill").style.width=(r/QSECS*100).toFixed(1)+"%";
+  $("#timertext").textContent = r>0 ? r.toFixed(1)+"s" : "0.0s";
+  w.classList.toggle("warn", r<=15 && r>6);
+  w.classList.toggle("late", r<=6 && r>0);
+  w.classList.toggle("done", r<=0);
+  $("#timerhint").textContent = r>0 ? "+"+speedBonus()+" candy if you answer now" : "no speed bonus left";
+  const t=Math.ceil(r);
+  if(t<=5 && t>0 && t!==S.lastTick){ S.lastTick=t; tone(880,.04,"square",.035,0); }
+  if(r<=0) stopTimer();
+}
+function startTimer(from){
+  stopTimer();
+  S.qStart = from || Date.now(); S.lastTick=99;
+  paintTimer();
+  S.timerId = setInterval(paintTimer, 60);
+}
+function stopTimer(){ if(S.timerId){ clearInterval(S.timerId); S.timerId=null; } }
+function freezeTimer(){ stopTimer(); }
+
+function askQuestion(p,mode){
+  const label = mode==="bonus" ? "Bonus chest · " : mode==="shortcut" ? "The hatch · " : "";
+  $("#topic").innerHTML = label + esc(p.topic) +
+    (mode==="normal" && p.fromAbove ? ` <i class="above">${esc(p.fromAbove)}</i>` : "") +
+    (mode==="bonus" ? ` <i class="above hard">hard · ${esc(BANK[S.level].name)}</i>` : "") +
+    (mode==="shortcut" ? ` <i class="above hard">very hard · exact answer · ${esc(BANK[S.level].name)}</i>` : "");
+  $("#question").textContent = p.question;
+  $("#choices").innerHTML = p.choices.map((c,i)=>
+    `<button class="ch" data-v="${esc(c)}"><b>${i+1}</b><span>${esc(c)}</span></button>`).join("");
+  $("#feedback").className=""; $("#feedback").innerHTML="";
+  $("#nextwrap").classList.add("hidden");
+  $("#choices").onclick=e=>{const b=e.target.closest(".ch"); if(!b||b.disabled)return; answer(b,mode);};
+  $("#timerwrap").classList.remove("hidden");
+  startTimer(mode==="normal" ? S.roomQStart : 0);
+}
+
+function fbSteps(p){ return `<div class="steps"><b>Why:</b> ${esc(p.steps)}</div>`; }
+
+function answer(btn,mode){
+  const p = mode==="bonus" ? S.bonus : mode==="shortcut" ? S.shortcut : S.current;
+  const right = btn.dataset.v === p.answer;
+  const fb = $("#feedback");
+
+  if(mode==="normal"){
+    save.totals.attempts++; if(right) save.totals.correct++;
+    const tt = save.topics[p.topic] || (save.topics[p.topic]={c:0,a:0});
+    tt.a++; if(right) tt.c++;
+  }
+
+  const spd = speedBonus(), secs = (Date.now()-S.qStart)/1000;
+  stopTimer();
+
+  /* ---------------- correct ---------------- */
+  if(right){
+    btn.classList.add("right");
+    [...$("#choices").children].forEach(c=>c.disabled=true);
+    SFX.right();
+
+    if(mode==="bonus"){
+      S.lanterns=Math.min(3,S.lanterns+0.5); S.candy+=2+spd; S.speedCandy+=spd;
+      $("#candynum").textContent=S.candy; renderLanterns(); renderChase();
+      $("#chest").classList.add("hidden");
+      fb.className="ok show";
+      fb.innerHTML=`<div class="ft">The lid gives. Half a lantern, and something sweet. +${2+spd} 🍬${spd?` <span style="color:var(--gold)">(${spd} for speed)</span>`:""}</div>${fbSteps(p)}`;
+      $("#nextwrap").classList.remove("hidden");
+      $("#nextBtn").textContent="Back to the room";
+      $("#nextBtn").onclick=()=>askQuestion(S.current,"normal");
+      store(); return;
+    }
+
+    if(mode==="shortcut"){
+      S.jump=3; S.candy+=5+spd; S.speedCandy+=spd; $("#candynum").textContent=S.candy;
+      save.totals.shortcuts++; store();
+      $("#hatch").classList.add("hidden");
+      fb.className="ok show";
+      fb.innerHTML=`<div class="ft">The hatch swallows you and spits you out three rooms deeper. +${5+spd} 🍬${spd?` <span style="color:var(--gold)">(${spd} for speed)</span>`:""}</div>${fbSteps(p)}`;
+      $("#nextwrap").classList.remove("hidden");
+      $("#nextBtn").textContent="Crawl through";
+      $("#nextBtn").onclick=()=>advance(3);
+      return;
+    }
+
+    const base = S.tries===0?3:1, gain = base+spd;
+    S.candy+=gain; S.speedCandy+=spd; $("#candynum").textContent=S.candy;
+    S.log.push({topic:p.topic,firstTry:S.tries===0,secs:secs,spd:spd});
+    fb.className="ok show";
+    const speedWord = spd>=5?"Before the wick even moved.":spd>=4?"Fast.":spd>=2?"Quick enough.":spd>=1?"Just in time.":"The clock beat you, but the door still opens.";
+    fb.innerHTML=`<div class="ft">${S.tries===0?"The lock turns first time":"It gives, eventually"} — +${gain} 🍬${
+      spd?` <span style="color:var(--gold)">(${spd} for speed, ${secs.toFixed(1)}s)</span>`:` <span style="color:var(--dim)">(${secs.toFixed(1)}s — no speed bonus)</span>`}</div>
+      <div class="steps" style="color:var(--gold)">${speedWord}</div>${fbSteps(p)}`;
+    $("#nextwrap").classList.remove("hidden");
+    $("#nextBtn").textContent = S.room===9 ? "Step into the cold air" : "Open the next door";
+    $("#nextBtn").onclick=()=>advance(1);
+    store(); return;
+  }
+
+  /* ---------------- wrong ---------------- */
+  btn.classList.add("wrong"); btn.disabled=true;
+  SFX.wrong();
+
+  if(mode==="bonus"){
+    [...$("#choices").children].forEach(c=>c.disabled=true);
+    $("#chest").classList.add("hidden");
+    fb.className="no show";
+    fb.innerHTML=`<div class="ft">The lid slams. It keeps what it had.</div>
+      <div class="steps"><b>Hint:</b> ${esc(p.hint)}</div>`;
+    $("#nextwrap").classList.remove("hidden");
+    $("#nextBtn").textContent="Back to the room";
+    $("#nextBtn").onclick=()=>askQuestion(S.current,"normal");
+    return;
+  }
+
+  if(mode==="shortcut"){
+    [...$("#choices").children].forEach(c=>c.disabled=true);
+    $("#hatch").classList.add("hidden");
+    S.lanterns=Math.max(0,S.lanterns-1);
+    renderLanterns(); renderChase(); SFX.king();
+    if(S.lanterns<=0){
+      fb.className="no show";
+      fb.innerHTML=`<div class="ft">The dark under the house takes the rest of your light.</div>${fbSteps(p)}`;
+      setTimeout(()=>endGame(false),1100); return;
+    }
+    fb.className="no show";
+    fb.innerHTML=`<div class="ft">The passage was a mouth. A whole lantern, gone.</div>
+      <div class="steps"><b>Hint:</b> ${esc(p.hint)}</div>`;
+    $("#nextwrap").classList.remove("hidden");
+    $("#nextBtn").textContent="Back to the room";
+    $("#nextBtn").onclick=()=>askQuestion(S.current,"normal");
+    return;
+  }
+
+  S.tries++;
+  S.lanterns=Math.max(0,S.lanterns-0.5);
+  renderLanterns(); renderChase();
+
+  if(S.lanterns<=0){
+    [...$("#choices").children].forEach(c=>c.disabled=true);
+    fb.className="no show";
+    fb.innerHTML=`<div class="ft">The last wick drowns.</div>${fbSteps(p)}`;
+    setTimeout(()=>endGame(false),1100); return;
+  }
+
+  SFX.king();
+  startTimer(S.qStart);                 /* the clock does not wait for you */
+  fb.className="no show";
+  fb.innerHTML=`<div class="ft">${P(TAUNTS)(esc(S.name))}</div>
+    <div class="steps"><b>Hint:</b> ${esc(p.hint)}</div>
+    <div class="steps again">Half a lantern gone. Try again — the answer is still on the table${remaining()>0?", and the clock is still running":""}.</div>`;
+}
+
+function advance(n){
+  S.room+=n;
+  if(S.room>=10){ escapeScene(); return; }
+  n>1 ? SFX.hatch() : SFX.door();
+  loadRoom();
+}
+
+/* ---------- chest and hatch ---------- */
+function wireProps(){
+  $("#chest").onclick=()=>{
+    if(S.chestUsed) return; S.chestUsed=true; SFX.chest();
+    S.bonus=challengeProblem(S.level,false);
+    askQuestion(S.bonus,"bonus");
+  };
+  $("#hatch").onclick=()=>{
+    if(S.hatchUsed) return;
+    $("#overlayCard").innerHTML=`
+      <h2 style="color:var(--blood)">A hatch in the floor</h2>
+      <p style="font-size:17px;line-height:1.7;color:var(--dim)">
+        It drops into somewhere three rooms ahead. Something has been using it.<br><br>
+        One problem: the hardest kind ${BANK[S.level].name} has, and the wrong answers
+        sit right next to the right one.
+        Solve it and you skip three rooms and take <b style="color:var(--gold)">5 🍬</b>.
+        Fail and it costs you <b style="color:var(--blood)">a whole lantern</b>.</p>
+      <div class="row" style="margin-top:18px">
+        <button class="btn" id="hatchYes">Go down</button>
+        <button class="btn ghost" id="hatchNo">Leave it shut</button></div>`;
+    freezeTimer();
+    $("#overlay").classList.remove("hidden");
+    $("#hatchYes").onclick=()=>{
+      $("#overlay").classList.add("hidden"); S.hatchUsed=true; SFX.hatch();
+      S.shortcut=challengeProblem(S.level,true);
+      askQuestion(S.shortcut,"shortcut");
+    };
+    $("#hatchNo").onclick=()=>{ $("#overlay").classList.add("hidden"); SFX.click(); startTimer(S.roomQStart); };
+  };
+}
+
+/* =====================================================================
+   GETTING OUT — you see yourself leave, with the candy
+   ===================================================================== */
+function escapeScene(){
+  /* what you carry out depends on the lanterns still burning — ten each */
+  S.escapeBonus = Math.round(10*S.lanterns);
+  S.candy += S.escapeBonus;
+  const av=(AVATARS.find(a=>a.id===S.avatar)||AVATARS[0]).svg;
+  let bats="";
+  for(let k=0;k<7;k++){ const x=R(90,720), y=R(40,150), s=(Math.random()*0.5+0.5).toFixed(2);
+    bats+=`<g transform="translate(${x},${y}) scale(${s})" opacity=".8" class="flick">
+      <path d="M0 0 q-10 -8 -20 -2 q8 2 10 8 q6 -4 10 -6 q4 2 10 6 q2 -6 10 -8 q-10 -6 -20 2Z" fill="#0b0810"/></g>`; }
+  let sweets="";
+  const cols=["#ff8a1f","#ff4d8a","#4fbf7a","#5f96e0","#ffcf5c","#c47aff"];
+  for(let k=0;k<Math.min(26,Math.max(6,S.candy));k++){
+    sweets+=`<g transform="translate(${196+((k*13)%74)},${352-Math.floor(k/6)*11}) rotate(${R(-40,40)})">
+      <rect x="0" y="0" width="11" height="7" rx="2.5" fill="${cols[k%6]}"/>
+      <path d="M0 3.5 l-4 -3.5 v7Z" fill="${cols[k%6]}"/><path d="M11 3.5 l4 -3.5 v7Z" fill="${cols[k%6]}"/></g>`;
+  }
+  $("#scene").innerHTML=`
+  <defs>
+    <linearGradient id="skyg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#101a36"/><stop offset="60%" stop-color="#0a1024"/><stop offset="1" stop-color="#070a16"/></linearGradient>
+    <linearGradient id="lawng" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="${W().floor[9]}"/><stop offset="1" stop-color="#05060a"/></linearGradient>
+    <radialGradient id="moong"><stop offset="0" stop-color="#fff7d8" stop-opacity=".5"/>
+      <stop offset="1" stop-color="#fff7d8" stop-opacity="0"/></radialGradient>
+    <radialGradient id="vig2" cx="42%" cy="60%" r="74%">
+      <stop offset="44%" stop-color="#000" stop-opacity="0"/><stop offset="100%" stop-color="#000" stop-opacity=".9"/></radialGradient>
+  </defs>
+  <rect width="800" height="460" fill="url(#skyg)"/>
+  <g fill="#f4eed2">${Array.from({length:60},()=>`<circle cx="${R(0,800)}" cy="${R(0,230)}" r="${(Math.random()*1.1+0.3).toFixed(1)}" opacity="${(Math.random()*.7+.2).toFixed(2)}"/>`).join("")}</g>
+  <circle cx="150" cy="86" r="120" fill="url(#moong)"/>
+  <circle cx="150" cy="86" r="46" fill="#f6f0d8"/>
+  <circle cx="150" cy="86" r="8" fill="#e2dcc2" opacity=".6"/><circle cx="168" cy="102" r="5" fill="#e2dcc2" opacity=".5"/>
+  ${bats}
+  <path d="M0 320 q140 -34 300 -14 q180 22 500 -12 V460 H0Z" fill="url(#lawng)"/>
+  ${W().out.build()}
+  <g transform="translate(700,326) scale(.5) translate(-32,-76)" opacity=".75">${KING_BODY}</g>
+  <path d="M160 460 q60 -90 190 -140 q90 -34 170 -40" stroke="#1d2a22" stroke-width="30" fill="none" opacity=".6"/>
+  ${sweets}
+  <ellipse cx="228" cy="392" rx="62" ry="15" fill="#000" opacity=".5"/>
+  <g transform="translate(168,258) scale(2.1)">${av}</g>
+  <g transform="translate(272,318)">
+    <path d="M0 0 h56 l-6 54 H6Z" fill="#c4520c"/>
+    <path d="M0 0 h56 v9 H0Z" fill="#e8620f"/>
+    <path d="M10 0 q18 -22 36 0" stroke="#e8620f" stroke-width="4" fill="none"/>
+    <path d="M14 18 l8 4 -8 4Z" fill="#26100a"/><path d="M42 18 l-8 4 8 4Z" fill="#26100a"/>
+    <path d="M16 34 q12 9 24 0Z" fill="#26100a"/>
+    <g><rect x="8" y="-12" width="12" height="8" rx="3" fill="#ff4d8a"/>
+       <rect x="24" y="-16" width="12" height="8" rx="3" fill="#4fbf7a"/>
+       <rect x="38" y="-11" width="12" height="8" rx="3" fill="#5f96e0"/></g>
+  </g>
+  <rect width="800" height="460" fill="url(#vig2)"/>`;
+  $("#roomtag").textContent="Out of "+W().name;
+  $("#chest").classList.add("hidden"); $("#hatch").classList.add("hidden");
+  document.body.classList.remove("dying");
+  $("#topic").innerHTML='<span style="color:var(--good)">Escaped</span> <i class="above">'+esc(W().name)+'</i>';
+  $("#question").textContent=`${S.name}, you are outside. ${W().out.line}`;
+  $("#choices").innerHTML="";
+  stopTimer(); $("#timerwrap").classList.add("hidden");
+  const fb=$("#feedback"); fb.className="ok show";
+  fb.innerHTML=`<div class="ft">${S.lanterns} lantern${S.lanterns===1?"":"s"} still lit — the bucket fills.
+      <span style="color:var(--gold)">+${S.escapeBonus} 🍬</span>, for 🍬 ${S.candy} in all.</div>
+    <div class="steps">Every lantern you still had is ten more sweets. He is behind you, watching. He is not angry.</div>`;
+  $("#nextwrap").classList.remove("hidden");
+  $("#nextBtn").textContent="Count the candy";
+  $("#nextBtn").onclick=()=>endGame(true);
+  SFX.win();
+}
+
+/* =====================================================================
+   END
+   ===================================================================== */
+const RANKS=[[0,"Doorstep Dawdler"],[1,"Empty-Handed"],[25,"Trick-or-Treater"],[42,"Candle Bearer"],
+  [58,"Room Runner"],[72,"Lantern Keeper"],[84,"Master of the Dark"]];
+function rankFor(c){ let r=RANKS[0][1]; for(const[t,n]of RANKS) if(c>=t) r=n; return r; }
+
+function endGame(won){
+  stopTimer();
+  save.totals.rooms += S.room; if(won) save.totals.wins++;
+  let unlocked=null;
+  if(won && S.world===unlockFor(S.level) && S.world<WORLDS.length-1){
+    save.unlock[S.level]=S.world+1; save.world=S.world+1; unlocked=WORLDS[S.world+1];
+  }
+  if(S.candy>save.best.candy) save.best.candy=S.candy;
+  if(S.room>save.best.rooms) save.best.rooms=S.room;
+  store();
+  const secs=Math.round((Date.now()-S.started)/1000), mins=Math.floor(secs/60), rem=secs%60;
+  const first=S.log.filter(l=>l.firstTry).length, cleared=S.log.length;
+  const miss={}; S.log.forEach(l=>{ if(!l.firstTry) miss[l.topic]=(miss[l.topic]||0)+1; });
+  const missList=Object.keys(miss).sort((a,b)=>miss[b]-miss[a]);
+  const acc = cleared? Math.round(first/cleared*100) : 0;
+  const timed = S.log.filter(l=>typeof l.secs==="number");
+  const avgSecs = timed.length ? (timed.reduce((a,l)=>a+l.secs,0)/timed.length).toFixed(1)+"s" : "—";
+  const advice = missList.length
+    ? `Worth practising: <b style="color:var(--gold)">${missList.slice(0,3).map(esc).join(", ")}</b>.`
+    : (cleared ? `Nothing caught you out. Try a grade higher.` : `You never got started.`);
+  const nextTier = tierFor(S.level)<3
+    ? `<div class="missed" style="margin-top:8px">Next time at ${BANK[S.level].name} the house will be
+       <b style="color:var(--blood)">${TIERS[Math.min(3,tierFor(S.level))].name}</b>.</div>` : "";
+
+  if(!won) SFX.lose();
+  $("#overlayCard").innerHTML = `
+    <div class="center" style="font-size:66px;line-height:1">${won?"🌕":"🎃"}</div>
+    <h2 class="center" style="color:${won?"var(--good)":"var(--pumpkin)"}">
+      ${won?`${esc(S.name)} got out`:`He caught ${esc(S.name)}`}</h2>
+    <p class="center" style="color:var(--dim);margin-top:-4px;font-size:16px">
+      ${won?`Ten rooms of ${W().name} behind you, at ${BANK[S.level].name}, ${TIERS[S.tier].name}.`
+           :`You got as far as ${W().rooms[Math.min(9,S.room)]}.`}</p>
+    <div class="rank">${rankFor(won?S.candy:0)}</div>
+    <table class="rc">
+      <tr><td>Rooms cleared</td><td>${cleared} / 10</td></tr>
+      <tr><td>First-try accuracy</td><td>${acc}%</td></tr>
+      <tr><td>Candy picked up inside</td><td>🍬 ${S.candy-(S.escapeBonus||0)}</td></tr>
+      <tr><td>&nbsp;&nbsp;of that, won on the clock</td><td>🍬 ${S.speedCandy||0}</td></tr>
+      <tr><td>Average time a room</td><td>${avgSecs}</td></tr>
+      <tr><td>Lanterns left</td><td>${S.lanterns} of 3</td></tr>
+      <tr><td>Escape bonus (10 a lantern)</td><td>${won?"🍬 "+(S.escapeBonus||0):"— none, you never got out"}</td></tr>
+      <tr><td>Candy in the bucket</td><td>🍬 ${won?S.candy:0}</td></tr>
+      <tr><td>Time</td><td>${mins}m ${rem}s</td></tr>
+      <tr><td>Where</td><td>${esc(W().name)}</td></tr>
+      <tr><td>Level</td><td>${BANK[S.level].name} · ${TIERS[S.tier].name}</td></tr>
+    </table>
+    ${unlocked?`<div class="unlock">${unlocked.icon} <b>${esc(unlocked.name)}</b> is open to you
+       <b style="color:var(--gold)">at ${esc(BANK[S.level].name)}</b>.
+       <div style="font-size:13.5px;color:var(--dim);margin-top:5px">Other grades still have to open it themselves.</div></div>`:""}
+    <div class="missed">${advice}</div>${nextTier}
+    <div class="row" style="margin-top:20px">
+      <button class="btn" id="againBtn">Go back in</button>
+      <button class="btn ghost" id="menuBtn">Change level or face</button></div>`;
+  $("#overlay").classList.remove("hidden");
+  $("#againBtn").onclick=()=>{ $("#overlay").classList.add("hidden"); startGame(); };
+  $("#menuBtn").onclick=()=>{ $("#overlay").classList.add("hidden");
+    $("#game").classList.add("hidden"); $("#setup").classList.remove("hidden");
+    document.body.classList.remove("dying"); buildSetup(); };
+}
+
+/* =====================================================================
+   WIRING
+   ===================================================================== */
+function toggleSfx(){ sfxOn=!sfxOn; save.sfx=sfxOn; store();
+  document.querySelectorAll(".sfxLabel").forEach(e=>e.textContent=sfxOn?"Sound: on":"Sound: off");
+  $("#sfxBtn").textContent=sfxOn?"Sound: on":"Sound: off"; if(sfxOn) SFX.click(); }
+function toggleMusic(){ musicOn=!musicOn; save.music=musicOn; store();
+  $("#musBtn").textContent=musicOn?"Music: on":"Music: off";
+  $("#musBtn2").textContent=musicOn?"♪":"♪̸";
+  if(musicOn){ ac(); musicStart(); } musicGain(); }
+
+$("#startBtn").onclick=()=>{ ac(); musicStart(); startGame(); };
+$("#quitBtn").onclick=()=>{ freezeTimer(); if(confirm("Walk out? The run ends here.")) endGame(false); else startTimer(S.roomQStart); };
+$("#sfxBtn").onclick=toggleSfx;
+$("#musBtn").onclick=toggleMusic;
+$("#musBtn2").onclick=toggleMusic;
+$("#sfxBtn2").onclick=toggleSfx;
+$("#nameInput").addEventListener("keydown",e=>{ if(e.key==="Enter") $("#startBtn").click(); });
+window.addEventListener("resize",()=>{ if(!$("#game").classList.contains("hidden")) renderChase(); });
+document.addEventListener("keydown",e=>{
+  if($("#game").classList.contains("hidden")||!$("#overlay").classList.contains("hidden")) return;
+  if(e.key>="1"&&e.key<="4"){ const b=$("#choices").children[+e.key-1]; if(b&&!b.disabled) b.click(); }
+  if(e.key==="Enter"&&!$("#nextwrap").classList.contains("hidden")) $("#nextBtn").click();
+});
+
+load(); sfxOn=save.sfx!==false; musicOn=save.music!==false;
+$("#musBtn2").textContent=musicOn?"♪":"♪̸";
+wireProps(); buildSetup();
+</script>
+</body>
+</html>
