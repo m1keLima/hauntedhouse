@@ -92,6 +92,16 @@ input[type=text]::placeholder{color:#5c5070}
 .btn:hover{transform:translateY(-2px);box-shadow:0 14px 32px rgba(255,138,31,.36)}
 .btn.ghost{background:transparent;border:1px solid var(--line);color:var(--dim);box-shadow:none;font-size:15px;padding:12px 20px}
 .btn.ghost:hover{color:var(--ink);border-color:#cfe0ff}
+.kidrow{display:flex;gap:14px;align-items:center;width:100%;text-align:left;font:inherit;color:var(--ink);
+  background:#150e20;border:1px solid var(--line);border-radius:14px;padding:14px 16px;cursor:pointer;transition:.15s}
+.kidrow:hover{border-color:#7fd7ff}
+.kidrow .kidicon{font-size:30px;filter:grayscale(1);opacity:.5;transition:.15s}
+.kidrow small{display:block;color:var(--dim);font-size:13.5px;line-height:1.55;margin-top:3px;font-weight:400}
+.kidrow[aria-pressed="true"]{border-color:#7fd7ff;background:#10202c;box-shadow:0 0 0 2px rgba(127,215,255,.22)}
+.kidrow[aria-pressed="true"] .kidicon{filter:none;opacity:1}
+.kidrow[aria-pressed="true"] b{color:#7fd7ff}
+#famline{font-size:14px;color:var(--dim);text-align:center;margin-top:16px;line-height:1.8}
+#famline b{color:var(--gold)}
 #tierNote{font-size:14px;color:var(--dim);margin-top:10px;line-height:1.6}
 #saveline{font-size:13px;color:var(--dim);text-align:center;margin-top:16px;line-height:1.7}
 #saveline a{color:var(--dim)}
@@ -122,10 +132,27 @@ kbd{background:#271a38;border:1px solid var(--line);border-radius:5px;padding:2p
 #scene{display:block;width:100%;height:auto}
 #roomtag{position:absolute;left:14px;top:12px;font-size:13px;letter-spacing:3.5px;text-transform:uppercase;
   color:var(--gold);text-shadow:0 2px 10px #000;font-weight:700}
-#chest,#hatch{position:absolute;bottom:7%;cursor:pointer;animation:bob 2.4s ease-in-out infinite}
-#chest{right:5%;filter:drop-shadow(0 0 16px rgba(255,207,92,.75))}
-#hatch{left:32%;filter:drop-shadow(0 0 16px rgba(196,18,31,.7));animation-duration:3.1s}
+#roomline{position:absolute;left:14px;top:32px;max-width:62%;font-size:14px;font-style:italic;
+  color:#c7b6dd;text-shadow:0 2px 12px #000, 0 0 20px #000;opacity:.92;line-height:1.35}
+@media(max-width:560px){#roomline{font-size:12.5px;max-width:80%}}
+#readrow{margin:-6px 0 14px}
+#readrow .btn{font-size:16px;padding:10px 18px;color:#7fd7ff;border-color:#2d5a6e}
+#chest,#hatch{position:absolute;bottom:5%;cursor:pointer;text-align:center;line-height:0}
+#chest{right:4%;filter:drop-shadow(0 0 16px rgba(255,207,92,.75));animation:bob 2.4s ease-in-out infinite}
+#hatch{left:30%;filter:drop-shadow(0 0 22px rgba(196,18,31,.8))}
 @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+/* the shortcut has to read as a way out at a glance, so it is labelled and lit */
+.propbadge{display:inline-block;margin-top:4px;line-height:1.2;font-size:12.5px;letter-spacing:2px;
+  text-transform:uppercase;font-weight:800;background:rgba(6,3,10,.9);border:1.5px solid;border-radius:9px;
+  padding:4px 9px;white-space:nowrap}
+#chest .propbadge{color:var(--gold);border-color:#c79a2f;box-shadow:0 0 14px rgba(255,207,92,.45)}
+#hatch .propbadge{color:#ff7b86;border-color:var(--blood);box-shadow:0 0 18px rgba(196,18,31,.6);
+  animation:badgepulse 1.9s ease-in-out infinite}
+@keyframes badgepulse{0%,100%{box-shadow:0 0 12px rgba(196,18,31,.45)}50%{box-shadow:0 0 26px rgba(255,77,92,.9)}}
+.hatchring{animation:ringpulse 2.2s ease-out infinite;transform-origin:52px 44px}
+@keyframes ringpulse{0%{transform:scale(.72);opacity:.9}100%{transform:scale(1.5);opacity:0}}
+.hatcharrow{animation:arrowdrop 1.5s ease-in-out infinite}
+@keyframes arrowdrop{0%,100%{transform:translateY(-4px);opacity:.55}50%{transform:translateY(4px);opacity:1}}
 .flick{animation:flick 3.1s infinite}
 @keyframes flick{0%,100%{opacity:.85}43%{opacity:.58}47%{opacity:.96}61%{opacity:.48}70%{opacity:.9}}
 .eyes{animation:blink 6.5s infinite}
@@ -137,6 +164,17 @@ kbd{background:#271a38;border:1px solid var(--line);border-radius:5px;padding:2p
 @keyframes fogx{from{transform:translateX(-7%)}to{transform:translateX(7%)}}
 .kingglow{animation:kingpulse 3.4s ease-in-out infinite}
 @keyframes kingpulse{0%,100%{opacity:1}50%{opacity:.86}}
+/* the fright layer: things that are only there when you are not looking */
+.creep{animation:creep 13s ease-in-out infinite}
+@keyframes creep{0%,58%,100%{opacity:0}66%,88%{opacity:.9}}
+.reach{animation:reach 9s ease-in-out infinite}
+@keyframes reach{0%,100%{transform:translateY(26px)}45%,60%{transform:translateY(-4px)}}
+.sway{animation:sway 8.5s ease-in-out infinite}
+@keyframes sway{0%,100%{transform:rotate(-3.5deg)}50%{transform:rotate(3.5deg)}}
+.drip{animation:drip 5.5s ease-in infinite}
+@keyframes drip{0%,64%{transform:translateY(0);opacity:0}70%{opacity:.95}100%{transform:translateY(122px);opacity:0}}
+.scuttle{animation:scuttle 17s linear infinite}
+@keyframes scuttle{0%{transform:translateX(860px)}100%{transform:translateX(-140px)}}
 
 #qcard{margin-top:14px}
 #topic{font-size:13px;letter-spacing:2.5px;text-transform:uppercase;color:var(--pumpkin);font-weight:700}
@@ -213,11 +251,20 @@ table.rc td:last-child{text-align:right;font-weight:800;color:var(--gold)}
     <div class="seclabel">4 &mdash; Choose your face</div>
     <div class="grid-av" id="avGrid"></div>
 
+    <div class="seclabel">5 &mdash; Do you want it read to you?</div>
+    <button class="kidrow" id="kidBtn" aria-pressed="false">
+      <span class="kidicon">🔊</span>
+      <span><b id="kidTitle">Read-aloud mode: off</b>
+        <small>Every question and every answer is read out loud, and the clock is put away &mdash;
+        take as long as you like. For readers who would rather listen.</small></span>
+    </button>
+
     <div class="row" style="margin-top:26px">
       <button class="btn" id="startBtn">Approach the house</button>
       <button class="btn ghost" id="sfxBtn">Sound: on</button>
       <button class="btn ghost" id="musBtn">Music: on</button>
     </div>
+    <div id="famline"></div>
     <div id="saveline"></div>
   </div>
 
@@ -230,15 +277,21 @@ table.rc td:last-child{text-align:right;font-weight:800;color:var(--gold)}
       The <b style="color:var(--pumpkin)">Pumpkin King</b> is in the room with you. Every half lantern you lose, he is closer. At nothing, he has you.<br>
       A <b style="color:var(--gold)">chest</b> may appear once you are below full lanterns: the hardest kind of problem your grade has,
       worth <b style="color:var(--gold)">half a lantern</b> back. Wrong costs nothing.<br>
-      A <b style="color:var(--blood)">hatch</b> in the floor skips three rooms &mdash; but a wrong answer down there costs
-      <b style="color:var(--blood)">a whole lantern</b>.<br>
+      A red-rimmed <b style="color:var(--blood)">shortcut hatch</b> in the floor &mdash; labelled, you cannot miss it &mdash;
+      skips three rooms, but a wrong answer down there costs <b style="color:var(--blood)">a whole lantern</b>.
+      Opening the chest or the hatch <b style="color:var(--good)">stops the room's clock</b>; it starts again from the same
+      second when you come back.<br>
       Every problem runs a <b style="color:var(--good)">30-second candy clock</b>. It never costs you anything to be slow &mdash;
       but answer while it is still running and you take <b style="color:var(--gold)">up to 5 extra sweets</b>, more the faster you are.<br>
       What you carry out is decided by the lanterns you still have &mdash; <b style="color:var(--gold)">ten sweets for each one</b>,
       on top of whatever you picked up inside. Come out dark and you come out poor.<br>
       Escape a place and the next one opens &mdash; the graveyard, the forest, the mountain, the cave, the dungeon, the castle &mdash;
       but only <b style="color:var(--gold)">for the grade you beat it at</b>. Open the graveyard at Grade 4 and Grade 5 still starts back at the house.
-      The more you play a grade, the harder that grade gets.
+      The more you play a grade, the harder that grade gets.<br>
+      Get all the way out of the <b style="color:var(--gold)">castle</b> &mdash; the last of the seven &mdash; and your face goes home,
+      to whoever has been waiting up. Every face has a different family.<br>
+      Rather listen than read? Turn on <b style="color:#7fd7ff">read-aloud mode</b> above: every question and every answer
+      is read out, and the clock is put away.
       <span style="color:var(--ink)">Keys <kbd>1</kbd>&ndash;<kbd>4</kbd> answer, <kbd>Enter</kbd> continues.</span>
     </div>
   </div>
@@ -264,6 +317,7 @@ table.rc td:last-child{text-align:right;font-weight:800;color:var(--gold)}
   <div id="scenewrap">
     <svg id="scene" viewBox="0 0 800 460" preserveAspectRatio="xMidYMid slice"></svg>
     <div id="roomtag"></div>
+    <div id="roomline"></div>
     <div id="chest" class="hidden" title="A chest, glowing">
       <svg width="86" height="72" viewBox="0 0 64 54">
         <rect x="4" y="22" width="56" height="28" rx="4" fill="#4a2e14" stroke="#a5762f" stroke-width="2"/>
@@ -271,15 +325,22 @@ table.rc td:last-child{text-align:right;font-weight:800;color:var(--gold)}
         <rect x="27" y="20" width="10" height="14" rx="2" fill="#ffcf5c"/>
         <circle cx="32" cy="27" r="2.4" fill="#4a2e14"/>
         <g fill="#ffcf5c" opacity=".9"><circle cx="12" cy="12" r="2"/><circle cx="52" cy="14" r="2.4"/><circle cx="32" cy="6" r="1.8"/></g>
-      </svg></div>
-    <div id="hatch" class="hidden" title="A hatch in the floor">
-      <svg width="96" height="62" viewBox="0 0 72 46">
-        <ellipse cx="36" cy="30" rx="32" ry="14" fill="#05030a"/>
-        <path d="M6 30 a30 13 0 0 1 60 0" fill="none" stroke="#6b4a2c" stroke-width="3"/>
-        <path d="M40 30 L66 12 a30 13 0 0 0 -30 5Z" fill="#33221a" stroke="#6b4a2c" stroke-width="2"/>
-        <g fill="#c4121f" opacity=".95"><ellipse cx="30" cy="30" rx="2.6" ry="1.8"/><ellipse cx="41" cy="31" rx="2.6" ry="1.8"/></g>
-        <path d="M22 38 q14 6 28 0" stroke="#c4121f" stroke-width="1.6" fill="none" opacity=".55"/>
-      </svg></div>
+      </svg><span class="propbadge">🎁 Bonus chest</span></div>
+    <div id="hatch" class="hidden" title="A hatch in the floor — skip three rooms">
+      <svg width="150" height="112" viewBox="0 0 104 78">
+        <ellipse class="hatchring" cx="52" cy="44" rx="40" ry="18" fill="none" stroke="#ff4d5c" stroke-width="2.5"/>
+        <ellipse cx="52" cy="44" rx="34" ry="15" fill="#05030a"/>
+        <ellipse cx="52" cy="44" rx="34" ry="15" fill="none" stroke="#c4121f" stroke-width="2.5" opacity=".9"/>
+        <ellipse cx="52" cy="46" rx="24" ry="10" fill="#2a0308"/>
+        <ellipse cx="52" cy="50" rx="15" ry="6" fill="#7d0a14" opacity=".8" class="flick"/>
+        <g stroke="#8a6234" stroke-width="3" fill="none">
+          <path d="M42 44 v22"/><path d="M62 44 v22"/>
+          <path d="M42 50 h20 M42 57 h20 M42 64 h20"/></g>
+        <path d="M86 44 L102 16 L70 4 L54 30 Z" fill="#3c2820" stroke="#8a6234" stroke-width="2.5"/>
+        <path d="M78 36 L92 12 M68 30 L82 8" stroke="#5c3f2a" stroke-width="2"/>
+        <g class="hatcharrow" fill="#ff4d5c" stroke="#ff4d5c" stroke-width="3.5" stroke-linecap="round">
+          <path d="M22 8 v13"/><path d="M22 28 l-8 -10 h16Z"/></g>
+      </svg><span class="propbadge">⬇ Shortcut · skip 3</span></div>
   </div>
 
   <div class="card" id="qcard">
@@ -290,6 +351,7 @@ table.rc td:last-child{text-align:right;font-weight:800;color:var(--gold)}
       <span id="timerhint">candy clock</span>
     </div>
     <div id="question"></div>
+    <div id="readrow" class="hidden"><button class="btn ghost" id="readBtn">🔊 Read it again</button></div>
     <div id="choices"></div>
     <div id="feedback"></div>
     <div id="nextwrap" class="hidden"><button class="btn" id="nextBtn">Continue</button></div>
@@ -334,7 +396,10 @@ const BANK = [
   ()=>{let a=R(4,19),b=R(4,19);if(a===b)b++;return{t:"Comparing",q:`Which number is larger, ${a} or ${b}?`,a:String(Math.max(a,b)),w:[String(Math.min(a,b)),"They are equal",String(a+b)],s:`${Math.max(a,b)} comes later when you count, so it is larger.`};},
   ()=>{const sh=P([["a triangle",3],["a square",4],["a pentagon",5],["a hexagon",6]]);
     return{t:"Shapes",q:`How many sides does ${sh[0]} have?`,a:sh[1],w:[sh[1]+1,sh[1]-1,sh[1]+2,sh[1]*2],s:`${sh[0].charAt(0).toUpperCase()+sh[0].slice(1)} has ${sh[1]} sides.`};},
-  ()=>{const a=R(12,20),b=R(2,6);return{t:"Taking away",q:`You had ${a} sweets and ate ${b}. How many are left?`,a:a-b,w:[a+b,a-b-1,a-b+1,b],s:`${a} − ${b} = ${a-b}.`};}
+  ()=>{const a=R(12,20),b=R(2,6);return{t:"Taking away",q:`You had ${a} sweets and ate ${b}. How many are left?`,a:a-b,w:[a+b,a-b-1,a-b+1,b],s:`${a} − ${b} = ${a-b}.`};},
+  ()=>{const a=R(6,14),b=a+R(2,6);return{t:"How many more",q:`A ghost has ${a} candles and a witch has ${b}. How many more does the witch have?`,a:b-a,w:[a+b,b-a+1,b-a-1,b],s:`${b} − ${a} = ${b-a} more.`};},
+  ()=>{const s=R(14,20),n=R(2,5);return{t:"Counting back",q:`${s} bats hang in a row. ${n} fly off. How many are still hanging?`,a:s-n,w:[s+n,s-n-1,s-n+1,n],s:`Count back ${n} from ${s}: ${s-n}.`};},
+  ()=>{const g=R(2,5),e=R(2,5);return{t:"Equal groups",q:`${g} pumpkins each have ${e} candles. How many candles altogether?`,a:g*e,w:[g+e,g*e+g,g*e-e,g*e+2],s:`${g} groups of ${e} is ${g*e}.`};}
 ]},
 
 /* ---------------- 2. Grade 2 ---------------- */
@@ -353,7 +418,10 @@ const BANK = [
     return{t:"Telling time",q:`What time is ${add} minutes after ${clock(start)}?`,a:clock(start+add),w:[clock(start-add),clock(start+add+15),clock(start+add-30),clock(start+60)],s:`${clock(start)} plus ${add} minutes is ${clock(start+add)}.`};},
   ()=>{const t=R(1,6),f=R(1,5);const v=t*10+f*5;
     return{t:"Money",q:`You have ${t} ten-pence coins and ${f} five-pence coins. How much is that, in pence?`,a:v,w:[t+f,v+5,v-5,t*5+f*10],s:`${t}×10p = ${t*10}p and ${f}×5p = ${f*5}p, so ${v}p altogether.`};},
-  ()=>{let a=R(20,99),b=R(20,99);if(a===b)b++;return{t:"Comparing numbers",q:`Which is greater, ${a} or ${b}?`,a:String(Math.max(a,b)),w:[String(Math.min(a,b)),"They are equal",String(a+b)],s:`Compare the tens digits first: ${Math.max(a,b)} is greater.`};}
+  ()=>{let a=R(20,99),b=R(20,99);if(a===b)b++;return{t:"Comparing numbers",q:`Which is greater, ${a} or ${b}?`,a:String(Math.max(a,b)),w:[String(Math.min(a,b)),"They are equal",String(a+b)],s:`Compare the tens digits first: ${Math.max(a,b)} is greater.`};},
+  ()=>{const h=R(12,40),o=R(11,30);return{t:"Trick-or-treat totals",q:`You collect ${h} sweets at the first house and ${o} at the next. How many do you have?`,a:h+o,w:[h+o+10,h-o,h+o-10,h*2],s:`${h} + ${o} = ${h+o}.`};},
+  ()=>{const a=R(30,90),b=R(10,25);return{t:"Measuring length",q:`A broom is ${a} cm long and a wand is ${b} cm. How much longer is the broom?`,a:(a-b)+" cm",w:[(a+b)+" cm",(a-b+10)+" cm",(a-b-10)+" cm",b+" cm"],s:`${a} − ${b} = ${a-b} cm.`};},
+  ()=>{const n=R(3,9),each=P([2,5,10]);return{t:"Repeated addition",q:`${n} spiders each spin ${each} webs. How many webs is that?`,a:n*each,w:[n+each,n*each+each,n*each-n,n*each+1],s:`${each} + ${each} … ${n} times over is ${n} × ${each} = ${n*each}.`};}
 ]},
 
 /* ---------------- 3. Grade 3 ---------------- */
@@ -371,7 +439,13 @@ const BANK = [
     return{t:"Comparing fractions",q:`Which is bigger, 1/${d1} or 1/${d2}?`,a:`1/${big}`,w:[`1/${d1===big?d2:d1}`,"They are equal",`1/${d1+d2}`],s:`The more pieces you cut something into, the smaller each piece. ${big} is the smaller denominator, so 1/${big} is bigger.`};},
   ()=>{const g=R(3,8),each=R(3,9);return{t:"Multiplication problems",q:`${g} spiders each have ${each} eggs. How many eggs altogether?`,a:g*each,w:[g+each,g*each+g,g*each-each,g*each+10],s:`${g} × ${each} = ${g*each}.`};},
   ()=>{const k=R(3,8),n=R(3,7);return{t:"Sharing equally",q:`${k*n} bones are shared equally between ${k} dogs. How many does each get?`,a:n,w:[k,k*n,n+1,n-1],s:`${k*n} ÷ ${k} = ${n}.`};},
-  ()=>{const s=R(3,11);return{t:"Area of a square",q:`A square has sides of ${s} cm. What is its area, in cm²?`,a:s*s,w:[4*s,2*s,s*s+s,s+s],s:`Area = ${s} × ${s} = ${s*s} cm².`};}
+  ()=>{const s=R(3,11);return{t:"Area of a square",q:`A square has sides of ${s} cm. What is its area, in cm²?`,a:s*s,w:[4*s,2*s,s*s+s,s+s],s:`Area = ${s} × ${s} = ${s*s} cm².`};},
+  ()=>{const paid=P([50,100]),cost=R(12,paid-10);return{t:"Change from a note",q:`A lantern costs ${cost}p. You pay with ${paid}p. What is your change?`,a:(paid-cost)+"p",w:[(paid+cost)+"p",(paid-cost+10)+"p",(paid-cost-10)+"p",cost+"p"],s:`${paid} − ${cost} = ${paid-cost}p.`};},
+  ()=>{const bars=[R(2,9),R(2,9),R(2,9)],names=["Monday","Tuesday","Wednesday"];const mx=Math.max(...bars);
+    return{t:"Reading a chart",q:`Ghosts seen: ${names.map((n,i)=>`${n} ${bars[i]}`).join(", ")}. How many more were seen on the busiest day than the quietest?`,
+      a:mx-Math.min(...bars),w:[mx,bars.reduce((x,y)=>x+y,0),mx-Math.min(...bars)+1,Math.min(...bars)],s:`Busiest ${mx}, quietest ${Math.min(...bars)}. ${mx} − ${Math.min(...bars)} = ${mx-Math.min(...bars)}.`};},
+  ()=>{const start=R(1,9),mins=P([20,25,40,45]);const end=start*60+mins;
+    return{t:"Elapsed time",q:`The hunt starts at ${clock(start*60)} and lasts ${mins} minutes. When does it finish?`,a:clock(end),w:[clock(end+15),clock(end-15),clock(start*60+60),clock(end+60)],s:`${clock(start*60)} plus ${mins} minutes is ${clock(end)}.`};}
 ]},
 
 /* ---------------- 4. Grade 4 ---------------- */
@@ -391,7 +465,13 @@ const BANK = [
     return{t:"Decimal place value",q:`What is the value of the digit ${b} in ${v.toFixed(1)}?`,a:frac(b,10),w:[String(b),frac(b,100),String(b*10),frac(a,10)],s:`It sits in the tenths column, so it is worth ${b}/10.`};},
   ()=>{const a=P([3,4,6]),b=P([5,8,9]);let l=a*b/gcd(a,b);
     return{t:"Multiples",q:`What is the lowest common multiple of ${a} and ${b}?`,a:l,w:[a*b,a+b,l+a,Math.abs(a-b)||2].filter(v=>v!==l),s:`Multiples of ${a}: ${[1,2,3,4].map(k=>a*k).join(", ")}… The first one that ${b} also divides is ${l}.`};},
-  ()=>{const x=R(10,80);return{t:"Angles",q:`Two angles are complementary. One is ${x}°. What is the other?`,a:(90-x)+"°",w:[(180-x)+"°",(x)+"°",(360-x)+"°",(90+x)+"°"],s:`Complementary angles add to 90°, so 90° − ${x}° = ${90-x}°.`};}
+  ()=>{const x=R(10,80);return{t:"Angles",q:`Two angles are complementary. One is ${x}°. What is the other?`,a:(90-x)+"°",w:[(180-x)+"°",(x)+"°",(360-x)+"°",(90+x)+"°"],s:`Complementary angles add to 90°, so 90° − ${x}° = ${90-x}°.`};},
+  ()=>{const boxes=R(4,9),each=R(6,12),eaten=R(3,15);const t=boxes*each;
+    return{t:"Two-step problems",q:`${boxes} boxes hold ${each} candles each. ${eaten} burn out. How many are still lit?`,a:t-eaten,w:[t,t+eaten,boxes*each-boxes,each-eaten+boxes],s:`${boxes} × ${each} = ${t}, then ${t} − ${eaten} = ${t-eaten}.`};},
+  ()=>{const n=R(120,980),d=P([10,100]);const v=Math.round(n/d)*d;
+    return{t:"Rounding big numbers",q:`Round ${n} to the nearest ${d}.`,a:v,w:[v+d,v-d,n,v+d*2].filter(x=>x!==v),s:`${n} sits ${n-v>0?"just above":"just below"} ${v}, and ${v} is the nearest ${d}.`};},
+  ()=>{const tot=R(3,9)*4,part=tot/4;
+    return{t:"Fraction word problems",q:`A quarter of the ${tot} candles in the hall have gone out. How many are still burning?`,a:tot-part,w:[part,tot,tot-part-1,tot-part+1],s:`A quarter of ${tot} is ${part}, so ${tot} − ${part} = ${tot-part} still burn.`};}
 ]},
 
 /* ---------------- 5. Grade 5 ---------------- */
@@ -419,7 +499,13 @@ const BANK = [
     return{t:"Simplifying fractions",q:`Write ${n*k}/${d*k} in its simplest form.`,a:frac(n,d),w:[`${n*k}/${d*k}`,frac(d,n),frac(n+1,d),frac(n,d+1)].filter(v=>v!==frac(n,d)),s:`Divide top and bottom by ${k*gcd(n,d)} → ${frac(n,d)}.`};},
   ()=>{const x=P([-5,-3,-2,2,3,5]),y=P([-6,-4,-1,1,4,6]);
     const quad = x>0&&y>0?"First":x<0&&y>0?"Second":x<0&&y<0?"Third":"Fourth";
-    return{t:"Coordinates",q:`Which quadrant contains the point (${x}, ${y})?`,a:quad,w:["First","Second","Third","Fourth"].filter(v=>v!==quad),s:`x is ${x>0?"positive":"negative"} and y is ${y>0?"positive":"negative"}, which is the ${quad.toLowerCase()} quadrant.`};}
+    return{t:"Coordinates",q:`Which quadrant contains the point (${x}, ${y})?`,a:quad,w:["First","Second","Third","Fourth"].filter(v=>v!==quad),s:`x is ${x>0?"positive":"negative"} and y is ${y>0?"positive":"negative"}, which is the ${quad.toLowerCase()} quadrant.`};},
+  ()=>{const d=P([2,4,5,8]),n=R(1,d-1),k=R(2,6);const tot=d*k;
+    return{t:"Fraction of an amount",q:`${n}/${d} of the ${tot} lanterns in the crypt are lit. How many are lit?`,a:n*k,w:[k,tot-n*k,n*k+k,d*n],s:`One ${d}th of ${tot} is ${k}, so ${n}/${d} is ${n} × ${k} = ${n*k}.`};},
+  ()=>{const v=(R(100,999)/100);const dp=P([1,2]);const r=dp===1?Math.round(v*10)/10:Math.round(v*100)/100;
+    return{t:"Rounding decimals",q:`Round ${v.toFixed(2)} to ${dp} decimal place${dp===1?"":"s"}.`,a:N(r),w:[N(r+0.1),N(r-0.1),N(Math.floor(v)),N(r+0.01)].filter(x=>x!==N(r)),s:`Look at the next digit along and round ${dp===1?"the tenths":"the hundredths"} accordingly → ${N(r)}.`};},
+  ()=>{const d=P([4,6,8,10]),a=R(3,d-1),b=R(1,a-1);
+    return{t:"Subtracting fractions",q:`${a}/${d} − ${b}/${d} = ?`,a:frac(a-b,d),w:[frac(a+b,d),frac(a-b,d*2),frac(a-b+1,d),frac(b,d)],s:`Same bottom number, so take the tops: ${a} − ${b} = ${a-b}, giving ${frac(a-b,d)}.`};}
 ]},
 
 /* ---------------- 6. Grade 6 ---------------- */
@@ -442,7 +528,13 @@ const BANK = [
   ()=>{const b=R(2,5),e=R(2,4);return{t:"Exponents",q:`${b}${sup(e)} = ?`,a:Math.pow(b,e),w:[b*e,Math.pow(e,b),Math.pow(b,e)+b,Math.pow(b,e-1)],s:`${Array(e).fill(b).join(" × ")} = ${Math.pow(b,e)}.`};},
   ()=>{const b=R(4,16),h=R(3,12);const v=b*h/2;
     return{t:"Area of a triangle",q:`A triangle has base ${b} and height ${h}. What is its area?`,a:N(v),w:[N(b*h),N(b+h),N(v+b),N(2*(b+h))],s:`Area = ½ × ${b} × ${h} = ${v}.`};},
-  ()=>{const x=R(2,12),a=R(2,9);return{t:"One-step equations",q:`Solve:  ${a}x = ${a*x}`,a:x,w:[a*x,x+1,a,a*x-a],s:`Divide both sides by ${a}: x = ${x}.`};}
+  ()=>{const x=R(2,12),a=R(2,9);return{t:"One-step equations",q:`Solve:  ${a}x = ${a*x}`,a:x,w:[a*x,x+1,a,a*x-a],s:`Divide both sides by ${a}: x = ${x}.`};},
+  ()=>{const n=R(1,5),d=R(2,6),k=R(2,5);
+    return{t:"Dividing fractions",q:`${frac(n,d)} ÷ ${k} = ?`,a:frac(n,d*k),w:[frac(n*k,d),frac(n,d+k),frac(n+k,d),frac(d,n*k)],s:`Dividing by ${k} is multiplying by 1/${k}: ${frac(n,d)} × 1/${k} = ${frac(n,d*k)}.`};},
+  ()=>{const a=-R(2,15),b=R(3,20);
+    return{t:"Temperature change",q:`The crypt is ${a}°C. It warms by ${b}°C. What is the temperature now?`,a:(a+b)+"°C",w:[(a-b)+"°C",(b-a)+"°C",(a+b+2)+"°C",(-a+b)+"°C"],s:`${a} + ${b} = ${a+b}°C.`};},
+  ()=>{const w=R(2,9),l=R(2,9),h=R(2,9);
+    return{t:"Volume of a box",q:`A coffin measures ${w} × ${l} × ${h} feet. What is its volume, in cubic feet?`,a:w*l*h,w:[w+l+h,2*(w*l+l*h+w*h),w*l,w*l*h+w],s:`Volume = ${w} × ${l} × ${h} = ${w*l*h}.`};}
 ]},
 
 /* ---------------- 7. Grade 7 ---------------- */
@@ -465,7 +557,13 @@ const BANK = [
     return{t:"Scale drawings",q:`A map uses 1 cm : ${p} km. How far apart in real life are two towns ${real} cm apart on the map?`,a:p*real+" km",w:[(real/p).toFixed(1)+" km",(p+real)+" km",(p*real+p)+" km",real+" km"],s:`${real} × ${p} = ${p*real} km.`};},
   ()=>{const pr=P([200,400,500,800,1000]),r=P([2,4,5,10]),y=R(1,5);
     return{t:"Simple interest",q:`£${pr} earns ${r}% simple interest for ${y} year${y>1?"s":""}. How much interest?`,a:N(pr*r*y/100),w:[N(pr*r/100),N(pr+pr*r*y/100),N(pr*y),N(pr*r*y/1000)],s:`I = P × r × t = ${pr} × ${r/100} × ${y} = ${pr*r*y/100}.`};},
-  ()=>{const x=R(20,150);return{t:"Angle relationships",q:`Two angles are supplementary. One is ${x}°. What is the other?`,a:(180-x)+"°",w:[(90-x)+"°",(360-x)+"°",x+"°",(180+x)+"°"],s:`Supplementary angles add to 180°, so 180° − ${x}° = ${180-x}°.`};}
+  ()=>{const x=R(20,150);return{t:"Angle relationships",q:`Two angles are supplementary. One is ${x}°. What is the other?`,a:(180-x)+"°",w:[(90-x)+"°",(360-x)+"°",x+"°",(180+x)+"°"],s:`Supplementary angles add to 180°, so 180° − ${x}° = ${180-x}°.`};},
+  ()=>{const a=R(1,4),b=a+R(1,4),k=R(5,20);const tot=(a+b)*k;
+    return{t:"Ratio sharing",q:`£${tot} is shared in the ratio ${a}:${b}. What is the larger share?`,a:"£"+b*k,
+      w:["£"+a*k,"£"+tot/2,"£"+(b*k+k),"£"+k],s:`${a} + ${b} = ${a+b} parts, so one part is £${k}. The larger share is ${b} × £${k} = £${b*k}.`};},
+  ()=>{const m=R(2,9),xs=SH([m,m,R(10,19),R(20,29),R(30,44)]);const hi=Math.max(...xs),lo=Math.min(...xs);
+    return{t:"Range and mode",q:`For the data ${xs.join(", ")} — what is the range?`,a:hi-lo,
+      w:[hi,lo,hi+lo,m],s:`Range = largest − smallest = ${hi} − ${lo} = ${hi-lo}. (The mode, the repeated value, is ${m}.)`};}
 ]},
 
 /* ---------------- 8. Grade 8 ---------------- */
@@ -487,17 +585,27 @@ const BANK = [
   ()=>{const r=R(2,8),h=R(2,10);return{t:"Cylinder volume",q:`A cylinder has radius ${r} and height ${h}. What is its volume?`,a:`${r*r*h}π`,w:[`${2*r*h}π`,`${r*h}π`,`${r*r}π`,`${r*r*h*2}π`],s:`V = πr²h = π × ${r*r} × ${h} = ${r*r*h}π.`};},
   ()=>{const n=P([8,27,64,125,216,343]);const c=Math.round(Math.cbrt(n));
     return{t:"Cube roots",q:`What is the cube root of ${n}?`,a:c,w:[c+1,c-1,n/c,c*c],s:`${c} × ${c} × ${c} = ${n}.`};},
-  ()=>{const x=R(-6,6),y=R(-6,6);const ax=P(["x-axis","y-axis"]);
+  ()=>{/* both coordinates non-zero and of different size, or the four options collide */
+    const pool=SH([1,2,3,4,5,6,-1,-2,-3,-4,-5,-6]);
+    const x=pool[0], y=pool.find(v=>Math.abs(v)!==Math.abs(x));
+    const ax=P(["x-axis","y-axis"]);
     const res = ax==="x-axis" ? `(${x}, ${-y})` : `(${-x}, ${y})`;
     return{t:"Reflections",q:`Reflect the point (${x}, ${y}) in the ${ax}. Where does it land?`,a:res,
-      w:[`(${-x}, ${-y})`,`(${x}, ${y})`,`(${y}, ${x})`,`(${-x}, ${y})`].filter(v=>v!==res),
+      w:[`(${-x}, ${-y})`,`(${x}, ${y})`,`(${y}, ${x})`,`(${-y}, ${-x})`].filter(v=>v!==res),
       s:`Reflecting in the ${ax} flips the sign of the ${ax==="x-axis"?"y":"x"}-coordinate → ${res}.`};},
   ()=>{const n=R(5,7);const arr=SH(Array.from({length:n},()=>R(1,30)));
     const sorted=arr.slice().sort((a,b)=>a-b);const med=n%2?sorted[(n-1)/2]:(sorted[n/2-1]+sorted[n/2])/2;
     return{t:"Median",q:`Find the median of ${arr.join(", ")}.`,a:N(med),w:[N(arr[0]),N(Math.max(...arr)),N(Math.round(arr.reduce((a,b)=>a+b,0)/n*10)/10),N(Math.min(...arr))].filter(v=>v!==N(med)),
       s:`In order: ${sorted.join(", ")}. The middle value is ${med}.`};},
   ()=>{const m=R(2,6),c=R(1,9),x=R(2,7);
-    return{t:"Linear functions",q:`A line has slope ${m} and passes through (0, ${c}). What is y when x = ${x}?`,a:m*x+c,w:[m+x+c,m*x,m*x-c,m*(x+c)],s:`y = ${m}x + ${c}, so y = ${m}(${x}) + ${c} = ${m*x+c}.`};}
+    return{t:"Linear functions",q:`A line has slope ${m} and passes through (0, ${c}). What is y when x = ${x}?`,a:m*x+c,w:[m+x+c,m*x,m*x-c,m*(x+c)],s:`y = ${m}x + ${c}, so y = ${m}(${x}) + ${c} = ${m*x+c}.`};},
+  ()=>{const r=R(2,6),h=3*R(1,5);const v=r*r*h/3;
+    return{t:"Cone volume",q:`A cone has radius ${r} and height ${h}. What is its volume, in terms of π?`,a:v+"π",
+      w:[(r*r*h)+"π",(v+r)+"π",(2*r*h)+"π",(r*h)+"π"],s:`V = ⅓πr²h = ⅓π × ${r*r} × ${h} = ${v}π.`};},
+  ()=>{const n=R(1200,98000),sf=P([2,3]);const d=Math.floor(Math.log10(n))+1,f=Math.pow(10,d-sf),v=Math.round(n/f)*f;
+    return{t:"Significant figures",q:`Round ${n} to ${sf} significant figures.`,a:v,
+      w:[v+f,v-f,n,Math.round(n/(f*10))*f*10].filter(x=>x!==v),
+      s:`Keep the first ${sf} digits and let the rest go to zero → ${v}.`};}
 ]},
 
 /* ---------------- 9. Grade 9 — Algebra I ---------------- */
@@ -519,9 +627,10 @@ const BANK = [
       s:`Add ${b}: ${a}x > ${rhs-a+b}. Divide by ${a} → x > ${x-1}.`};},
   ()=>{const m=R(-4,5)||2,c=R(-8,8),x=R(-4,6);
     return{t:"Functions",q:`f(x) = ${m===1?"":m===-1?"−":m}x ${signed(c)}. Find f(${x}).`,a:m*x+c,w:[m+x+c,m*x-c,m*(x+c),m*x+c+m],s:`f(${x}) = ${m<0?"("+m+")":m}(${x}) ${signed(c)} = ${m*x} ${signed(c)} = ${m*x+c}.`};},
-  ()=>{const a=R(2,6),b=R(2,8);
+  ()=>{const a=R(2,6),b=a+R(1,5);         /* a ≠ b, so the swapped-coefficient distractor stays wrong */
     return{t:"Expanding",q:`Expand:  (x + ${a})(x + ${b})`,a:`x² ${signed(a+b)}x ${signed(a*b)}`,
-      w:[`x² ${signed(a*b)}x ${signed(a+b)}`,`x² ${signed(a+b)}x ${signed(a+b)}`,`x² ${signed(a*b)}`,`2x ${signed(a+b)}`],
+      w:[`x² ${signed(a*b)}x ${signed(a+b)}`,`x² ${signed(a+b)}x ${signed(a+b)}`,`x² ${signed(a*b)}`,
+         `x² ${signed(a+b)}x ${signed(a*b+1)}`,`2x ${signed(a+b)}`],
       s:`Outer + inner give ${a}x + ${b}x = ${a+b}x; last terms give ${a}×${b} = ${a*b}.`};},
   ()=>{const k=R(2,9);return{t:"Difference of squares",q:`Factorise:  x² − ${k*k}`,a:`(x + ${k})(x − ${k})`,
     w:[`(x − ${k})²`,`(x + ${k})²`,`(x + ${k*k})(x − 1)`,`x(x − ${k*k})`],s:`a² − b² = (a + b)(a − b), with b = ${k}.`};},
@@ -537,7 +646,14 @@ const BANK = [
     return{t:"Polynomial subtraction",q:`Simplify:  (${a}x² + ${c}x) − (${b}x² + ${d}x)`,
       a:`${a-b===1?"":a-b===-1?"−":a-b}x² ${signed(c-d)}x`.replace(/^0x² /,""),
       w:[`${a+b}x² ${signed(c+d)}x`,`${a-b}x² ${signed(d-c)}x`,`${a-b}x ${signed(c-d)}`,`${a*b}x² ${signed(c*d)}x`],
-      s:`Subtract like terms: (${a} − ${b})x² = ${a-b}x², and (${c} − ${d})x = ${c-d}x.`};}
+      s:`Subtract like terms: (${a} − ${b})x² = ${a-b}x², and (${c} − ${d})x = ${c-d}x.`};},
+  ()=>{const p=R(1,7),q=p+R(1,5);
+    return{t:"Factorising quadratics",q:`Factorise:  x² + ${p+q}x + ${p*q}`,a:`(x + ${p})(x + ${q})`,
+      w:[`(x + ${p})(x + ${q+1})`,`(x + ${p+1})(x + ${q})`,`(x − ${p})(x − ${q})`,`(x + ${p*q})(x + 1)`],
+      s:`Two numbers that multiply to ${p*q} and add to ${p+q}: ${p} and ${q}.`};},
+  ()=>{const b=R(1,7),c=R(1,24);const k=c-b*b;
+    return{t:"Completing the square",q:`x² + ${2*b}x + ${c} is written as (x + a)² + k. What is k?`,a:k,
+      w:[c,b*b,c+b*b,-k].filter(v=>v!==k),s:`a is half of ${2*b}, so a = ${b}, and k = ${c} − ${b}² = ${k}.`};}
 ]},
 
 /* ---------------- 10. Grade 10 — Geometry ---------------- */
@@ -578,7 +694,14 @@ const BANK = [
       w:[m,frac(dx,dy),frac(-dy,dx),frac(dy+1,dx)].filter(v=>v!==perp),s:`Perpendicular slopes are negative reciprocals: −1 ÷ (${m}) = ${perp}.`};},
   ()=>{const a=R(3,10),b=R(3,10),h=R(2,9);const v=(a+b)*h/2;
     return{t:"Area of a trapezium",q:`A trapezium has parallel sides ${a} and ${b}, and height ${h}. What is its area?`,a:N(v),
-      w:[N(a*b*h),N((a+b)*h),N(a+b+h),N(v+h)],s:`Area = ½(a + b)h = ½(${a+b})(${h}) = ${v}.`};}
+      w:[N(a*b*h),N((a+b)*h),N(a+b+h),N(v+h)],s:`Area = ½(a + b)h = ½(${a+b})(${h}) = ${v}.`};},
+  ()=>{const o=R(2,12),a=o+R(1,6);
+    return{t:"Tangent ratio",q:`In a right-angled triangle, the side opposite θ is ${o} and the adjacent side is ${a}. What is tan θ?`,
+      a:frac(o,a),w:[frac(a,o),frac(o,o+a),frac(o+a,a),frac(o,a+1)],s:`tan θ = opposite ÷ adjacent = ${o}/${a} = ${frac(o,a)}.`};},
+  ()=>{const t=P([[1,2,2,3],[2,3,6,7],[1,4,8,9],[4,4,7,9],[2,6,9,11]]),k=R(1,4);
+    return{t:"Space diagonal",q:`A box measures ${t[0]*k} × ${t[1]*k} × ${t[2]*k}. How long is its longest internal diagonal?`,
+      a:t[3]*k,w:[(t[0]+t[1]+t[2])*k,t[2]*k,(t[3]+1)*k,t[3]*k*2],
+      s:`√(${t[0]*k}² + ${t[1]*k}² + ${t[2]*k}²) = √${(t[3]*k)*(t[3]*k)} = ${t[3]*k}.`};}
 ]},
 
 /* ---------------- 11. Grade 11 — Algebra II / Precalc ---------------- */
@@ -615,7 +738,15 @@ const BANK = [
       s:`f⁻¹(y) = (y − ${c})/${m}. With y = ${m*y+c}: (${m*y+c} − ${c})/${m} = ${y}.`};},
   ()=>{const ang=P([[30,"1/2"],[90,"1"],[150,"1/2"],[180,"0"],[210,"−1/2"],[270,"−1"]]);
     return{t:"Trig values",q:`What is sin ${ang[0]}°?`,a:ang[1],w:["0","1","−1","1/2","√3/2","−1/2"].filter(v=>v!==ang[1]).slice(0,4),
-      s:`Read it off the unit circle: sin ${ang[0]}° = ${ang[1]}.`};}
+      s:`Read it off the unit circle: sin ${ang[0]}° = ${ang[1]}.`};},
+  ()=>{const n=R(4,8),k=R(2,3);const C=(n,k)=>{let r=1;for(let i=0;i<k;i++) r=r*(n-i)/(i+1); return Math.round(r);};
+    const c=C(n,k);
+    return{t:"Binomial coefficients",q:`What is the coefficient of x${sup(k)} in (1 + x)${sup(n)}?`,a:c,
+      w:[C(n,k+1),n*k,c+1,n].filter(v=>v!==c),s:`It is ${n}C${k} = ${c}.`};},
+  ()=>{const a=R(1,5),b=a+R(1,5);
+    return{t:"Partial fractions",q:`1/((x + ${a})(x + ${b})) is written as A/(x + ${a}) + B/(x + ${b}). What is A?`,
+      a:frac(1,b-a),w:[frac(-1,b-a),frac(1,a+b),frac(1,a*b),frac(b-a,1)],
+      s:`Cover up (x + ${a}) and set x = −${a}: A = 1/(${b} − ${a}) = ${frac(1,b-a)}.`};}
 ]},
 
 /* ---------------- 12. Grade 12 — Calculus ---------------- */
@@ -656,7 +787,15 @@ const BANK = [
   ()=>{const a=R(2,6),n=R(2,4);const v=Math.round(Math.pow(a,n+1)/(n+1)*1000)/1000;
     return{t:"Power rule integration",q:`Evaluate:  ∫₀${sup(a)} x${sup(n)} dx`,a:N(v),
       w:[N(Math.pow(a,n)),N(Math.round(Math.pow(a,n+1)*1000)/1000),N(Math.round(v*(n+1)*1000)/1000),N(n*Math.pow(a,n-1))].filter(x=>x!==N(v)),
-      s:`∫xⁿ dx = x^(n+1)/(n+1), so we get ${a}${sup(n+1)}/${n+1} = ${v}.`};}
+      s:`∫xⁿ dx = x^(n+1)/(n+1), so we get ${a}${sup(n+1)}/${n+1} = ${v}.`};},
+  ()=>{const t=P([[3,4,5],[6,8,10],[5,12,13],[8,15,17]]);
+    return{t:"Implicit differentiation",q:`For x² + y² = ${t[2]*t[2]}, what is dy/dx at the point (${t[0]}, ${t[1]})?`,
+      a:frac(-t[0],t[1]),w:[frac(t[0],t[1]),frac(-t[1],t[0]),frac(t[1],t[0]),frac(-t[0],t[2])],
+      s:`Differentiate both sides: 2x + 2y·dy/dx = 0, so dy/dx = −x/y = ${frac(-t[0],t[1])}.`};},
+  ()=>{const a=R(2,6);const num=a*a*a;
+    return{t:"Area between curves",q:`Find the area enclosed between y = ${a}x and y = x².`,a:frac(num,6),
+      w:[frac(num,3),frac(num,2),frac(a*a,6),frac(num,12)],
+      s:`They cross at x = 0 and x = ${a}. ∫₀${sup(a)}(${a}x − x²)dx = ${a}³/6 = ${frac(num,6)}.`};}
 ]},
 
 /* ---------------- 13. College — Engineering ---------------- */
@@ -700,7 +839,14 @@ const BANK = [
   ()=>{const a=R(2,9),den=P([2,3,4,5]);const sum=Math.round(a/(1-1/den)*1000)/1000;
     return{t:"Geometric series",q:`Find the sum to infinity of a geometric series with first term ${a} and ratio 1/${den}.`,a:N(sum),
       w:[N(a*den),N(Math.round(a/(1+1/den)*1000)/1000),N(a),N(a*den-a)].filter(v=>v!==N(sum)),
-      s:`S = a/(1 − r) = ${a}/(1 − 1/${den}) = ${sum}.`};}
+      s:`S = a/(1 − r) = ${a}/(1 − 1/${den}) = ${sum}.`};},
+  ()=>{let a,b,c,d,det;do{a=R(1,6);b=R(1,6);c=R(1,6);d=R(1,6);det=a*d-b*c;}while(det===0);
+    return{t:"Matrix inverse",q:`For A = [[${a}, ${b}], [${c}, ${d}]], what is the top-left entry of A⁻¹?`,
+      a:frac(d,det),w:[frac(a,det),frac(-b,det),frac(d,a*d+b*c||1),frac(det,d)],
+      s:`A⁻¹ = (1/det)·[[d, −b], [−c, a]], and det = ${det}, so the top-left entry is ${frac(d,det)}.`};},
+  ()=>{const a=R(1,7),b=R(8,15);
+    return{t:"Curl",q:`F = (${a}y, ${b}x, 0). What is the k-component of ∇ × F?`,a:b-a,
+      w:[a-b,a+b,0,b],s:`∂(${b}x)/∂x − ∂(${a}y)/∂y = ${b} − ${a} = ${b-a}.`};}
 ]},
 
 /* ---------------- 14. Masters — Engineering ---------------- */
@@ -748,7 +894,15 @@ const BANK = [
   ()=>{const p=P([0.2,0.25,0.4,0.5]),q=P([0.3,0.5,0.6]);const pi1=Math.round(q/(p+q)*1000)/1000;
     return{t:"Markov chains",q:`A two-state chain moves A→B with probability ${p} and B→A with probability ${q}. What fraction of time is spent in A?`,
       a:N(pi1),w:[N(Math.round(p/(p+q)*1000)/1000),N(p),N(q),"0.5"].filter(v=>v!==N(pi1)),
-      s:`Balance gives π_A·${p} = π_B·${q}, so π_A = ${q}/(${p} + ${q}) = ${pi1}.`};}
+      s:`Balance gives π_A·${p} = π_B·${q}, so π_A = ${q}/(${p} + ${q}) = ${pi1}.`};},
+  ()=>{const f=R(2,40)*100;
+    return{t:"Nyquist rate",q:`A signal contains nothing above ${f} Hz. What is the lowest sampling rate that avoids aliasing?`,
+      a:(2*f)+" Hz",w:[f+" Hz",(f/2)+" Hz",(4*f)+" Hz",(2*f+100)+" Hz"],
+      s:`Sample above twice the highest frequency present: 2 × ${f} = ${2*f} Hz.`};},
+  ()=>{const a=P([2,4,6,10,12,20]);
+    return{t:"RMS of a sine",q:`A sine wave has a peak of ${a} V. What is its RMS value, to two decimal places?`,
+      a:(a/Math.SQRT2).toFixed(2)+" V",w:[(a/2).toFixed(2)+" V",(a*Math.SQRT2).toFixed(2)+" V",a.toFixed(2)+" V",(a/Math.PI).toFixed(2)+" V"],
+      s:`RMS = peak/√2 = ${a}/1.4142 = ${(a/Math.SQRT2).toFixed(2)} V.`};}
 ]},
 
 /* ---------------- 15. PhD in Engineering ---------------- */
@@ -801,7 +955,13 @@ const BANK = [
   ()=>{const n=R(2,4);const full=n;
     return{t:"Controllability",q:`A system has ${n} states. What rank must the controllability matrix have for the system to be fully controllable?`,
       a:full,w:[full-1,full+1,2*full,1].filter(v=>v!==full),
-      s:`Full controllability requires rank([B AB … Aⁿ⁻¹B]) = n = ${n}.`};}
+      s:`Full controllability requires rank([B AB … Aⁿ⁻¹B]) = n = ${n}.`};},
+  ()=>{const a=R(5,40),b=R(1,4);
+    return{t:"Condition number",q:`A matrix has singular values ${a} and ${b}. What is its 2-norm condition number?`,
+      a:N(a/b),w:[N(b/a),N(a*b),N(a-b),N(a+b)],s:`κ₂ = σmax/σmin = ${a}/${b} = ${N(a/b)}.`};},
+  ()=>{const lam=R(2,9),t=R(2,6);
+    return{t:"Poisson process",q:`Events arrive as a Poisson process at ${lam} per hour. What is the variance of the count over ${t} hours?`,
+      a:lam*t,w:[lam,t,lam+t,lam*t*lam],s:`For a Poisson count both mean and variance are λt = ${lam} × ${t} = ${lam*t}.`};}
 ]}
 ];
 
@@ -809,6 +969,42 @@ const BANK = [
    HINTS — a method reminder that never contains the answer.
    ===================================================================== */
 const HINTS = {
+"Ratio sharing":"Add the parts of the ratio first — that tells you what one part is worth.",
+"Range and mode":"Range is the spread: biggest take away smallest.",
+"Cone volume":"A cone is a third of the cylinder that would contain it.",
+"Significant figures":"Count digits from the first non-zero one, then look at the next digit to decide.",
+"Factorising quadratics":"Find two numbers that multiply to the constant and add to the x coefficient.",
+"Completing the square":"Halve the x coefficient to get a, then correct the constant by a².",
+"Tangent ratio":"Tangent is opposite over adjacent.",
+"Space diagonal":"Pythagoras twice: across the base, then up.",
+"Binomial coefficients":"The coefficients of (1 + x)ⁿ are the row of Pascal's triangle.",
+"Partial fractions":"Cover up one factor and substitute the value that kills it.",
+"Implicit differentiation":"Differentiate both sides with respect to x and remember the chain rule on y.",
+"Area between curves":"Find where they meet, then integrate the difference between them.",
+"Matrix inverse":"The inverse swaps the diagonal, negates the off-diagonal, and divides by the determinant.",
+"Curl":"The k-component is ∂F_y/∂x − ∂F_x/∂y.",
+"Nyquist rate":"Twice the highest frequency present.",
+"RMS of a sine":"For a sine, RMS is the peak divided by √2.",
+"Condition number":"The ratio of the largest singular value to the smallest.",
+"Poisson process":"For a Poisson count, the mean and the variance are the same number.",
+"How many more":"Difference means take the smaller away from the bigger.",
+"Counting back":"Start at the number you had and step backwards.",
+"Equal groups":"Groups of the same size means multiply.",
+"Trick-or-treat totals":"Put the two amounts together — add the tens, then the ones.",
+"Measuring length":"How much longer means subtract.",
+"Repeated addition":"The same number added over and over is a multiplication.",
+"Change from a note":"Change is what you paid take away what it cost.",
+"Reading a chart":"Find the biggest and the smallest first, then subtract.",
+"Elapsed time":"Add the minutes on, and carry into the next hour at 60.",
+"Two-step problems":"Two steps, in order: work out the total first, then take the loss away.",
+"Rounding big numbers":"Look at the digit just to the right of the place you are rounding to.",
+"Fraction word problems":"Find the fraction of the total first, then decide whether the question wants that part or the rest.",
+"Fraction of an amount":"Divide by the bottom number, then multiply by the top.",
+"Rounding decimals":"Look one digit further right than the place you are keeping.",
+"Subtracting fractions":"Same denominator: subtract the numerators and leave the bottom alone.",
+"Dividing fractions":"Dividing by a number is multiplying by its reciprocal.",
+"Temperature change":"Warming up moves you to the right along the number line.",
+"Volume of a box":"Volume is length × width × height.",
 "Addition":"Count on from the bigger number.",
 "Subtraction":"Count back, or ask what you add to the smaller number to reach the bigger one.",
 "Counting on":"Start at the first number and step forward.",
@@ -1486,10 +1682,23 @@ const HARD = [
   [0,6,7,9,10],    /* C  */ [3,7,9,10],     /* M  */ [0,1,3,9,10]    /* PhD */
 ];
 /* A challenge: a hard type from the player's own grade. `tight` replaces the
-   distractors with near misses, so only an exact answer gets through. */
-function challengeProblem(level, tight){
-  const pool = HARD[level] || BANK[level].gens.map((_,i)=>i);
-  const p = makeProblem(level, P(pool));
+   distractors with near misses, so only an exact answer gets through.
+   `avoid` is the run's set of topics already seen, so a chest or a hatch
+   cannot hand back a type one of the rooms has already used. */
+function challengeProblem(level, tight, avoid){
+  let pool = HARD[level] || BANK[level].gens.map((_,i)=>i);
+  if(avoid && avoid.size){
+    const fresh = pool.filter(g=>!avoid.has(TOPIC[level][g]));
+    if(fresh.length) pool = fresh;
+    else {
+      /* every hard type is spoken for — a fresh ordinary type beats a repeat */
+      const any = BANK[level].gens.map((_,i)=>i).filter(g=>!avoid.has(TOPIC[level][g]));
+      if(any.length) pool = any;
+    }
+  }
+  const gi = P(pool);
+  if(avoid) avoid.add(TOPIC[level][gi]);
+  const p = makeProblem(level, gi);
   if(tight && /^-?\d+$/.test(p.answer)){
     const a = parseInt(p.answer,10);
     const near = SH([a+1,a-1,a+2,a-2,a+10,a-10]).filter(v=>v!==a);
@@ -1603,8 +1812,91 @@ const AVATARS = [
    <path d="M12 25 h40 l-2 4 H14Z" fill="#3a2b18"/>
    <path d="M25 30 l6 4 -6 4Z" fill="#21150b"/><path d="M39 30 l-6 4 6 4Z" fill="#21150b"/>
    <path d="M24 44 l3 -3 3 3 3 -3 3 3 3 -3" stroke="#21150b" stroke-width="2" fill="none"/>
-   <path d="M18 47 q-5 4 -8 3 M46 47 q5 4 8 3" stroke="#8a6d3a" stroke-width="2" fill="none"/>`}
+   <path d="M18 47 q-5 4 -8 3 M46 47 q5 4 8 3" stroke="#8a6d3a" stroke-width="2" fill="none"/>`},
+ {id:"jack",name:"Pumpkin kid",svg:`
+   <path d="M20 52 h24 l4 22 H16Z" fill="#2d4a24"/>
+   <path d="M20 52 q12 8 24 0" stroke="#1d3318" stroke-width="2" fill="none"/>
+   <ellipse cx="32" cy="34" rx="18" ry="16" fill="#ef7c14"/>
+   <ellipse cx="32" cy="34" rx="6" ry="16" fill="#ff9f45" opacity=".45"/>
+   <ellipse cx="20" cy="34" rx="5" ry="15" fill="#c95c08" opacity=".35"/><ellipse cx="44" cy="34" rx="5" ry="15" fill="#c95c08" opacity=".35"/>
+   <path d="M31 17 q1 -8 6 -9 l-1 5 q-3 1 -3 4Z" fill="#3d6b22"/>
+   <path d="M22 30 l7 4 -7 4Z" fill="#2a0f02"/><path d="M42 30 l-7 4 7 4Z" fill="#2a0f02"/>
+   <path d="M23 42 l4 -3 3 3 4 -3 3 3 4 -3 2 5 q-11 6 -20 0Z" fill="#2a0f02"/>
+   <circle cx="26" cy="33" r="1.6" fill="#ffe08a"/><circle cx="38" cy="33" r="1.6" fill="#ffe08a"/>`},
+ {id:"banshee",name:"Banshee",svg:`
+   <path d="M32 10 C16 10 12 26 14 40 q-4 18 2 34 l8 -8 6 6 6 -8 6 8 6 -6 8 8 q6 -16 2 -34 C52 26 48 10 32 10Z"
+     fill="#9fd6e8" opacity=".55"/>
+   <path d="M16 26 q6 -18 16 -16 q10 -2 16 16 q-8 -8 -16 -6 q-8 -2 -16 6Z" fill="#cfe9f4" opacity=".7"/>
+   <path d="M18 34 q6 26 -2 40 M46 34 q-6 26 2 40" stroke="#cfe9f4" stroke-width="2" fill="none" opacity=".5"/>
+   <ellipse cx="26" cy="36" rx="3.4" ry="4.6" fill="#0b1a22"/><ellipse cx="38" cy="36" rx="3.4" ry="4.6" fill="#0b1a22"/>
+   <ellipse cx="26" cy="36" rx="1.2" ry="2" fill="#7fe8ff"/><ellipse cx="38" cy="36" rx="1.2" ry="2" fill="#7fe8ff"/>
+   <ellipse cx="32" cy="50" rx="5" ry="8" fill="#0b1a22"/>
+   <path d="M26 44 q6 -3 12 0" stroke="#cfe9f4" stroke-width="1.4" fill="none" opacity=".6"/>`},
+ {id:"gargoyle",name:"Gargoyle",svg:`
+   <path d="M14 74 q2 -22 18 -22 q16 0 18 22Z" fill="#5a5f66"/>
+   <path d="M10 48 q-8 -18 2 -28 q2 14 12 20Z" fill="#4a4f57"/><path d="M54 48 q8 -18 -2 -28 q-2 14 -12 20Z" fill="#4a4f57"/>
+   <ellipse cx="32" cy="34" rx="16" ry="14" fill="#6b7078"/>
+   <path d="M18 24 l-2 -12 10 7Z" fill="#5a5f66"/><path d="M46 24 l2 -12 -10 7Z" fill="#5a5f66"/>
+   <ellipse cx="32" cy="42" rx="9" ry="6" fill="#7b818a"/>
+   <ellipse cx="29" cy="41" rx="1.4" ry="1.1" fill="#2a2d33"/><ellipse cx="35" cy="41" rx="1.4" ry="1.1" fill="#2a2d33"/>
+   <ellipse cx="25" cy="32" rx="3.4" ry="3" fill="#ffd66b"/><ellipse cx="39" cy="32" rx="3.4" ry="3" fill="#ffd66b"/>
+   <circle cx="25" cy="32" r="1.2" fill="#22252b"/><circle cx="39" cy="32" r="1.2" fill="#22252b"/>
+   <path d="M27 46 l1.6 4 1.6 -4Z" fill="#e8e6de"/><path d="M34 46 l1.6 4 1.6 -4Z" fill="#e8e6de"/>
+   <path d="M20 58 q12 6 24 0" stroke="#43474e" stroke-width="2" fill="none"/>`},
+ {id:"imp",name:"Little devil",svg:`
+   <path d="M18 52 h28 l3 22 H15Z" fill="#7d1220"/>
+   <path d="M46 60 q12 4 10 14 q-4 -8 -10 -6Z" fill="#c4384a"/>
+   <circle cx="32" cy="34" r="15" fill="#d6455a"/>
+   <path d="M18 24 l-3 -13 12 7Z" fill="#a72232"/><path d="M46 24 l3 -13 -12 7Z" fill="#a72232"/>
+   <ellipse cx="26" cy="33" rx="3.4" ry="3" fill="#ffe27a"/><ellipse cx="38" cy="33" rx="3.4" ry="3" fill="#ffe27a"/>
+   <circle cx="26" cy="33.4" r="1.3" fill="#2a0a0f"/><circle cx="38" cy="33.4" r="1.3" fill="#2a0a0f"/>
+   <path d="M22 28 l8 3 M42 28 l-8 3" stroke="#8d1c2a" stroke-width="2" stroke-linecap="round"/>
+   <path d="M24 42 q8 8 16 0 q-8 3 -16 0Z" fill="#3d0810"/>
+   <path d="M26 43 l1.4 3.4 1.6 -3.4Z" fill="#fff"/><path d="M35 43 l1.4 3.4 1.6 -3.4Z" fill="#fff"/>`},
+ {id:"bog",name:"Bog beast",svg:`
+   <path d="M16 74 q0 -26 16 -26 q16 0 16 26Z" fill="#2f4a33"/>
+   <ellipse cx="32" cy="36" rx="17" ry="16" fill="#3f6141"/>
+   <path d="M15 28 q6 -14 17 -12 q11 -2 17 12 q-9 -6 -17 -5 q-8 -1 -17 5Z" fill="#547a4a"/>
+   <path d="M20 22 q-2 12 -6 16 M44 22 q2 12 6 16" stroke="#6d9c5c" stroke-width="2.4" fill="none" opacity=".8"/>
+   <ellipse cx="25" cy="34" rx="4.4" ry="4" fill="#d9f27a"/><ellipse cx="39" cy="34" rx="4.4" ry="4" fill="#d9f27a"/>
+   <ellipse cx="25" cy="34" rx="1.5" ry="3" fill="#13210f"/><ellipse cx="39" cy="34" rx="1.5" ry="3" fill="#13210f"/>
+   <path d="M24 45 q8 6 16 0 q-8 2 -16 0Z" fill="#17240f"/>
+   <g fill="#6d9c5c" opacity=".75"><circle cx="20" cy="56" r="3"/><circle cx="44" cy="60" r="2.4"/><circle cx="32" cy="64" r="2"/></g>
+   <path d="M18 50 q-7 6 -9 14 M46 50 q7 6 9 14" stroke="#2f4a33" stroke-width="4" fill="none" stroke-linecap="round"/>`},
+ {id:"spiderkid",name:"Spider kid",svg:`
+   <g stroke="#1a1420" stroke-width="3" fill="none" stroke-linecap="round">
+     <path d="M20 54 q-12 2 -16 -8 M20 60 q-14 4 -16 12 M44 54 q12 2 16 -8 M44 60 q14 4 16 12"/></g>
+   <path d="M18 52 h28 l3 22 H15Z" fill="#2a1f38"/>
+   <path d="M18 56 h28 M18 64 h28" stroke="#6b3a8a" stroke-width="2"/>
+   <circle cx="32" cy="34" r="15" fill="#2e2140"/>
+   <ellipse cx="24" cy="30" rx="4" ry="4.6" fill="#c4ff4f"/><ellipse cx="40" cy="30" rx="4" ry="4.6" fill="#c4ff4f"/>
+   <ellipse cx="27" cy="39" rx="2.4" ry="2.8" fill="#c4ff4f" opacity=".8"/><ellipse cx="37" cy="39" rx="2.4" ry="2.8" fill="#c4ff4f" opacity=".8"/>
+   <circle cx="24" cy="30.6" r="1.4" fill="#12100f"/><circle cx="40" cy="30.6" r="1.4" fill="#12100f"/>
+   <path d="M27 45 q5 4 10 0" stroke="#0e0a14" stroke-width="2" fill="none"/>
+   <path d="M20 22 q12 -8 24 0" stroke="#6b3a8a" stroke-width="2.4" fill="none"/>`}
 ];
+/* who is waiting at home — the reward for carrying one face all the way
+   through the castle. Keyed by avatar id, drawn from the avatar's own art. */
+const FAMILY = {
+  witch:     {them:"her mother and her aunt", pet:"a cat with one white foot", line:"Three broomsticks lean by the door. The soup has been on since moonrise."},
+  vampire:   {them:"his father and his little sister", pet:"a bat called Pip", line:"They set the table for one, because only he still pretends to eat."},
+  ghost:     {them:"her ghost mum and her ghost gran", pet:"a dog that went through the fence", line:"Nobody in this house can hug properly. They do it anyway."},
+  skeleton:  {them:"both her parents", pet:"a rattling little dog", line:"Every one of them counted their ribs at the door. Everyone is all here."},
+  cat:       {them:"her mother and three brothers", pet:"a very small moth", line:"Six green eyes open on the wall, and one tail thumps the step."},
+  astro:     {them:"his mum and his dad", pet:"a robot the size of a kettle", line:"The capsule light is on. They have kept the landing lamp burning all week."},
+  mummy:     {them:"his mother and his uncle", pet:"a beetle in a jar", line:"Four thousand years, and they still wait up."},
+  wolf:      {them:"her mum and her big brother", pet:"a pup who cannot howl yet", line:"They heard him coming a mile off, and started howling early."},
+  reaper:    {them:"her grandmother and her twin", pet:"a raven with a bad leg", line:"They are not frightening at home. At home they are just short."},
+  frank:     {them:"his mother and his maker", pet:"a very old tortoise", line:"The storm is over. The lamps in the window are steady now."},
+  zombie:    {them:"his dad and his gran", pet:"a hen with no feathers left", line:"Everyone is slower than they were. Nobody minds."},
+  scarecrow: {them:"the two old crows who raised him", pet:"a field mouse in his pocket", line:"They came down off the poles to meet him at the gate."},
+  jack:      {them:"his mum and his baby sister", pet:"a candle that follows him", line:"The whole patch lit up when he came over the hill."},
+  banshee:   {them:"her mother and her four sisters", pet:"a wind that never settles", line:"They screamed when they saw her. That is how her family says welcome."},
+  gargoyle:  {them:"his father and his grandfather", pet:"a pigeon with a chipped beak", line:"They climbed down off the roof for the first time in ninety years."},
+  imp:       {them:"his mum and his enormous uncle", pet:"a toad that sulks", line:"Someone has set fire to the cake. Everyone agrees that is correct."},
+  bog:       {them:"her mother and both her cousins", pet:"a frog who sings flat", line:"The water went still, and four green heads came up together."},
+  spiderkid: {them:"her mum and her eight small brothers", pet:"a moth she promised not to eat", line:"They spun a welcome across the whole doorway. She read it twice."}
+};
 const avSVG = (id,size)=>{const a=AVATARS.find(v=>v.id===id)||AVATARS[0];
   return `<svg width="${size}" height="${size}" viewBox="0 0 64 80">${a.svg}</svg>`;};
 
@@ -1812,6 +2104,90 @@ function dressing(){
   return eyes.join("")+web(0,0,1.15,false)+web(800,0,1.15,true)+web(0,460,.8,false)+dust;
 }
 
+/* ---------------------------------------------------------------
+   The fright. Every room gets two of these, three once the lanterns
+   are down — a thing that is there and does not explain itself. No
+   jump scares and no gore: this has to stay playable by a seven year
+   old at bedtime. Add to SCARES, not to the room art.
+   --------------------------------------------------------------- */
+const SCARES = [
+  /* somebody stands at the back of the room and watches */
+  ()=>{const x=R(560,730);
+    return `<g class="creep" style="animation-delay:${R(0,6)}s"><ellipse cx="${x}" cy="318" rx="20" ry="6" fill="#000" opacity=".5"/>
+      <path d="M${x} 214 q-15 0 -15 22 v82 h30 v-82 q0 -22 -15 -22Z" fill="#05040a"/>
+      <ellipse cx="${x}" cy="208" rx="13" ry="15" fill="#05040a"/>
+      <ellipse cx="${x-5}" cy="206" rx="2.2" ry="2.8" fill="#d8c05a"/><ellipse cx="${x+5}" cy="206" rx="2.2" ry="2.8" fill="#d8c05a"/></g>`;},
+  /* hands coming up out of the floor */
+  ()=>{const x=R(240,620);
+    return `<g fill="#1a1620" class="reach" style="animation-delay:${R(0,5)}s">
+      ${[0,1,2].map(k=>`<g transform="translate(${x+k*34},${392+k%2*10})">
+        <path d="M0 24 v-22 M-6 24 v-18 M6 24 v-18 M-11 24 v-13 M11 24 v-14" stroke="#1a1620" stroke-width="4" stroke-linecap="round"/>
+        <path d="M-12 24 h24 v12 h-24Z"/></g>`).join("")}</g>`;},
+  /* something hangs from the ceiling, wrapped */
+  ()=>{const x=R(150,680), l=R(40,90);
+    return `<g class="sway" style="transform-origin:${x}px 0px;animation-delay:${R(0,4)}s">
+      <path d="M${x} 0 v${l}" stroke="#6b6152" stroke-width="2"/>
+      <path d="M${x} ${l} q-17 16 -13 42 q4 24 13 30 q9 -6 13 -30 q4 -26 -13 -42Z" fill="#b9b1a0" opacity=".72"/>
+      <path d="M${x-13} ${l+22} q13 8 26 0 M${x-14} ${l+36} q14 9 28 0 M${x-11} ${l+50} q11 7 22 0"
+        stroke="#7d7566" stroke-width="1.6" fill="none" opacity=".8"/></g>`;},
+  /* a stain that is still spreading */
+  ()=>{const x=R(120,660);
+    return `<g opacity=".72"><path d="M${x} 130 q-7 40 0 74 q7 -34 0 -74Z" fill="#5c0c14"/>
+      <ellipse cx="${x}" cy="208" rx="3" ry="6" fill="#7d0f18" class="drip" style="animation-delay:${R(0,4)}s"/>
+      <ellipse cx="${x}" cy="330" rx="22" ry="6" fill="#3d070d"/></g>`;},
+  /* rats, going the other way */
+  ()=>{const y=R(336,404), s=(Math.random()*0.5+0.7).toFixed(2);
+    return `<g class="scuttle" style="animation-delay:${R(0,7)}s">${[0,1,2].map(k=>
+      `<g transform="translate(${k*46},${y+k*8}) scale(${s})" fill="#17131c">
+        <ellipse cx="0" cy="0" rx="13" ry="6"/><circle cx="-12" cy="-2" r="5"/>
+        <path d="M13 0 q16 -2 22 8" stroke="#17131c" stroke-width="2" fill="none"/>
+        <circle cx="-15" cy="-3" r="1.2" fill="#c4121f"/></g>`).join("")}</g>`;},
+  /* a face pressed against the wall from the inside */
+  ()=>{const x=R(160,640), y=R(120,200);
+    return `<g class="creep" style="animation-delay:${R(0,7)}s" opacity=".5">
+      <ellipse cx="${x}" cy="${y}" rx="26" ry="33" fill="#241d2e"/>
+      <ellipse cx="${x-9}" cy="${y-6}" rx="5" ry="7" fill="#0a0810"/><ellipse cx="${x+9}" cy="${y-6}" rx="5" ry="7" fill="#0a0810"/>
+      <ellipse cx="${x}" cy="${y+16}" rx="7" ry="10" fill="#0a0810"/>
+      <ellipse cx="${x}" cy="${y}" rx="26" ry="33" fill="none" stroke="#3d3350" stroke-width="2"/></g>`;},
+  /* handprints, going up */
+  ()=>{const x=R(120,620);
+    return `<g fill="#4a1018" opacity=".55">${[0,1,2,3].map(k=>`<g transform="translate(${x+k*30},${300-k*44}) scale(.8)">
+      <path d="M0 14 v-16 M-7 14 v-13 M7 14 v-13 M-13 14 v-9 M12 15 v-10" stroke="#4a1018" stroke-width="3.4" stroke-linecap="round"/>
+      <path d="M-14 14 h27 v10 h-27Z"/></g>`).join("")}</g>`;},
+  /* the candle you are not holding */
+  ()=>{const x=R(200,640);
+    return `<g class="creep" style="animation-delay:${R(0,5)}s"><rect x="${x-3}" y="276" width="6" height="30" fill="#e4d8bc"/>
+      <path d="M${x} 262 q-5 8 0 14 q5 -6 0 -14Z" fill="#ffb347" class="flick"/>
+      <circle cx="${x}" cy="270" r="30" fill="url(#halo)"/></g>`;}
+];
+function scares(lanterns){
+  const n = lanterns<=1.5 ? 3 : 2;
+  return SH(SCARES).slice(0,n).map(f=>f()).join("");
+}
+/* said once, under the room name — the room telling on itself */
+const SCARELINES = [
+  "Something in here was moving a second ago.",
+  "The door you came through is not there any more.",
+  "Two of the footprints on the floor are yours.",
+  "Whatever is breathing in here, it is not doing it in time with you.",
+  "The dust has been disturbed, recently, in a circle around you.",
+  "A chair is still warm.",
+  "There is a drawing of this room, on the wall of this room.",
+  "Somebody has counted the walls in here and written the wrong number.",
+  "The cold comes from above.",
+  "Nothing here has a shadow except you.",
+  "It stopped when you stopped.",
+  "The ceiling creaks in the shape of footsteps.",
+  "A light went out behind you and has not come back on.",
+  "Something small ran under the floor, left to right, then right to left.",
+  "There is a smell of matches, and no matches.",
+  "Your name is scratched into the plaster, spelled almost right.",
+  "The walls are closer together than they were in the last room.",
+  "Every clock in this house has stopped at the same minute.",
+  "One of the coats on the hook is filled out.",
+  "A hand-shaped patch of the window has been wiped clean, from outside."
+];
+
 function dressingOutdoor(){
   let d="";
   for(let k=0;k<2;k++){ const x=P([80,180,600,700,740]), y=R(150,250);
@@ -1845,7 +2221,8 @@ function sceneSVG(i, avatarId){
     <radialGradient id="moong2"><stop offset="0" stop-color="#fff7d8" stop-opacity=".45"/>
       <stop offset="1" stop-color="#fff7d8" stop-opacity="0"/></radialGradient>
     <radialGradient id="vig" cx="50%" cy="54%" r="70%">
-      <stop offset="42%" stop-color="#000" stop-opacity="0"/><stop offset="100%" stop-color="#000" stop-opacity=".93"/></radialGradient>
+      <stop offset="${(42-10*(3-Math.min(3,(typeof S!=="undefined"?S.lanterns:3)))).toFixed(0)}%" stop-color="#000" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#000" stop-opacity=".96"/></radialGradient>
     <filter id="dread" x="-30%" y="-30%" width="160%" height="160%">
       <feGaussianBlur stdDeviation="2.2" result="b"/>
       <feColorMatrix in="b" type="matrix" values="1.3 0 0 0 0  0 .5 0 0 0  0 0 .4 0 0  0 0 0 1 0" result="c"/>
@@ -1858,6 +2235,7 @@ function sceneSVG(i, avatarId){
   <rect y="320" width="800" height="140" fill="url(#floorg)"/>
   ${w.props(i)}
   ${w.indoor?dressing():dressingOutdoor()}
+  ${scares(typeof S!=="undefined"?S.lanterns:3)}
   <g id="kingInRoom"><g class="kingglow"><ellipse cx="32" cy="76" rx="26" ry="7" fill="#000" opacity=".55"/>
     ${KING_BODY}</g></g>
   <ellipse cx="150" cy="430" rx="56" ry="13" fill="#000" opacity=".5"/>
@@ -1870,7 +2248,7 @@ function sceneSVG(i, avatarId){
 /* =====================================================================
    AUDIO — effects and a very quiet, very unpleasant score.
    ===================================================================== */
-let AC=null, sfxOn=true, musicOn=true;
+let AC=null, sfxOn=true, musicOn=true, kidMode=false;
 function ac(){ if(AC===null){ try{ AC=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){ AC=false; } }
   if(AC && AC.state==="suspended") AC.resume(); return AC||null; }
 
@@ -1904,6 +2282,42 @@ const SFX={
   lose(){ [294,233,175,117].forEach((f,i)=>tone(f,.6,"sawtooth",.12,i*0.22,f*0.55)); noise(1.3,.055,120); },
   click(){ tone(330,.05,"square",.04,0); }
 };
+
+/* =====================================================================
+   READ-ALOUD MODE — for a player who would rather listen than read.
+   The clock is gone entirely in this mode (see startTimer and
+   speedBonus); nothing about the maths changes.
+   Maths does not survive being handed straight to a speech engine, so
+   every symbol is spelled out in words first.
+   ===================================================================== */
+const SAY = [
+  [/\s*\+\s*/g," plus "], [/\s*[−–—-]\s*/g," minus "], [/\s*[×*]\s*/g," times "],
+  [/\s*[÷]\s*/g," divided by "], [/\s*=\s*/g," equals "], [/\s*≈\s*/g," is about "],
+  [/\s*≤\s*/g," is less than or equal to "], [/\s*≥\s*/g," is greater than or equal to "],
+  [/\s*<\s*/g," is less than "], [/\s*>\s*/g," is greater than "],
+  [/(\d)\s*\/\s*(\d)/g,"$1 over $2"], [/√/g," the square root of "], [/π/g," pi "],
+  [/²/g," squared "], [/³/g," cubed "], [/⁴/g," to the power four "], [/ⁿ/g," to the power n "],
+  [/°/g," degrees "], [/%/g," percent "], [/∞/g," infinity "], [/θ/g," theta "],
+  [/Δ/g," delta "], [/Σ/g," the sum of "], [/∫/g," the integral of "], [/±/g," plus or minus "],
+  [/\?/g," what"], [/\s{2,}/g," "]
+];
+function speakable(s){ let t=String(s); for(const [re,to] of SAY) t=t.replace(re,to); return t.trim(); }
+function stopSpeech(){ try{ if(window.speechSynthesis) speechSynthesis.cancel(); }catch(e){} }
+function say(text,rate){
+  if(!window.speechSynthesis) return;
+  try{
+    const u=new SpeechSynthesisUtterance(speakable(text));
+    u.rate=rate||0.92; u.pitch=1; u.lang=document.documentElement.lang||"en";
+    speechSynthesis.speak(u);
+  }catch(e){}
+}
+/* the question, then every option, numbered the way the buttons are */
+function readAloud(p){
+  if(!kidMode||!p) return;
+  stopSpeech();
+  say(p.question, 0.88);
+  p.choices.forEach((c,i)=>say(`Number ${i+1}. ${c}.`, 0.92));
+}
 
 /* =====================================================================
    THE SCORE — a written piece, not a drone. A slow minor-key waltz in
@@ -2042,12 +2456,13 @@ function musicGain(){ if(MUSIC.master){ const c=ac();
    SAVE
    ===================================================================== */
 const KEY="hauntedhouse.v2";
-const blank=()=>({name:"",avatar:"witch",level:0,world:0,unlock:{},sfx:true,music:true,
+const blank=()=>({name:"",avatar:"witch",level:0,world:0,unlock:{},sfx:true,music:true,kid:false,family:{},
   best:{candy:0,rooms:0},prog:{},totals:{runs:0,rooms:0,correct:0,attempts:0,wins:0,shortcuts:0},topics:{}});
 let save=blank();
 function load(){ try{ const j=JSON.parse(localStorage.getItem(KEY)); if(j&&j.totals) save=Object.assign(blank(),j);}catch(e){}
   /* older saves kept one ladder for every grade — hand it to the grade they were on */
   if(!save.unlock || typeof save.unlock!=="object"){ save.unlock={}; }
+  if(!save.family || typeof save.family!=="object"){ save.family={}; }
   if(typeof save.maxWorld==="number"){ if(save.maxWorld>0) save.unlock[save.level||0]=save.maxWorld; delete save.maxWorld; store(); }
 }
 /* how far this grade has got — every grade opens its own places */
@@ -2058,7 +2473,7 @@ function store(){ try{ localStorage.setItem(KEY,JSON.stringify(save)); }catch(e)
    STATE
    ===================================================================== */
 const S={room:0,lanterns:3,candy:0,level:0,world:0,escapeBonus:0,speedCandy:0,avatar:"witch",name:"",tries:0,
-  qStart:0,roomQStart:0,timerId:null,lastTick:99,
+  qStart:0,roomQStart:0,roomHeld:0,timerId:null,lastTick:99,
   current:null,bonus:null,shortcut:null,chestUsed:false,hatchUsed:false,hatchShown:false,
   plan:[],started:0,log:[],jump:0,tier:0};
 
@@ -2178,24 +2593,52 @@ function buildSetup(){
   $("#startBtn").textContent = (save.world||0)===0 ? "Approach the house" : "Go into the "+wn.toLowerCase();
   $("#sfxBtn").textContent = sfxOn?"Sound: on":"Sound: off";
   $("#musBtn").textContent = musicOn?"Music: on":"Music: off";
+  paintKid();
+  paintFamilies();
+}
+function paintKid(){
+  $("#kidBtn").setAttribute("aria-pressed", kidMode?"true":"false");
+  $("#kidTitle").textContent = kidMode ? "Read-aloud mode: on" : "Read-aloud mode: off";
+}
+/* the families you have brought someone home to */
+function paintFamilies(){
+  const found=AVATARS.filter(a=>save.family&&save.family[a.id]);
+  $("#famline").innerHTML = found.length
+    ? `<b>${found.length} of ${AVATARS.length}</b> have made it out of the castle and got home:
+       ${found.map(a=>esc(a.name)).join(" · ")}`
+    : `Take one face all the way through the castle and you will see who has been waiting up for them.`;
 }
 
 /* =====================================================================
    RUN
    ===================================================================== */
-function buildPlan(level){
+/* Ten rooms, ten genuinely different problem types. The preferred grade is
+   tried first, then its neighbours, and if those are somehow exhausted the
+   whole bank is searched nearest-grade-first rather than allowing a repeat.
+   `used` comes back out so the chest and the hatch can avoid it too. */
+function buildPlan(level, used){
   const tier=tierFor(level), mix=SH(TIERS[tier].mix);
-  const pools={}; const plan=[]; const usedTopics=new Set();
+  const pools={}; const plan=[]; const usedTopics = used || new Set();
   const poolFor=l=>{ if(!pools[l]) pools[l]=SH(BANK[l].gens.map((_,i)=>i)); return pools[l]; };
+  const take=l=>{
+    const pool=poolFor(l), hard=HARD[l]||[];
+    /* rooms take the ordinary types first, which leaves the hard ones for
+       the chest and the hatch — that is where they are supposed to show up */
+    let idx=pool.findIndex(g=>!usedTopics.has(TOPIC[l][g]) && hard.indexOf(g)<0);
+    if(idx<0) idx=pool.findIndex(g=>!usedTopics.has(TOPIC[l][g]));
+    if(idx<0) return null;
+    const g=pool.splice(idx,1)[0]; usedTopics.add(TOPIC[l][g]);
+    return {lvl:l,gen:g};
+  };
+  const byDistance = BANK.map((_,i)=>i).sort((a,b)=>Math.abs(a-level)-Math.abs(b-level));
   for(const up of mix){
     const l=Math.min(BANK.length-1, level+up);
     let chosen=null;
-    for(const order of [l, Math.min(BANK.length-1,l+1), level]){        /* fall back if a pool runs dry */
-      const pool=poolFor(order);
-      const idx=pool.findIndex(g=>!usedTopics.has(TOPIC[order][g]));
-      if(idx>=0){ const g=pool.splice(idx,1)[0]; chosen={lvl:order,gen:g}; usedTopics.add(TOPIC[order][g]); break; }
+    for(const order of [l, Math.min(BANK.length-1,l+1), level, Math.max(0,level-1)]){
+      chosen=take(order); if(chosen) break;
     }
-    if(!chosen){ const pool=poolFor(l); const g=pool.length?pool.pop():R(0,BANK[l].gens.length-1); chosen={lvl:l,gen:g}; }
+    if(!chosen) for(const order of byDistance){ chosen=take(order); if(chosen) break; }
+    if(!chosen){ const g=R(0,BANK[l].gens.length-1); chosen={lvl:l,gen:g}; }   /* cannot happen: 190+ types, 10 rooms */
     plan.push(chosen);
   }
   return plan;
@@ -2203,9 +2646,9 @@ function buildPlan(level){
 
 function startGame(){
   S.level=save.level; S.world=Math.min(save.world||0, unlockFor(save.level)); S.avatar=save.avatar; S.name=(save.name||"").trim()||"the visitor";
-  S.tier=tierFor(S.level); S.plan=buildPlan(S.level);
+  S.tier=tierFor(S.level); S.usedTopics=new Set(); S.plan=buildPlan(S.level,S.usedTopics);
   S.room=0; S.lanterns=3; S.candy=0; S.escapeBonus=0; S.speedCandy=0; S.started=Date.now(); S.log=[]; S.jump=0;
-  S.hatchUsed=false;
+  S.hatchUsed=false; S.sawFamily=false;
   save.totals.runs++; save.prog[S.level]=(save.prog[S.level]||0)+1; store();
   $("#setup").classList.add("hidden"); $("#game").classList.remove("hidden");
   $("#king").innerHTML=KING_SVG(48); $("#hero").innerHTML=avSVG(S.avatar,46);
@@ -2217,12 +2660,13 @@ function startGame(){
 
 function loadRoom(){
   S.tries=0; S.bonus=null; S.shortcut=null; S.chestUsed=false; S.jump=0;
-  S.roomQStart=Date.now();
+  S.roomQStart=Date.now(); S.roomHeld=0;
   const slot=S.plan[Math.min(S.plan.length-1,S.room)];
   S.current=makeProblem(slot.lvl, slot.gen);
   S.current.fromAbove = slot.lvl>S.level ? BANK[slot.lvl].name : null;
   $("#scene").innerHTML=sceneSVG(S.room,S.avatar);
   $("#roomtag").textContent=`${S.room+1}. ${W().rooms[S.room]}`;
+  $("#roomline").textContent=P(SCARELINES);
   $("#roomnum").textContent=`Room ${S.room+1} / 10`;
   renderLanterns(); renderChase(); renderKing();
   $("#candynum").textContent=S.candy;
@@ -2243,7 +2687,7 @@ function loadRoom(){
    --------------------------------------------------------------- */
 const QSECS = 30, SPEED_MAX = 5;
 function remaining(){ return Math.max(0, QSECS - (Date.now()-S.qStart)/1000); }
-function speedBonus(){ return Math.round(remaining()/QSECS*SPEED_MAX); }
+function speedBonus(){ return kidMode ? 0 : Math.round(remaining()/QSECS*SPEED_MAX); }
 function paintTimer(){
   const r=remaining(), w=$("#timerwrap");
   $("#timerfill").style.width=(r/QSECS*100).toFixed(1)+"%";
@@ -2259,13 +2703,29 @@ function paintTimer(){
 function startTimer(from){
   stopTimer();
   S.qStart = from || Date.now(); S.lastTick=99;
+  if(kidMode) return;                    /* read-aloud mode has no clock at all */
   paintTimer();
   S.timerId = setInterval(paintTimer, 60);
 }
 function stopTimer(){ if(S.timerId){ clearInterval(S.timerId); S.timerId=null; } }
 function freezeTimer(){ stopTimer(); }
 
+/* -----------------------------------------------------------------
+   Leaving the room question — for the chest, the hatch, or a dialog —
+   holds the room clock where it stands. Coming back resumes it from
+   exactly that second, so a detour is never paid for in room time.
+   ----------------------------------------------------------------- */
+function holdRoomClock(){
+  stopTimer();
+  S.roomHeld = Math.min(QSECS*1000, Date.now()-S.roomQStart);
+}
+function resumeRoomClock(){
+  S.roomQStart = Date.now() - S.roomHeld;
+  startTimer(S.roomQStart);
+}
+
 function askQuestion(p,mode){
+  S.spoken=p;
   const label = mode==="bonus" ? "Bonus chest · " : mode==="shortcut" ? "The hatch · " : "";
   $("#topic").innerHTML = label + esc(p.topic) +
     (mode==="normal" && p.fromAbove ? ` <i class="above">${esc(p.fromAbove)}</i>` : "") +
@@ -2277,8 +2737,10 @@ function askQuestion(p,mode){
   $("#feedback").className=""; $("#feedback").innerHTML="";
   $("#nextwrap").classList.add("hidden");
   $("#choices").onclick=e=>{const b=e.target.closest(".ch"); if(!b||b.disabled)return; answer(b,mode);};
-  $("#timerwrap").classList.remove("hidden");
-  startTimer(mode==="normal" ? S.roomQStart : 0);
+  $("#timerwrap").classList.toggle("hidden", kidMode);
+  $("#readrow").classList.toggle("hidden", !kidMode);
+  if(mode==="normal") resumeRoomClock(); else startTimer(0);
+  if(kidMode) readAloud(p);
 }
 
 function fbSteps(p){ return `<div class="steps"><b>Why:</b> ${esc(p.steps)}</div>`; }
@@ -2295,7 +2757,8 @@ function answer(btn,mode){
   }
 
   const spd = speedBonus(), secs = (Date.now()-S.qStart)/1000;
-  stopTimer();
+  stopTimer(); stopSpeech();
+  if(kidMode) say(right ? "That is right." : "Not that one. "+p.hint, 0.95);
 
   /* ---------------- correct ---------------- */
   if(right){
@@ -2331,9 +2794,10 @@ function answer(btn,mode){
     S.candy+=gain; S.speedCandy+=spd; $("#candynum").textContent=S.candy;
     S.log.push({topic:p.topic,firstTry:S.tries===0,secs:secs,spd:spd});
     fb.className="ok show";
-    const speedWord = spd>=5?"Before the wick even moved.":spd>=4?"Fast.":spd>=2?"Quick enough.":spd>=1?"Just in time.":"The clock beat you, but the door still opens.";
+    const speedWord = kidMode ? "Take all the time you want — the door opens either way."
+      : spd>=5?"Before the wick even moved.":spd>=4?"Fast.":spd>=2?"Quick enough.":spd>=1?"Just in time.":"The clock beat you, but the door still opens.";
     fb.innerHTML=`<div class="ft">${S.tries===0?"The lock turns first time":"It gives, eventually"} — +${gain} 🍬${
-      spd?` <span style="color:var(--gold)">(${spd} for speed, ${secs.toFixed(1)}s)</span>`:` <span style="color:var(--dim)">(${secs.toFixed(1)}s — no speed bonus)</span>`}</div>
+      kidMode?"":spd?` <span style="color:var(--gold)">(${spd} for speed, ${secs.toFixed(1)}s)</span>`:` <span style="color:var(--dim)">(${secs.toFixed(1)}s — no speed bonus)</span>`}</div>
       <div class="steps" style="color:var(--gold)">${speedWord}</div>${fbSteps(p)}`;
     $("#nextwrap").classList.remove("hidden");
     $("#nextBtn").textContent = S.room===9 ? "Step into the cold air" : "Open the next door";
@@ -2392,7 +2856,7 @@ function answer(btn,mode){
   fb.className="no show";
   fb.innerHTML=`<div class="ft">${P(TAUNTS)(esc(S.name))}</div>
     <div class="steps"><b>Hint:</b> ${esc(p.hint)}</div>
-    <div class="steps again">Half a lantern gone. Try again — the answer is still on the table${remaining()>0?", and the clock is still running":""}.</div>`;
+    <div class="steps again">Half a lantern gone. Try again — the answer is still on the table${!kidMode&&remaining()>0?", and the clock is still running":""}.</div>`;
 }
 
 function advance(n){
@@ -2406,7 +2870,8 @@ function advance(n){
 function wireProps(){
   $("#chest").onclick=()=>{
     if(S.chestUsed) return; S.chestUsed=true; SFX.chest();
-    S.bonus=challengeProblem(S.level,false);
+    holdRoomClock();                       /* the room clock waits for you */
+    S.bonus=challengeProblem(S.level,false,S.usedTopics);
     askQuestion(S.bonus,"bonus");
   };
   $("#hatch").onclick=()=>{
@@ -2422,14 +2887,14 @@ function wireProps(){
       <div class="row" style="margin-top:18px">
         <button class="btn" id="hatchYes">Go down</button>
         <button class="btn ghost" id="hatchNo">Leave it shut</button></div>`;
-    freezeTimer();
+    holdRoomClock();
     $("#overlay").classList.remove("hidden");
     $("#hatchYes").onclick=()=>{
       $("#overlay").classList.add("hidden"); S.hatchUsed=true; SFX.hatch();
-      S.shortcut=challengeProblem(S.level,true);
+      S.shortcut=challengeProblem(S.level,true,S.usedTopics);
       askQuestion(S.shortcut,"shortcut");
     };
-    $("#hatchNo").onclick=()=>{ $("#overlay").classList.add("hidden"); SFX.click(); startTimer(S.roomQStart); };
+    $("#hatchNo").onclick=()=>{ $("#overlay").classList.add("hidden"); SFX.click(); resumeRoomClock(); };
   };
 }
 
@@ -2499,9 +2964,96 @@ function escapeScene(){
       <span style="color:var(--gold)">+${S.escapeBonus} 🍬</span>, for 🍬 ${S.candy} in all.</div>
     <div class="steps">Every lantern you still had is ten more sweets. He is behind you, watching. He is not angry.</div>`;
   $("#nextwrap").classList.remove("hidden");
-  $("#nextBtn").textContent="Count the candy";
-  $("#nextBtn").onclick=()=>endGame(true);
+  const home = S.world===WORLDS.length-1;      /* out of the castle: the last door there is */
+  $("#nextBtn").textContent = home ? "Walk home" : "Count the candy";
+  $("#nextBtn").onclick = home ? familyScene : ()=>endGame(true);
   SFX.win();
+}
+
+/* =====================================================================
+   HOME — only for a face that has been through every place, the castle
+   last. You get to see who has been waiting up.
+   ===================================================================== */
+function familyScene(){
+  const a=AVATARS.find(v=>v.id===S.avatar)||AVATARS[0];
+  const f=FAMILY[a.id]||{them:"the ones who love them",pet:"a small waiting animal",line:"The light was left on."};
+  S.sawFamily=true;
+  if(!save.family) save.family={};
+  const firstTime=!save.family[a.id];
+  save.family[a.id]=true; store();
+
+  const win=(x,y,w,h)=>`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="3" fill="#ffc45c" opacity=".92" class="flick"/>
+    <rect x="${x+w/2-1.5}" y="${y}" width="3" height="${h}" fill="#3a2410"/>
+    <rect x="${x}" y="${y+h/2-1.5}" width="${w}" height="3" fill="#3a2410"/>`;
+  let lanterns="";
+  for(let k=0;k<7;k++){ const x=120+k*84;
+    lanterns+=`<g><path d="M${x} 300 v-26" stroke="#3a2c1c" stroke-width="2"/>
+      <ellipse cx="${x}" cy="268" rx="8" ry="7" fill="#ff9a33" class="flick"/>
+      <circle cx="${x}" cy="268" r="26" fill="url(#halo)"/></g>`; }
+
+  $("#scene").innerHTML=`
+  <defs>
+    <linearGradient id="homesky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1a1436"/><stop offset="62%" stop-color="#2a1a30"/><stop offset="1" stop-color="#120c18"/></linearGradient>
+    <linearGradient id="homeground" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#241a1c"/><stop offset="1" stop-color="#0a0710"/></linearGradient>
+    <radialGradient id="halo"><stop offset="0" stop-color="#ffb347" stop-opacity=".5"/>
+      <stop offset="1" stop-color="#ffb347" stop-opacity="0"/></radialGradient>
+    <radialGradient id="warm" cx="50%" cy="56%" r="62%">
+      <stop offset="0" stop-color="#ffb347" stop-opacity=".22"/><stop offset="1" stop-color="#ffb347" stop-opacity="0"/></radialGradient>
+    <radialGradient id="vig3" cx="50%" cy="58%" r="78%">
+      <stop offset="52%" stop-color="#000" stop-opacity="0"/><stop offset="100%" stop-color="#000" stop-opacity=".78"/></radialGradient>
+  </defs>
+  <rect width="800" height="460" fill="url(#homesky)"/>
+  <g fill="#f4eed2">${Array.from({length:70},()=>`<circle cx="${R(0,800)}" cy="${R(0,220)}" r="${(Math.random()*1.1+0.3).toFixed(1)}" opacity="${(Math.random()*.7+.2).toFixed(2)}"/>`).join("")}</g>
+  ${moon(672,80,38)}
+  <path d="M0 300 q200 -26 400 -10 q200 16 400 -8 V460 H0Z" fill="url(#homeground)"/>
+  <g fill="#120d18"><path d="M470 300 V168 h210 v132Z"/><path d="M452 174 L575 84 L698 174Z"/>
+    <path d="M636 300 v-78 h34 v78Z"/></g>
+  ${win(500,196,44,40)}${win(610,196,44,40)}
+  <rect x="556" y="240" width="44" height="60" rx="4" fill="#ffd27a" opacity=".95"/>
+  <path d="M556 240 h44 v60 h-44Z" fill="none" stroke="#5c3a1c" stroke-width="3"/>
+  <circle cx="575" cy="152" r="9" fill="#ffc45c" class="flick"/><circle cx="575" cy="152" r="34" fill="url(#halo)"/>
+  <path d="M120 460 q120 -80 300 -128 q80 -22 140 -32" stroke="#2b2118" stroke-width="34" fill="none" opacity=".55"/>
+  ${lanterns}
+  <ellipse cx="578" cy="322" rx="180" ry="42" fill="url(#warm)"/>
+  <g transform="translate(300,226) scale(2.5)">${a.svg}</g>
+  <ellipse cx="338" cy="428" rx="58" ry="13" fill="#000" opacity=".45"/>
+  <g transform="translate(436,222) scale(2.6)" opacity=".97">${a.svg}</g>
+  <ellipse cx="500" cy="432" rx="60" ry="13" fill="#000" opacity=".4"/>
+  <g transform="translate(560,258) scale(2.2)" opacity=".95">${a.svg}</g>
+  <ellipse cx="632" cy="424" rx="52" ry="12" fill="#000" opacity=".4"/>
+  <g transform="translate(680,294) scale(1.3)" opacity=".95">${a.svg}</g>
+  <ellipse cx="722" cy="400" rx="30" ry="8" fill="#000" opacity=".4"/>
+  <ellipse cx="214" cy="402" rx="26" ry="7" fill="#000" opacity=".4"/>
+  <g transform="translate(196,372) scale(1.25)"><ellipse cx="14" cy="16" rx="16" ry="11" fill="#3b3040"/>
+    <circle cx="0" cy="9" r="9" fill="#3b3040"/><path d="M-6 2 l-2 -8 7 4Z" fill="#3b3040"/>
+    <circle cx="-3" cy="8" r="2" fill="#ffd66b"/>
+    <path d="M6 24 v4 M18 24 v4" stroke="#3b3040" stroke-width="3" stroke-linecap="round"/>
+    <path d="M28 12 q14 -4 15 8" stroke="#3b3040" stroke-width="3.4" fill="none" stroke-linecap="round"/></g>
+  <g transform="translate(46,268) scale(.62)" opacity=".5">${KING_BODY}</g>
+  <path d="M44 330 h40" stroke="#1a1420" stroke-width="3" opacity=".5"/>
+  <rect width="800" height="460" fill="url(#vig3)"/>`;
+
+  $("#roomtag").textContent="Home";
+  $("#roomline").textContent="";
+  $("#chest").classList.add("hidden"); $("#hatch").classList.add("hidden");
+  document.body.classList.remove("dying");
+  stopTimer(); $("#timerwrap").classList.add("hidden"); $("#readrow").classList.add("hidden");
+  $("#topic").innerHTML='<span style="color:var(--gold)">The door at the end</span> <i class="above">'+esc(a.name)+'</i>';
+  $("#question").textContent=`${S.name} came all the way through the castle, and kept walking until the road was one they knew.`;
+  $("#choices").innerHTML="";
+  const fb=$("#feedback"); fb.className="ok show";
+  fb.innerHTML=`<div class="ft">Waiting up: ${esc(f.them)} — and ${esc(f.pet)}.</div>
+    <div class="steps" style="color:var(--gold)">${esc(f.line)}</div>
+    <div class="steps">The Pumpkin King stops at the gate. He does not come up the path. That was the whole game:
+      seven places, ten rooms each, and someone at the end of it who left the light on.
+      ${firstTime?`<br><b style="color:var(--gold)">${esc(a.name)} has found their family.</b> Every face has one of their own.`:""}</div>`;
+  $("#nextwrap").classList.remove("hidden");
+  $("#nextBtn").textContent="Go inside";
+  $("#nextBtn").onclick=()=>endGame(true);
+  if(kidMode) say(`${f.line} Waiting up: ${f.them}, and ${f.pet}.`, 0.9);
+  SFX.win(); paintFamilies();
 }
 
 /* =====================================================================
@@ -2512,7 +3064,7 @@ const RANKS=[[0,"Doorstep Dawdler"],[1,"Empty-Handed"],[25,"Trick-or-Treater"],[
 function rankFor(c){ let r=RANKS[0][1]; for(const[t,n]of RANKS) if(c>=t) r=n; return r; }
 
 function endGame(won){
-  stopTimer();
+  stopTimer(); stopSpeech();
   save.totals.rooms += S.room; if(won) save.totals.wins++;
   let unlocked=null;
   if(won && S.world===unlockFor(S.level) && S.world<WORLDS.length-1){
@@ -2557,6 +3109,10 @@ function endGame(won){
       <tr><td>Where</td><td>${esc(W().name)}</td></tr>
       <tr><td>Level</td><td>${BANK[S.level].name} · ${TIERS[S.tier].name}</td></tr>
     </table>
+    ${S.sawFamily?`<div class="unlock" style="background:rgba(255,138,31,.16);border-color:#b8722a">
+       🏮 <b>${esc((AVATARS.find(v=>v.id===S.avatar)||AVATARS[0]).name)} got home.</b>
+       <div style="font-size:13.5px;color:var(--dim);margin-top:5px">Every face has a family of its own waiting at the
+       end of the castle — ${Object.keys(save.family||{}).length} of ${AVATARS.length} found so far.</div></div>`:""}
     ${unlocked?`<div class="unlock">${unlocked.icon} <b>${esc(unlocked.name)}</b> is open to you
        <b style="color:var(--gold)">at ${esc(BANK[S.level].name)}</b>.
        <div style="font-size:13.5px;color:var(--dim);margin-top:5px">Other grades still have to open it themselves.</div></div>`:""}
@@ -2582,8 +3138,12 @@ function toggleMusic(){ musicOn=!musicOn; save.music=musicOn; store();
   $("#musBtn2").textContent=musicOn?"♪":"♪̸";
   if(musicOn){ ac(); musicStart(); } musicGain(); }
 
+$("#kidBtn").onclick=()=>{ kidMode=!kidMode; save.kid=kidMode; store(); SFX.click(); paintKid();
+  if(kidMode) say("Read aloud is on. I will read every question to you, and there is no clock.");
+  else stopSpeech(); };
+$("#readBtn").onclick=()=>{ readAloud(S.spoken); };
 $("#startBtn").onclick=()=>{ ac(); musicStart(); startGame(); };
-$("#quitBtn").onclick=()=>{ freezeTimer(); if(confirm("Walk out? The run ends here.")) endGame(false); else startTimer(S.roomQStart); };
+$("#quitBtn").onclick=()=>{ holdRoomClock(); if(confirm("Walk out? The run ends here.")) endGame(false); else resumeRoomClock(); };
 $("#sfxBtn").onclick=toggleSfx;
 $("#musBtn").onclick=toggleMusic;
 $("#musBtn2").onclick=toggleMusic;
@@ -2596,7 +3156,7 @@ document.addEventListener("keydown",e=>{
   if(e.key==="Enter"&&!$("#nextwrap").classList.contains("hidden")) $("#nextBtn").click();
 });
 
-load(); sfxOn=save.sfx!==false; musicOn=save.music!==false;
+load(); sfxOn=save.sfx!==false; musicOn=save.music!==false; kidMode=save.kid===true;
 $("#musBtn2").textContent=musicOn?"♪":"♪̸";
 wireProps(); buildSetup();
 </script>
