@@ -231,6 +231,22 @@ kbd{background:#271a38;border:1px solid var(--line);border-radius:5px;padding:2p
 #overlay{position:fixed;inset:0;background:rgba(3,2,6,.94);display:flex;align-items:center;justify-content:center;
   padding:20px;z-index:60;backdrop-filter:blur(7px)}
 #overlay .card{max-width:660px;width:100%;max-height:92vh;overflow:auto}
+
+/* the welcome card: one side for the player, one for whoever is standing behind them */
+#help{position:fixed;inset:0;background:rgba(3,2,6,.95);display:flex;align-items:center;justify-content:center;
+  padding:20px;z-index:70;backdrop-filter:blur(8px)}
+#help.hidden{display:none !important}
+.helpcard{position:relative;max-width:980px;width:100%;max-height:94vh;overflow:auto}
+#helpX{position:absolute;top:10px;right:12px;width:42px;height:42px;border-radius:12px;cursor:pointer;
+  background:#150e20;border:1px solid var(--line);color:var(--dim);font-size:26px;line-height:1;font-family:inherit;
+  display:flex;align-items:center;justify-content:center;transition:.15s;z-index:2}
+#helpX:hover{color:var(--bad);border-color:var(--bad);transform:rotate(90deg)}
+.helpcols{display:grid;grid-template-columns:1fr 1fr;gap:26px}
+@media(max-width:760px){.helpcols{grid-template-columns:1fr;gap:6px}}
+.helpcol{min-width:0}
+.helplist{margin:0;padding-left:20px;font-size:15.5px;line-height:1.62;color:var(--dim)}
+.helplist li{margin:9px 0}
+.helplist b{color:var(--ink)}
 table.rc{width:100%;border-collapse:collapse;margin:14px 0;font-size:16px}
 table.rc td{padding:9px 4px;border-bottom:1px solid var(--line)}
 table.rc td:last-child{text-align:right;font-weight:800;color:var(--gold)}
@@ -269,6 +285,7 @@ table.rc td:last-child{text-align:right;font-weight:800;color:var(--gold)}
 
     <div class="row" style="margin-top:26px">
       <button class="btn" id="startBtn">Approach the house</button>
+      <button class="btn ghost" id="helpBtn">How this works</button>
       <button class="btn ghost" id="sfxBtn">Sound: on</button>
       <button class="btn ghost" id="musBtn">Music: on</button>
     </div>
@@ -373,6 +390,61 @@ table.rc td:last-child{text-align:right;font-weight:800;color:var(--gold)}
 </section>
 
 <div id="overlay" class="hidden"><div class="card" id="overlayCard"></div></div>
+
+<div id="help" class="hidden">
+  <div class="card helpcard">
+    <button id="helpX" title="Close" aria-label="Close">&times;</button>
+    <h2 class="center" style="color:var(--pumpkin);margin-bottom:2px">How this works</h2>
+    <p class="center" style="color:var(--dim);font-size:14px;margin:0 0 6px">
+      A maths game. Ten rooms, one question each, and something behind you.</p>
+
+    <div class="helpcols">
+      <div class="helpcol">
+        <div class="seclabel" style="margin-top:14px">🎃 If you are playing</div>
+        <ul class="helplist">
+          <li>Type your name, choose where to go, choose your school year, and pick a face.</li>
+          <li>Every room asks you <b>one maths question</b>. Answer ten and you are out of the house.</li>
+          <li>You carry <b style="color:var(--gold)">three lanterns</b>. A wrong answer costs half a one &mdash;
+              you get a <b>hint</b> and another go. You are never told the answer.</li>
+          <li>The <b style="color:var(--pumpkin)">Pumpkin King</b> steps closer every time your light drops.
+              If it all goes out, he has you.</li>
+          <li>Right answers are <b style="color:var(--gold)">sweets</b>. Quick answers are more sweets &mdash;
+              but taking your time never costs you anything.</li>
+          <li>A <b style="color:var(--gold)">glowing chest</b> is free to try: get it right and you win back half a lantern.</li>
+          <li>The <b style="color:var(--blood)">red hatch</b> skips three rooms &mdash; but get it wrong down there
+              and it costs a whole lantern.</li>
+          <li>It is <b>spooky, not scary</b>. Nothing jumps out at you, and nothing in here is real.</li>
+        </ul>
+      </div>
+
+      <div class="helpcol">
+        <div class="seclabel" style="margin-top:14px">🫖 If you are the grown-up</div>
+        <ul class="helplist">
+          <li><b>15 levels</b>, Grade 1 through to a PhD, with 200+ kinds of problem generated fresh every
+              time &mdash; the questions never run out and never repeat within a run.</li>
+          <li><b>The level you pick is the level you get.</b> As a level is replayed it gets harder from the
+              inside: harder types, and wrong answers that sit close to the right one.</li>
+          <li><b>A wrong answer gives a hint, never the answer.</b> The working is shown once they have it
+              right, or when the last lantern goes.</li>
+          <li><b>The clock never punishes.</b> Running it down only forfeits the speed bonus &mdash; a slow
+              thinker loses nothing.</li>
+          <li><b>Read-aloud mode</b> (step 5 on the front page) reads each question out loud &mdash; not the
+              four answers &mdash; and removes the clock entirely.</li>
+          <li><b>A bonus round</b> at the end offers fresh problems of exactly the kinds they got wrong first
+              time, for extra sweets, with nothing at stake. Offered after a loss too.</li>
+          <li>The report card gives first-try accuracy and names the topics worth practising.</li>
+          <li><b>Nothing leaves this device.</b> No account, no network, no adverts, no tracking. Progress is
+              saved in this browser alone, and the whole game is one file that works offline.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="center" style="margin-top:8px;color:var(--dim);font-size:14px">
+      Keys <kbd>1</kbd>&ndash;<kbd>4</kbd> answer, <kbd>Enter</kbd> continues.
+      You can open this again with <b>How this works</b> on the front page.</div>
+    <div class="row" style="margin-top:18px"><button class="btn" id="helpGo">Got it</button></div>
+  </div>
+</div>
 </div>
 
 <script>
@@ -2491,14 +2563,14 @@ function musicGain(){ if(MUSIC.master){ const c=ac();
    moment it goes out. Shown on the setup screen and at the foot of the
    report card, so a player can say which build they are playing.
    ===================================================================== */
-const BUILD = 3, RELEASED = "26 Sep 2026, 18:38";
+const BUILD = 4, RELEASED = "26 Sep 2026, 19:08";
 const VERSION_LINE = `v${BUILD} · released ${RELEASED}`;
 
 /* =====================================================================
    SAVE
    ===================================================================== */
 const KEY="hauntedhouse.v2";
-const blank=()=>({name:"",avatar:"witch",level:0,world:0,unlock:{},sfx:true,music:true,kid:false,family:{},
+const blank=()=>({name:"",avatar:"witch",level:0,world:0,unlock:{},sfx:true,music:true,kid:false,family:{},help:0,
   best:{candy:0,rooms:0},prog:{},totals:{runs:0,rooms:0,correct:0,attempts:0,wins:0,shortcuts:0},topics:{}});
 let save=blank();
 function load(){ try{ const j=JSON.parse(localStorage.getItem(KEY)); if(j&&j.totals) save=Object.assign(blank(),j);}catch(e){}
@@ -3368,6 +3440,17 @@ function toggleMusic(){ musicOn=!musicOn; save.music=musicOn; store();
   $("#musBtn2").textContent=musicOn?"♪":"♪̸";
   if(musicOn){ ac(); musicStart(); } musicGain(); }
 
+/* shown unasked on a first visit, and from the front page after that */
+function openHelp(){ $("#help").classList.remove("hidden"); }
+function closeHelp(){
+  $("#help").classList.add("hidden");
+  if(!save.help){ save.help=BUILD; store(); }
+}
+$("#helpBtn").onclick=()=>{ SFX.click(); openHelp(); };
+$("#helpX").onclick=closeHelp;
+$("#helpGo").onclick=closeHelp;
+$("#help").onclick=e=>{ if(e.target===$("#help")) closeHelp(); };
+
 $("#kidBtn").onclick=()=>{ kidMode=!kidMode; save.kid=kidMode; store(); SFX.click(); paintKid();
   if(kidMode) say("Read aloud is on. I will read each question to you, and there is no clock.");
   else stopSpeech(); };
@@ -3386,6 +3469,7 @@ $("#sfxBtn2").onclick=toggleSfx;
 $("#nameInput").addEventListener("keydown",e=>{ if(e.key==="Enter") $("#startBtn").click(); });
 window.addEventListener("resize",()=>{ if(!$("#game").classList.contains("hidden")) renderChase(); });
 document.addEventListener("keydown",e=>{
+  if(!$("#help").classList.contains("hidden")){ if(e.key==="Escape") closeHelp(); return; }
   if($("#game").classList.contains("hidden")||!$("#overlay").classList.contains("hidden")) return;
   if(e.key>="1"&&e.key<="4"){ const b=$("#choices").children[+e.key-1]; if(b&&!b.disabled) b.click(); }
   if(e.key==="Enter"&&!$("#nextwrap").classList.contains("hidden")) $("#nextBtn").click();
@@ -3394,6 +3478,7 @@ document.addEventListener("keydown",e=>{
 load(); sfxOn=save.sfx!==false; musicOn=save.music!==false; kidMode=save.kid===true;
 $("#musBtn2").textContent=musicOn?"♪":"♪̸";
 wireProps(); buildSetup();
+if(!save.help) openHelp();          /* first visit: say what this is before anything else */
 </script>
 </body>
 </html>
