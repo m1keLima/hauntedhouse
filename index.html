@@ -100,6 +100,14 @@ input[type=text]::placeholder{color:#5c5070}
 .kidrow[aria-pressed="true"]{border-color:#7fd7ff;background:#10202c;box-shadow:0 0 0 2px rgba(127,215,255,.22)}
 .kidrow[aria-pressed="true"] .kidicon{filter:none;opacity:1}
 .kidrow[aria-pressed="true"] b{color:#7fd7ff}
+#version{text-align:center;margin:18px 0 0;font-size:12px;letter-spacing:2.5px;text-transform:uppercase;color:#5c5070}
+.rcfoot{text-align:center;margin-top:16px;font-size:11.5px;letter-spacing:2px;text-transform:uppercase;color:#5c5070}
+.misslist{margin:14px 0 0;padding:14px 16px;border-radius:12px;background:rgba(196,18,31,.09);
+  border:1px solid rgba(196,18,31,.34);font-size:16px;line-height:1.7}
+.misslist b{color:var(--gold)}
+.misslist ul{margin:8px 0 0;padding-left:20px;color:var(--ink)}
+.misslist li{margin:3px 0}
+.misslist li span{color:var(--dim);font-size:14px}
 #famline{font-size:14px;color:var(--dim);text-align:center;margin-top:16px;line-height:1.8}
 #famline b{color:var(--gold)}
 #tierNote{font-size:14px;color:var(--dim);margin-top:10px;line-height:1.6}
@@ -294,9 +302,13 @@ table.rc td:last-child{text-align:right;font-weight:800;color:var(--gold)}
       to whoever has been waiting up. Every face has a different family.<br>
       Rather listen than read? Turn on <b style="color:#7fd7ff">read-aloud mode</b> above: every question is read out
       &mdash; not the answers &mdash; and the clock is put away.
+      Get a question wrong first time and it is remembered: at the end you are offered a
+      <b style="color:var(--gold)">bonus round</b> of the same kinds of problem, worth more candy, with nothing to lose.<br>
       <span style="color:var(--ink)">Keys <kbd>1</kbd>&ndash;<kbd>4</kbd> answer, <kbd>Enter</kbd> continues.</span>
     </div>
   </div>
+
+  <div id="version"></div>
 </section>
 
 <section id="game" class="hidden">
@@ -2475,6 +2487,14 @@ function musicGain(){ if(MUSIC.master){ const c=ac();
   MUSIC.master.gain.setTargetAtTime(musicOn?0.075:0.0001, c?c.currentTime:0, 0.4); } }
 
 /* =====================================================================
+   VERSION — bump BUILD by one on every release and set RELEASED to the
+   moment it goes out. Shown on the setup screen and at the foot of the
+   report card, so a player can say which build they are playing.
+   ===================================================================== */
+const BUILD = 3, RELEASED = "26 Sep 2026, 18:38";
+const VERSION_LINE = `v${BUILD} · released ${RELEASED}`;
+
+/* =====================================================================
    SAVE
    ===================================================================== */
 const KEY="hauntedhouse.v2";
@@ -2497,7 +2517,10 @@ function store(){ try{ localStorage.setItem(KEY,JSON.stringify(save)); }catch(e)
 const S={room:0,lanterns:3,candy:0,level:0,world:0,escapeBonus:0,speedCandy:0,avatar:"witch",name:"",tries:0,
   qStart:0,roomQStart:0,roomHeld:0,timerId:null,lastTick:99,
   current:null,bonus:null,shortcut:null,chestUsed:false,hatchUsed:false,hatchShown:false,
-  plan:[],started:0,log:[],jump:0,tier:0};
+  plan:[],slot:null,started:0,log:[],jump:0,tier:0,
+  /* every room type answered wrong first time, kept so the bonus round can
+     hand the same kinds of problem back at the end */
+  missed:{},practice:null,br:null,brCandy:0,brDone:false,reported:false,won:false,unlocked:null};
 
 const TAUNTS=[
   n=>`“${n}.” The walls say it back.`,
@@ -2617,6 +2640,7 @@ function buildSetup(){
   $("#musBtn").textContent = musicOn?"Music: on":"Music: off";
   paintKid();
   paintFamilies();
+  $("#version").textContent = VERSION_LINE;
 }
 function paintKid(){
   $("#kidBtn").setAttribute("aria-pressed", kidMode?"true":"false");
@@ -2678,6 +2702,8 @@ function startGame(){
   S.tier=tierFor(S.level); S.usedTopics=new Set(); S.plan=buildPlan(S.level,S.usedTopics);
   S.room=0; S.lanterns=3; S.candy=0; S.escapeBonus=0; S.speedCandy=0; S.started=Date.now(); S.log=[]; S.jump=0;
   S.hatchUsed=false; S.sawFamily=false;
+  S.missed={}; S.br=null; S.brCandy=0; S.brDone=false; S.reported=false; S.won=false; S.unlocked=null;
+  $("#chase").classList.remove("hidden"); $("#lanterns").parentNode.classList.remove("hidden");
   save.totals.runs++; save.prog[S.level]=(save.prog[S.level]||0)+1; store();
   $("#setup").classList.add("hidden"); $("#game").classList.remove("hidden");
   $("#king").innerHTML=KING_SVG(48); $("#hero").innerHTML=avSVG(S.avatar,46);
@@ -2691,6 +2717,7 @@ function loadRoom(){
   S.tries=0; S.bonus=null; S.shortcut=null; S.chestUsed=false; S.jump=0;
   S.roomQStart=Date.now(); S.roomHeld=0;
   const slot=S.plan[Math.min(S.plan.length-1,S.room)];
+  S.slot=slot;
   S.current=makeProblem(slot.lvl, slot.gen);
   S.current.hardType = slot.hard;
   if(slot.tight) tighten(S.current);
@@ -2756,12 +2783,14 @@ function resumeRoomClock(){
 
 function askQuestion(p,mode){
   S.spoken=p;
-  const label = mode==="bonus" ? "Bonus chest · " : mode==="shortcut" ? "The hatch · " : "";
+  const label = mode==="bonus" ? "Bonus chest · " : mode==="shortcut" ? "The hatch · "
+              : mode==="practice" ? "Bonus round · " : "";
   $("#topic").innerHTML = label + esc(p.topic) +
     (mode==="normal" ? ` <i class="above">${esc(BANK[S.level].name)}</i>` : "") +
     (mode==="normal" && p.hardType ? ` <i class="above hard">a hard one</i>`
       : mode==="normal" && p.tightened ? ` <i class="above hard">close answers</i>` : "") +
     (mode==="bonus" ? ` <i class="above hard">hard · ${esc(BANK[S.level].name)}</i>` : "") +
+    (mode==="practice" ? ` <i class="above">${esc(BANK[S.level].name)}</i> <i class="above hard">you missed this one</i>` : "") +
     (mode==="shortcut" ? ` <i class="above hard">very hard · exact answer · ${esc(BANK[S.level].name)}</i>` : "");
   $("#question").textContent = p.question;
   $("#choices").innerHTML = p.choices.map((c,i)=>
@@ -2778,11 +2807,12 @@ function askQuestion(p,mode){
 function fbSteps(p){ return `<div class="steps"><b>Why:</b> ${esc(p.steps)}</div>`; }
 
 function answer(btn,mode){
-  const p = mode==="bonus" ? S.bonus : mode==="shortcut" ? S.shortcut : S.current;
+  const p = mode==="bonus" ? S.bonus : mode==="shortcut" ? S.shortcut
+          : mode==="practice" ? S.practice : S.current;
   const right = btn.dataset.v === p.answer;
   const fb = $("#feedback");
 
-  if(mode==="normal"){
+  if(mode==="normal"||mode==="practice"){
     save.totals.attempts++; if(right) save.totals.correct++;
     const tt = save.topics[p.topic] || (save.topics[p.topic]={c:0,a:0});
     tt.a++; if(right) tt.c++;
@@ -2807,6 +2837,19 @@ function answer(btn,mode){
       $("#nextwrap").classList.remove("hidden");
       $("#nextBtn").textContent="Back to the room";
       $("#nextBtn").onclick=()=>askQuestion(S.current,"normal");
+      store(); return;
+    }
+
+    if(mode==="practice"){
+      const gain=(S.tries===0?4:2)+spd;
+      S.br.candy+=gain; S.brCandy+=gain; S.br.right++; if(S.tries===0) S.br.first++;
+      $("#candynum").textContent=S.brCandy;
+      fb.className="ok show";
+      fb.innerHTML=`<div class="ft">${S.tries===0?"Got it — and this is the one that caught you earlier":"Got it, second time"}.
+        +${gain} 🍬${spd?` <span style="color:var(--gold)">(${spd} for speed)</span>`:""}</div>${fbSteps(p)}`;
+      $("#nextwrap").classList.remove("hidden");
+      $("#nextBtn").textContent = S.br.i>=S.br.q.length-1 ? "Count it up" : "Next one";
+      $("#nextBtn").onclick=()=>{ S.br.i++; nextBonus(); };
       store(); return;
     }
 
@@ -2841,6 +2884,25 @@ function answer(btn,mode){
   btn.classList.add("wrong"); btn.disabled=true;
   SFX.wrong();
 
+  /* the bonus round costs nothing — one hint, one more try, then the working */
+  if(mode==="practice"){
+    S.tries++;
+    if(S.tries>=2){
+      [...$("#choices").children].forEach(c=>c.disabled=true);
+      fb.className="no show";
+      fb.innerHTML=`<div class="ft">Not this time. Here is how it goes.</div>${fbSteps(p)}`;
+      $("#nextwrap").classList.remove("hidden");
+      $("#nextBtn").textContent = S.br.i>=S.br.q.length-1 ? "Count it up" : "Next one";
+      $("#nextBtn").onclick=()=>{ S.br.i++; nextBonus(); };
+      return;
+    }
+    fb.className="no show";
+    fb.innerHTML=`<div class="ft">Not that one — and nothing is lost. Try again.</div>
+      <div class="steps"><b>Hint:</b> ${esc(p.hint)}</div>`;
+    startTimer(S.qStart);
+    return;
+  }
+
   if(mode==="bonus"){
     [...$("#choices").children].forEach(c=>c.disabled=true);
     $("#chest").classList.add("hidden");
@@ -2871,6 +2933,11 @@ function answer(btn,mode){
     $("#nextBtn").onclick=()=>askQuestion(S.current,"normal");
     return;
   }
+
+  /* remember the type, not the question — the bonus round hands back the same
+     kind of problem, freshly generated */
+  const miss = S.missed[p.topic] || (S.missed[p.topic]={topic:p.topic,lvl:S.slot.lvl,gen:S.slot.gen,n:0});
+  miss.n++;
 
   S.tries++;
   S.lanterns=Math.max(0,S.lanterns-0.5);
@@ -3089,37 +3156,165 @@ function familyScene(){
 }
 
 /* =====================================================================
+   THE BONUS ROUND — the types you got wrong first time, handed back at
+   the end for more candy. Nothing can be lost in here: no lanterns, no
+   King, no ending the run. It is offered from the report card and
+   returns to it.
+   ===================================================================== */
+const BONUS_MAX = 6;
+const missedList = () => Object.keys(S.missed).map(k=>S.missed[k]).sort((a,b)=>b.n-a.n);
+
+/* a warm room, for once */
+function bonusScene(){
+  const av=(AVATARS.find(a=>a.id===S.avatar)||AVATARS[0]).svg;
+  let candles="";
+  for(let k=0;k<6;k++){ const x=150+k*100, h=R(26,44);
+    candles+=`<g><rect x="${x-4}" y="${300-h}" width="8" height="${h}" fill="#e4d8bc"/>
+      <path d="M${x} ${292-h} q-5 7 0 13 q5 -6 0 -13Z" fill="#ffb347" class="flick"/>
+      <circle cx="${x}" cy="${298-h}" r="34" fill="url(#halo)"/></g>`; }
+  let sweets="";
+  const cols=["#ff8a1f","#ff4d8a","#4fbf7a","#5f96e0","#ffcf5c","#c47aff"];
+  for(let k=0;k<18;k++){
+    sweets+=`<g transform="translate(${470+((k*17)%200)},${330-Math.floor(k/7)*13}) rotate(${R(-30,30)})">
+      <rect x="0" y="0" width="13" height="8" rx="3" fill="${cols[k%6]}"/>
+      <path d="M0 4 l-5 -4 v8Z" fill="${cols[k%6]}"/><path d="M13 4 l5 -4 v8Z" fill="${cols[k%6]}"/></g>`;
+  }
+  /* bunting, because this is the one room in the house that is pleased to see you */
+  const sag = k => 40 + Math.sin(k/15*Math.PI)*44;
+  let bunting=`<path d="M10 40 Q400 106 790 40" stroke="#6b5433" stroke-width="2.5" fill="none"/>`;
+  for(let k=1;k<15;k++){ const x=10+k*52;
+    bunting+=`<path d="M${x-11} ${sag(k)} h22 l-11 26Z" fill="${cols[k%6]}" opacity=".85"/>`; }
+  return `
+  <defs>
+    <linearGradient id="wallg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3a2418"/><stop offset="1" stop-color="#160d10"/></linearGradient>
+    <linearGradient id="floorg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3d2a1c"/><stop offset="1" stop-color="#0a0608"/></linearGradient>
+    <radialGradient id="halo"><stop offset="0" stop-color="#ffb347" stop-opacity=".45"/>
+      <stop offset="1" stop-color="#ffb347" stop-opacity="0"/></radialGradient>
+    <radialGradient id="vig4" cx="50%" cy="56%" r="76%">
+      <stop offset="54%" stop-color="#000" stop-opacity="0"/><stop offset="100%" stop-color="#000" stop-opacity=".72"/></radialGradient>
+  </defs>
+  <rect width="800" height="460" fill="url(#wallg)"/>
+  <rect y="300" width="800" height="160" fill="url(#floorg)"/>
+  ${bunting}
+  <rect x="440" y="336" width="300" height="18" rx="5" fill="#4a3320"/>
+  <rect x="462" y="354" width="18" height="70" fill="#33220f"/><rect x="700" y="354" width="18" height="70" fill="#33220f"/>
+  ${sweets}
+  ${candles}
+  <ellipse cx="200" cy="428" rx="58" ry="13" fill="#000" opacity=".45"/>
+  <g transform="translate(140,296) scale(1.9)">${av}</g>
+  <rect width="800" height="460" fill="url(#vig4)"/>`;
+}
+
+function startBonus(){
+  S.br={q:missedList().slice(0,BONUS_MAX), i:0, candy:0, right:0, first:0};
+  $("#overlay").classList.add("hidden");
+  $("#setup").classList.add("hidden"); $("#game").classList.remove("hidden");
+  $("#chase").classList.add("hidden");
+  $("#lanterns").parentNode.classList.add("hidden");   /* nothing to lose in here */
+  $("#chest").classList.add("hidden"); $("#hatch").classList.add("hidden");
+  document.body.classList.remove("dying");
+  $("#scene").innerHTML=bonusScene();
+  $("#roomtag").textContent="Bonus round";
+  $("#roomline").textContent="Nothing in here can hurt you. These are the ones that caught you.";
+  $("#candynum").textContent=0;
+  $("#tierBadge").textContent="Bonus";
+  SFX.chest();
+  nextBonus();
+}
+
+function nextBonus(){
+  const br=S.br;
+  if(br.i>=br.q.length) return finishBonus();
+  const slot=br.q[br.i];
+  S.tries=0;
+  S.practice=makeProblem(slot.lvl, slot.gen);
+  $("#roomnum").textContent=`Bonus ${br.i+1} / ${br.q.length}`;
+  askQuestion(S.practice,"practice");
+}
+
+function finishBonus(){
+  const br=S.br;
+  stopTimer(); $("#timerwrap").classList.add("hidden"); $("#readrow").classList.add("hidden");
+  S.brDone=true;
+  if(br.candy>0) SFX.win();
+  $("#roomnum").textContent=`Bonus ${br.q.length} / ${br.q.length}`;
+  $("#topic").innerHTML='<span style="color:var(--gold)">Bonus round over</span>';
+  $("#question").textContent = br.right===br.q.length
+    ? `Every one of them, ${S.name}. The ones that caught you do not catch you twice.`
+    : br.right ? `${br.right} of ${br.q.length} put right, ${S.name}.`
+               : `None of them this time. They are still worth knowing.`;
+  $("#choices").innerHTML="";
+  const fb=$("#feedback"); fb.className="ok show";
+  fb.innerHTML=`<div class="ft">+${br.candy} 🍬 from the bonus round${
+      br.first?` <span style="color:var(--gold)">(${br.first} first time)</span>`:""}</div>
+    <div class="steps">${br.right===br.q.length
+      ? "Nothing on your missed list survived."
+      : "What is left on the list is what to look at next."}</div>`;
+  $("#nextwrap").classList.remove("hidden");
+  $("#nextBtn").textContent="Back to the count";
+  $("#nextBtn").onclick=()=>{
+    $("#chase").classList.remove("hidden"); $("#lanterns").parentNode.classList.remove("hidden");
+    endGame(S.won); };
+  if(kidMode) say(`Bonus round over. ${br.candy} extra sweets.`, 0.95);
+}
+
+/* =====================================================================
    END
    ===================================================================== */
 const RANKS=[[0,"Doorstep Dawdler"],[1,"Empty-Handed"],[25,"Trick-or-Treater"],[42,"Candle Bearer"],
   [58,"Room Runner"],[72,"Lantern Keeper"],[84,"Master of the Dark"]];
 function rankFor(c){ let r=RANKS[0][1]; for(const[t,n]of RANKS) if(c>=t) r=n; return r; }
 
+/* Counted once per run. The report card itself can be shown again — the
+   bonus round goes back to it — so the run's bookkeeping lives here and
+   the drawing lives in showReport(). */
 function endGame(won){
   stopTimer(); stopSpeech();
-  save.totals.rooms += S.room; if(won) save.totals.wins++;
-  let unlocked=null;
-  if(won && S.world===unlockFor(S.level) && S.world<WORLDS.length-1){
-    save.unlock[S.level]=S.world+1; save.world=S.world+1; unlocked=WORLDS[S.world+1];
+  if(!S.reported){
+    S.reported=true; S.won=won;
+    save.totals.rooms += S.room; if(won) save.totals.wins++;
+    if(won && S.world===unlockFor(S.level) && S.world<WORLDS.length-1){
+      save.unlock[S.level]=S.world+1; save.world=S.world+1; S.unlocked=WORLDS[S.world+1];
+    }
+    if(S.room>save.best.rooms) save.best.rooms=S.room;
+    if(!won) SFX.lose();
   }
-  if(S.candy>save.best.candy) save.best.candy=S.candy;
-  if(S.room>save.best.rooms) save.best.rooms=S.room;
+  const carried=(won?S.candy:0)+S.brCandy;
+  if(carried>save.best.candy) save.best.candy=carried;
   store();
+  showReport(won);
+}
+
+function showReport(won){
+  const unlocked=S.unlocked;
   const secs=Math.round((Date.now()-S.started)/1000), mins=Math.floor(secs/60), rem=secs%60;
   const first=S.log.filter(l=>l.firstTry).length, cleared=S.log.length;
-  const miss={}; S.log.forEach(l=>{ if(!l.firstTry) miss[l.topic]=(miss[l.topic]||0)+1; });
-  const missList=Object.keys(miss).sort((a,b)=>miss[b]-miss[a]);
   const acc = cleared? Math.round(first/cleared*100) : 0;
   const timed = S.log.filter(l=>typeof l.secs==="number");
   const avgSecs = timed.length ? (timed.reduce((a,l)=>a+l.secs,0)/timed.length).toFixed(1)+"s" : "—";
-  const advice = missList.length
-    ? `Worth practising: <b style="color:var(--gold)">${missList.slice(0,3).map(esc).join(", ")}</b>.`
-    : (cleared ? `Nothing caught you out. Try a grade higher.` : `You never got started.`);
+
+  /* what you got wrong first time, and the offer to have another go at it */
+  const missed = missedList();
+  const missBlock = missed.length ? `
+    <div class="misslist">
+      <b>Wrong first time — ${missed.length} kind${missed.length===1?"":"s"} of problem:</b>
+      <ul>${missed.map(m=>`<li>${esc(m.topic)} <span>— ${m.n===1?"once":m.n+" times"}</span></li>`).join("")}</ul>
+      ${S.brDone
+        ? `<div style="margin-top:10px;color:var(--gold)">Bonus round done: ${S.br.right} of ${S.br.q.length} put right,
+             +${S.br.candy} 🍬.</div>`
+        : `<div style="margin-top:10px">Have another go at ${missed.length>BONUS_MAX?"the worst "+BONUS_MAX+" of them":"them"} —
+             fresh problems of the same kinds, <b>4 🍬 each</b> plus the clock, and nothing to lose.</div>
+           <div class="row" style="margin-top:12px;justify-content:flex-start">
+             <button class="btn" id="bonusBtn">Bonus round · ${Math.min(missed.length,BONUS_MAX)} problem${Math.min(missed.length,BONUS_MAX)===1?"":"s"}</button>
+           </div>`}
+    </div>` : `<div class="missed" style="margin-top:14px">${
+      cleared ? "Nothing caught you out first time. Try a grade higher." : "You never got started."}</div>`;
   const nextTier = tierFor(S.level)<3
     ? `<div class="missed" style="margin-top:8px">Next time at ${BANK[S.level].name} the house will be
        <b style="color:var(--blood)">${TIERS[Math.min(3,tierFor(S.level))].name}</b>.</div>` : "";
 
-  if(!won) SFX.lose();
   $("#overlayCard").innerHTML = `
     <div class="center" style="font-size:66px;line-height:1">${won?"🌕":"🎃"}</div>
     <h2 class="center" style="color:${won?"var(--good)":"var(--pumpkin)"}">
@@ -3127,7 +3322,7 @@ function endGame(won){
     <p class="center" style="color:var(--dim);margin-top:-4px;font-size:16px">
       ${won?`Ten rooms of ${W().name} behind you, at ${BANK[S.level].name}, ${TIERS[S.tier].name}.`
            :`You got as far as ${W().rooms[Math.min(9,S.room)]}.`}</p>
-    <div class="rank">${rankFor(won?S.candy:0)}</div>
+    <div class="rank">${rankFor((won?S.candy:0)+S.brCandy)}</div>
     <table class="rc">
       <tr><td>Rooms cleared</td><td>${cleared} / 10</td></tr>
       <tr><td>First-try accuracy</td><td>${acc}%</td></tr>
@@ -3136,7 +3331,8 @@ function endGame(won){
       <tr><td>Average time a room</td><td>${avgSecs}</td></tr>
       <tr><td>Lanterns left</td><td>${S.lanterns} of 3</td></tr>
       <tr><td>Escape bonus (10 a lantern)</td><td>${won?"🍬 "+(S.escapeBonus||0):"— none, you never got out"}</td></tr>
-      <tr><td>Candy in the bucket</td><td>🍬 ${won?S.candy:0}</td></tr>
+      ${S.brDone?`<tr><td>Bonus round</td><td>🍬 ${S.br.candy}</td></tr>`:""}
+      <tr><td>Candy in the bucket</td><td>🍬 ${(won?S.candy:0)+S.brCandy}</td></tr>
       <tr><td>Time</td><td>${mins}m ${rem}s</td></tr>
       <tr><td>Where</td><td>${esc(W().name)}</td></tr>
       <tr><td>Level</td><td>${BANK[S.level].name} · ${TIERS[S.tier].name}</td></tr>
@@ -3148,11 +3344,13 @@ function endGame(won){
     ${unlocked?`<div class="unlock">${unlocked.icon} <b>${esc(unlocked.name)}</b> is open to you
        <b style="color:var(--gold)">at ${esc(BANK[S.level].name)}</b>.
        <div style="font-size:13.5px;color:var(--dim);margin-top:5px">Other grades still have to open it themselves.</div></div>`:""}
-    <div class="missed">${advice}</div>${nextTier}
+    ${missBlock}${nextTier}
     <div class="row" style="margin-top:20px">
       <button class="btn" id="againBtn">Go back in</button>
-      <button class="btn ghost" id="menuBtn">Change level or face</button></div>`;
+      <button class="btn ghost" id="menuBtn">Change level or face</button></div>
+    <div class="rcfoot">${VERSION_LINE}</div>`;
   $("#overlay").classList.remove("hidden");
+  const bb=$("#bonusBtn"); if(bb) bb.onclick=()=>{ SFX.click(); startBonus(); };
   $("#againBtn").onclick=()=>{ $("#overlay").classList.add("hidden"); startGame(); };
   $("#menuBtn").onclick=()=>{ $("#overlay").classList.add("hidden");
     $("#game").classList.add("hidden"); $("#setup").classList.remove("hidden");
@@ -3175,7 +3373,12 @@ $("#kidBtn").onclick=()=>{ kidMode=!kidMode; save.kid=kidMode; store(); SFX.clic
   else stopSpeech(); };
 $("#readBtn").onclick=()=>{ readAloud(S.spoken); };
 $("#startBtn").onclick=()=>{ ac(); musicStart(); startGame(); };
-$("#quitBtn").onclick=()=>{ holdRoomClock(); if(confirm("Walk out? The run ends here.")) endGame(false); else resumeRoomClock(); };
+$("#quitBtn").onclick=()=>{
+  /* walking out of the bonus round only ends the bonus round — the run is already over */
+  if(S.br && !S.brDone){ stopTimer(); S.br.i=S.br.q.length; finishBonus(); return; }
+  holdRoomClock();
+  if(confirm("Walk out? The run ends here.")) endGame(false); else resumeRoomClock();
+};
 $("#sfxBtn").onclick=toggleSfx;
 $("#musBtn").onclick=toggleMusic;
 $("#musBtn2").onclick=toggleMusic;
