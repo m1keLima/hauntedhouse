@@ -272,7 +272,7 @@ table.rc td:last-child{text-align:right;font-weight:800;color:var(--gold)}
     <div class="grid-levels" id="levelGrid"></div>
     <div id="tierNote"></div>
 
-    <div class="seclabel">4 &mdash; Choose your face</div>
+    <div class="seclabel">4 &mdash; Choose your character</div>
     <div class="grid-av" id="avGrid"></div>
 
     <div class="seclabel">5 &mdash; Do you want it read to you?</div>
@@ -315,8 +315,8 @@ table.rc td:last-child{text-align:right;font-weight:800;color:var(--gold)}
       The more you play a grade, the harder that grade gets &mdash; the hard types come out and the wrong answers
       start sitting right next to the right one. It <b style="color:var(--gold)">never leaves the grade you picked</b>:
       choose Grade 4 and all ten rooms are Grade 4.<br>
-      Get all the way out of the <b style="color:var(--gold)">castle</b> &mdash; the last of the seven &mdash; and your face goes home,
-      to whoever has been waiting up. Every face has a different family.<br>
+      Get all the way out of the <b style="color:var(--gold)">castle</b> &mdash; the last of the seven &mdash; and your character goes home,
+      to whoever has been waiting up. Every character has a different family.<br>
       Rather listen than read? Turn on <b style="color:#7fd7ff">read-aloud mode</b> above: every question is read out
       &mdash; not the answers &mdash; and the clock is put away.
       Get a question wrong first time and it is remembered: at the end you are offered a
@@ -362,8 +362,8 @@ table.rc td:last-child{text-align:right;font-weight:800;color:var(--gold)}
         <ellipse class="hatchring" cx="52" cy="44" rx="40" ry="18" fill="none" stroke="#ff4d5c" stroke-width="2.5"/>
         <ellipse cx="52" cy="44" rx="34" ry="15" fill="#05030a"/>
         <ellipse cx="52" cy="44" rx="34" ry="15" fill="none" stroke="#c4121f" stroke-width="2.5" opacity=".9"/>
-        <ellipse cx="52" cy="46" rx="24" ry="10" fill="#2a0308"/>
-        <ellipse cx="52" cy="50" rx="15" ry="6" fill="#7d0a14" opacity=".8" class="flick"/>
+        <ellipse cx="52" cy="46" rx="24" ry="10" fill="#120a04"/>
+        <ellipse cx="52" cy="50" rx="15" ry="6" fill="#a8660c" opacity=".75" class="flick"/>
         <g stroke="#8a6234" stroke-width="3" fill="none">
           <path d="M42 44 v22"/><path d="M62 44 v22"/>
           <path d="M42 50 h20 M42 57 h20 M42 64 h20"/></g>
@@ -402,7 +402,7 @@ table.rc td:last-child{text-align:right;font-weight:800;color:var(--gold)}
       <div class="helpcol">
         <div class="seclabel" style="margin-top:14px">🎃 If you are playing</div>
         <ul class="helplist">
-          <li>Type your name, choose where to go, choose your school year, and pick a face.</li>
+          <li>Type your name, choose where to go, choose your school year, and pick a character.</li>
           <li>Every room asks you <b>one maths question</b>. Answer ten and you are out of the house.</li>
           <li>You carry <b style="color:var(--gold)">three lanterns</b>. A wrong answer costs half a one &mdash;
               you get a <b>hint</b> and another go. You are never told the answer.</li>
@@ -420,7 +420,7 @@ table.rc td:last-child{text-align:right;font-weight:800;color:var(--gold)}
       <div class="helpcol">
         <div class="seclabel" style="margin-top:14px">🫖 If you are the grown-up</div>
         <ul class="helplist">
-          <li><b>15 levels</b>, Grade 1 through to a PhD, with 200+ kinds of problem generated fresh every
+          <li><b>Twelve levels</b>, Grade 1 through Grade 12, with 160+ kinds of problem generated fresh every
               time &mdash; the questions never run out and never repeat within a run.</li>
           <li><b>The level you pick is the level you get.</b> As a level is replayed it gets harder from the
               inside: harder types, and wrong answers that sit close to the right one.</li>
@@ -620,7 +620,7 @@ const BANK = [
   ()=>{const a=-R(2,15),b=R(3,20);
     return{t:"Temperature change",q:`The crypt is ${a}°C. It warms by ${b}°C. What is the temperature now?`,a:(a+b)+"°C",w:[(a-b)+"°C",(b-a)+"°C",(a+b+2)+"°C",(-a+b)+"°C"],s:`${a} + ${b} = ${a+b}°C.`};},
   ()=>{const w=R(2,9),l=R(2,9),h=R(2,9);
-    return{t:"Volume of a box",q:`A coffin measures ${w} × ${l} × ${h} feet. What is its volume, in cubic feet?`,a:w*l*h,w:[w+l+h,2*(w*l+l*h+w*h),w*l,w*l*h+w],s:`Volume = ${w} × ${l} × ${h} = ${w*l*h}.`};}
+    return{t:"Volume of a box",q:`A crate measures ${w} × ${l} × ${h} feet. What is its volume, in cubic feet?`,a:w*l*h,w:[w+l+h,2*(w*l+l*h+w*h),w*l,w*l*h+w],s:`Volume = ${w} × ${l} × ${h} = ${w*l*h}.`};}
 ]},
 
 /* ---------------- 7. Grade 7 ---------------- */
@@ -882,172 +882,6 @@ const BANK = [
     return{t:"Area between curves",q:`Find the area enclosed between y = ${a}x and y = x².`,a:frac(num,6),
       w:[frac(num,3),frac(num,2),frac(a*a,6),frac(num,12)],
       s:`They cross at x = 0 and x = ${a}. ∫₀${sup(a)}(${a}x − x²)dx = ${a}³/6 = ${frac(num,6)}.`};}
-]},
-
-/* ---------------- 13. College — Engineering ---------------- */
-{name:"College", note:"multivar, matrices, ODEs", gens:[
-  ()=>{const a=R(2,6),b=R(2,6),x=R(1,4),y=R(1,4);const v=2*a*x*y+b*y*y;
-    return{t:"Partial derivatives",q:`f(x,y) = ${a}x²y + ${b}xy². Find ∂f/∂x at (${x}, ${y}).`,a:v,
-      w:[a*x*x+2*b*x*y,2*a*x*y,b*y*y,v+x],s:`∂f/∂x = ${2*a}xy + ${b}y². At (${x}, ${y}) that is ${v}.`};},
-  ()=>{const a=R(1,6),b=R(1,6),c=R(1,6),d=R(1,6);const det=a*d-b*c;
-    return{t:"Determinants",q:`Find the determinant of [[${a}, ${b}], [${c}, ${d}]].`,a:det,w:[a*d+b*c,a*b-c*d,-det,a+d],
-      s:`det = ad − bc = ${a*d} − ${b*c} = ${det}.`};},
-  ()=>{const a=R(1,5),b=R(1,5),c=R(1,5),d=R(1,5),e=R(1,5),f=R(1,5);const v=a*e+b*f;
-    return{t:"Matrix multiplication",q:`For A = [[${a}, ${b}], [${c}, ${d}]] and B = [[${e}], [${f}]], what is the top entry of AB?`,
-      a:v,w:[c*e+d*f,a*e-b*f,a*f+b*e,a*e],s:`Row 1 · column 1 = ${a*e} + ${b*f} = ${v}.`};},
-  ()=>{const k=R(2,6),y0=R(2,9);
-    return{t:"First-order ODEs",q:`Solve  dy/dx = ${k}y  with y(0) = ${y0}.`,a:`y = ${y0}e^(${k}x)`,
-      w:[`y = ${y0}e^(−${k}x)`,`y = ${k}e^(${y0}x)`,`y = ${y0} + ${k}x`,`y = ${y0}x^${k}`],
-      s:`Separating gives y = Ae^(${k}x); y(0) = ${y0} fixes A = ${y0}.`};},
-  ()=>{const a=[R(1,5),R(1,5),R(1,5)],b=[R(1,5),R(1,5),R(1,5)];
-    const dot=a[0]*b[0]+a[1]*b[1]+a[2]*b[2];
-    return{t:"Dot product",q:`Find the dot product of (${a.join(", ")}) and (${b.join(", ")}).`,a:dot,
-      w:[a[0]*b[0],dot+a[0],dot-b[2],a.reduce((x,y)=>x+y,0)].filter(v=>v!==dot),
-      s:`${a[0]*b[0]} + ${a[1]*b[1]} + ${a[2]*b[2]} = ${dot}.`};},
-  ()=>{const n=R(2,4);const fact=[1,1,2,6,24,120][n];
-    return{t:"Taylor series",q:`In the Maclaurin series for e^x, what is the coefficient of x${sup(n)}?`,a:frac(1,fact),
-      w:[frac(1,n),String(fact),frac(1,fact*n),"1"],s:`e^x = Σ xⁿ/n!, so the coefficient is 1/${n}! = 1/${fact}.`};},
-  ()=>{const a=R(2,5),b=R(2,5);
-    return{t:"Double integrals",q:`Evaluate  ∫₀${sup(a)}∫₀${sup(b)} xy dy dx.`,a:N(a*a*b*b/4),
-      w:[N(a*b),N(a*a*b*b/2),N(a*b/4),N(a*a*b*b)],s:`Inner gives ${b*b/2}x; then ∫₀${sup(a)} ${b*b/2}x dx = ${b*b/2} × ${a*a/2} = ${a*a*b*b/4}.`};},
-  ()=>{const a=[R(1,4),R(1,4),R(1,4)],b=[R(1,4),R(1,4),R(1,4)];
-    const cx=a[1]*b[2]-a[2]*b[1];
-    return{t:"Cross product",q:`For a = (${a.join(", ")}) and b = (${b.join(", ")}), what is the i-component of a × b?`,
-      a:cx,w:[a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0],a[0]*b[0],-cx].filter(v=>v!==cx),
-      s:`The i-component is a₂b₃ − a₃b₂ = ${a[1]*b[2]} − ${a[2]*b[1]} = ${cx}.`};},
-  ()=>{const a=R(2,6),b=R(2,6),c=R(2,6);
-    return{t:"Divergence",q:`Find ∇·F for F = (${a}x, ${b}y, ${c}z).`,a:a+b+c,w:[a*b*c,a+b,a-b+c,0],
-      s:`∇·F = ∂/∂x(${a}x) + ∂/∂y(${b}y) + ∂/∂z(${c}z) = ${a} + ${b} + ${c} = ${a+b+c}.`};},
-  ()=>{const r1=R(1,6),r2=R(1,6)+6;const b=-(r1+r2),c=r1*r2;
-    return{t:"Second-order ODEs",q:`Solve the auxiliary equation for  y″ ${signed(b)}y′ ${signed(c)}y = 0.`,
-      a:`m = ${r1}, ${r2}`,w:[`m = ${-r1}, ${-r2}`,`m = ${b}, ${c}`,`m = ${r1}, ${-r2}`,`m = ${r1+r2}, ${r1*r2}`],
-      s:`m² ${signed(b)}m ${signed(c)} = 0 factorises as (m − ${r1})(m − ${r2}) = 0.`};},
-  ()=>{const a=R(2,9),den=P([2,3,4,5]);const sum=Math.round(a/(1-1/den)*1000)/1000;
-    return{t:"Geometric series",q:`Find the sum to infinity of a geometric series with first term ${a} and ratio 1/${den}.`,a:N(sum),
-      w:[N(a*den),N(Math.round(a/(1+1/den)*1000)/1000),N(a),N(a*den-a)].filter(v=>v!==N(sum)),
-      s:`S = a/(1 − r) = ${a}/(1 − 1/${den}) = ${sum}.`};},
-  ()=>{let a,b,c,d,det;do{a=R(1,6);b=R(1,6);c=R(1,6);d=R(1,6);det=a*d-b*c;}while(det===0);
-    return{t:"Matrix inverse",q:`For A = [[${a}, ${b}], [${c}, ${d}]], what is the top-left entry of A⁻¹?`,
-      a:frac(d,det),w:[frac(a,det),frac(-b,det),frac(d,a*d+b*c||1),frac(det,d)],
-      s:`A⁻¹ = (1/det)·[[d, −b], [−c, a]], and det = ${det}, so the top-left entry is ${frac(d,det)}.`};},
-  ()=>{const a=R(1,7),b=R(8,15);
-    return{t:"Curl",q:`F = (${a}y, ${b}x, 0). What is the k-component of ∇ × F?`,a:b-a,
-      w:[a-b,a+b,0,b],s:`∂(${b}x)/∂x − ∂(${a}y)/∂y = ${b} − ${a} = ${b-a}.`};}
-]},
-
-/* ---------------- 14. Masters — Engineering ---------------- */
-{name:"Masters", note:"transforms, systems", gens:[
-  ()=>{const n=R(2,5);const fact=[1,1,2,6,24,120][n];
-    return{t:"Laplace transforms",q:`What is the Laplace transform of t${sup(n)}?`,a:`${fact}/s${sup(n+1)}`,
-      w:[`${fact}/s${sup(n)}`,`1/s${sup(n+1)}`,`${n}/s${sup(n+1)}`,`s${sup(n+1)}/${fact}`],
-      s:`L{tⁿ} = n!/s^(n+1), and ${n}! = ${fact}.`};},
-  ()=>{const l1=R(1,6),l2=R(1,6)+6;
-    return{t:"Eigenvalues",q:`Find the eigenvalues of [[${l1}, 0], [${R(1,4)}, ${l2}]].`,a:`${l1}, ${l2}`,
-      w:[`${l1+l2}, ${l1*l2}`,`${-l1}, ${-l2}`,`${l1+1}, ${l2}`,`${l1*l2}, 0`],
-      s:`The matrix is lower-triangular, so the eigenvalues are the diagonal entries ${l1} and ${l2}.`};},
-  ()=>{const w=P([2,4,5,8,10]);const T=Math.round(2*Math.PI/w*1000)/1000;
-    return{t:"Periodicity",q:`What is the fundamental period of sin(${w}t)? (3 d.p.)`,a:N(T),
-      w:[N(Math.round(2*Math.PI*w*1000)/1000),N(Math.round(Math.PI/w*1000)/1000),N(w),N(Math.round(1/w*1000)/1000)],
-      s:`T = 2π/ω = 2π/${w} = ${T}.`};},
-  ()=>{const wn=P([2,4,5,10]),z=P([0.2,0.5,0.8]);const c=Math.round(2*z*wn*100)/100;
-    return{t:"Damping ratio",q:`For s² + ${c}s + ${wn*wn}, find the damping ratio ζ.`,a:N(z),
-      w:[N(c),N(wn),N(Math.round(z*2*100)/100),N(Math.round(z/2*100)/100)],
-      s:`Compare with s² + 2ζωₙs + ωₙ²: ωₙ = ${wn}, and 2ζ(${wn}) = ${c}, so ζ = ${z}.`};},
-  ()=>{const k=R(2,9),p=R(1,6);
-    return{t:"Final value theorem",q:`A system has step response Y(s) = ${k} / (s(s + ${p})). Find the steady-state value.`,
-      a:N(Math.round(k/p*1000)/1000),w:[N(k),N(p),N(Math.round(p/k*1000)/1000),"0"],
-      s:`lim(s→0) sY(s) = ${k}/${p} = ${Math.round(k/p*1000)/1000}.`};},
-  ()=>{const n=R(3,8),p=P([0.2,0.25,0.5]);const v=Math.round(n*p*(1-p)*1000)/1000;
-    return{t:"Binomial variance",q:`X ~ Binomial(n = ${n}, p = ${p}). What is Var(X)?`,a:N(v),
-      w:[N(Math.round(n*p*1000)/1000),N(Math.round(n*p*p*1000)/1000),N(n),N(Math.round(Math.sqrt(v)*1000)/1000)].filter(x=>x!==N(v)),
-      s:`Var = np(1−p) = ${n} × ${p} × ${Math.round((1-p)*100)/100} = ${v}.`};},
-  ()=>{const a=R(1,6),b=R(1,6);
-    return{t:"Inverse Laplace",q:`Find the inverse Laplace transform of ${b}/(s + ${a}).`,a:`${b}e^(−${a}t)`,
-      w:[`${b}e^(${a}t)`,`${a}e^(−${b}t)`,`${b}t e^(−${a}t)`,`${b}cos(${a}t)`],
-      s:`L⁻¹{1/(s + a)} = e^(−at), and the constant ${b} carries through.`};},
-  ()=>{const k=R(2,9),a=R(1,6),b=R(1,6);const dc=Math.round(k/(a*b)*1000)/1000;
-    return{t:"DC gain",q:`Find the DC gain of G(s) = ${k} / ((s + ${a})(s + ${b})).`,a:N(dc),
-      w:[N(k),N(Math.round(k/(a+b)*1000)/1000),N(a*b),N(Math.round(a*b/k*1000)/1000)].filter(v=>v!==N(dc)),
-      s:`DC gain = G(0) = ${k}/(${a} × ${b}) = ${dc}.`};},
-  ()=>{const g=P([10,100,1000,0.1,0.01]);const db=Math.round(20*Math.log10(g)*10)/10;
-    return{t:"Decibels",q:`A system has gain ${g}. What is that in dB?`,a:N(db)+" dB",
-      w:[N(Math.round(10*Math.log10(g)*10)/10)+" dB",N(g)+" dB",N(-db)+" dB",N(Math.round(20*g*10)/10)+" dB"].filter(v=>v!==N(db)+" dB"),
-      s:`dB = 20 log₁₀(gain) = 20 × ${Math.round(Math.log10(g)*10)/10} = ${db} dB.`};},
-  ()=>{const L=R(1,6);const lam=Math.round(Math.pow(Math.PI/L,2)*1000)/1000;
-    return{t:"PDE separation",q:`For u″ + λu = 0 on [0, ${L}] with u(0) = u(${L}) = 0, what is the smallest eigenvalue λ₁? (3 d.p.)`,
-      a:N(lam),w:[N(Math.round(Math.PI/L*1000)/1000),N(Math.round(Math.pow(Math.PI*2/L,2)*1000)/1000),N(L),N(Math.round(Math.PI*Math.PI*1000)/1000)].filter(v=>v!==N(lam)),
-      s:`λₙ = (nπ/L)². For n = 1 and L = ${L}: (π/${L})² = ${lam}.`};},
-  ()=>{const p=P([0.2,0.25,0.4,0.5]),q=P([0.3,0.5,0.6]);const pi1=Math.round(q/(p+q)*1000)/1000;
-    return{t:"Markov chains",q:`A two-state chain moves A→B with probability ${p} and B→A with probability ${q}. What fraction of time is spent in A?`,
-      a:N(pi1),w:[N(Math.round(p/(p+q)*1000)/1000),N(p),N(q),"0.5"].filter(v=>v!==N(pi1)),
-      s:`Balance gives π_A·${p} = π_B·${q}, so π_A = ${q}/(${p} + ${q}) = ${pi1}.`};},
-  ()=>{const f=R(2,40)*100;
-    return{t:"Nyquist rate",q:`A signal contains nothing above ${f} Hz. What is the lowest sampling rate that avoids aliasing?`,
-      a:(2*f)+" Hz",w:[f+" Hz",(f/2)+" Hz",(4*f)+" Hz",(2*f+100)+" Hz"],
-      s:`Sample above twice the highest frequency present: 2 × ${f} = ${2*f} Hz.`};},
-  ()=>{const a=P([2,4,6,10,12,20]);
-    return{t:"RMS of a sine",q:`A sine wave has a peak of ${a} V. What is its RMS value, to two decimal places?`,
-      a:(a/Math.SQRT2).toFixed(2)+" V",w:[(a/2).toFixed(2)+" V",(a*Math.SQRT2).toFixed(2)+" V",a.toFixed(2)+" V",(a/Math.PI).toFixed(2)+" V"],
-      s:`RMS = peak/√2 = ${a}/1.4142 = ${(a/Math.SQRT2).toFixed(2)} V.`};}
-]},
-
-/* ---------------- 15. PhD in Engineering ---------------- */
-{name:"PhD", note:"Engineering", gens:[
-  ()=>{const a=R(2,6),b=R(3,9);const lim=a*b;
-    return{t:"Routh–Hurwitz",q:`For s³ + ${a}s² + ${b}s + K, for which K is the system stable?`,
-      a:`0 < K < ${lim}`,w:[`K > ${lim}`,`0 < K < ${a+b}`,`K < ${a}`,"K > 0 always"],
-      s:`The Routh array needs (${a}·${b} − K)/${a} > 0, i.e. K < ${lim}, together with K > 0.`};},
-  ()=>{const rho=P([1000,998,1.2]),v=P([0.5,1,2,5]),D=P([0.01,0.05,0.1]),mu=P([0.001,0.0000181]);
-    const Re=Math.round(rho*v*D/mu);
-    return{t:"Reynolds number",q:`ρ = ${rho} kg/m³, v = ${v} m/s, D = ${D} m, μ = ${mu} Pa·s. Find Re.`,
-      a:Re.toLocaleString("en-US"),w:[Math.round(Re/10).toLocaleString("en-US"),Math.round(Re*10).toLocaleString("en-US"),
-        Math.round(Re/rho).toLocaleString("en-US"),Math.round(rho*v/D).toLocaleString("en-US")],
-      s:`Re = ρvD/μ ≈ ${Re.toLocaleString("en-US")}.`};},
-  ()=>{const n=R(3,6),r=R(1,n-1);
-    return{t:"Rank–nullity",q:`A linear map acts on ℝ${sup(n)} and has rank ${r}. What is the dimension of its kernel?`,
-      a:n-r,w:[r,n,n+r,n-r+1],s:`rank + nullity = ${n}, so nullity = ${n-r}.`};},
-  ()=>{const c=2*R(1,5);
-    return{t:"Constrained optimisation",q:`Minimise x² + y² subject to x + y = ${c}. What is the minimum?`,
-      a:N(c*c/2),w:[N(c*c),N(c),N(c*c/4),"0"],
-      s:`Lagrange gives x = y = ${c/2}, so the minimum is 2 × ${c/2}² = ${c*c/2}.`};},
-  ()=>{const a=R(2,6);
-    return{t:"Fourier transform",q:`What is the Fourier transform of δ(t − ${a})?`,a:`e^(−jω·${a})`,
-      w:[`e^(jω·${a})`,`${a}·e^(−jω)`,"1",`2πδ(ω − ${a})`],
-      s:`F{δ(t)} = 1, and a delay of ${a} multiplies the transform by e^(−jω${a}).`};},
-  ()=>{const k=R(2,9),m=R(1,6);const wn=Math.round(Math.sqrt(k/m)*1000)/1000;
-    return{t:"Natural frequency",q:`A mass–spring system has k = ${k} N/m and m = ${m} kg. Find ωₙ in rad/s. (3 d.p.)`,
-      a:N(wn),w:[N(Math.round(k/m*1000)/1000),N(Math.round(Math.sqrt(m/k)*1000)/1000),N(k*m),N(Math.round(wn/(2*Math.PI)*1000)/1000)].filter(v=>v!==N(wn)),
-      s:`ωₙ = √(k/m) = √(${k}/${m}) = ${wn} rad/s.`};},
-  ()=>{const a=R(1,5);
-    return{t:"Convolution",q:`What is x(t) ∗ δ(t − ${a})?`,a:`x(t − ${a})`,
-      w:[`x(t + ${a})`,`${a}·x(t)`,`x(${a}t)`,`x(t)·δ(t)`],
-      s:`Convolving with a shifted delta shifts the signal by ${a}.`};},
-  ()=>{const s1=R(2,6),s2=R(2,6);
-    return{t:"Variance of sums",q:`Independent X and Y have Var(X) = ${s1} and Var(Y) = ${s2}. Find Var(2X − Y).`,
-      a:4*s1+s2,w:[2*s1-s2,4*s1-s2,2*s1+s2,s1+s2].filter(v=>v!==4*s1+s2),
-      s:`Var(aX + bY) = a²Var(X) + b²Var(Y) = 4(${s1}) + 1(${s2}) = ${4*s1+s2}.`};},
-  ()=>{const vars=R(5,8),dims=R(2,4);
-    return{t:"Buckingham Pi",q:`A problem has ${vars} variables and ${dims} independent dimensions. How many dimensionless groups are there?`,
-      a:vars-dims,w:[vars,dims,vars+dims,vars-dims+1],s:`Buckingham Pi: groups = n − k = ${vars} − ${dims} = ${vars-dims}.`};},
-  ()=>{const h=P([10,25,50,100]),L=P([0.01,0.05,0.1]),k=P([0.5,1,2,20]);
-    const Bi=Math.round(h*L/k*1000)/1000;
-    return{t:"Biot number",q:`h = ${h} W/m²K, characteristic length ${L} m, k = ${k} W/mK. Find the Biot number. (3 d.p.)`,
-      a:N(Bi),w:[N(Math.round(k/(h*L)*1000)/1000),N(Math.round(h*k*L*1000)/1000),N(h*L),N(Math.round(h/k*1000)/1000)].filter(v=>v!==N(Bi)),
-      s:`Bi = hL/k = ${h} × ${L} / ${k} = ${Bi}.`};},
-  ()=>{const a=R(2,8);const r=Math.round(1/a*1000)/1000;
-    return{t:"Z-transform",q:`Where is the pole of the Z-transform of the sequence (1/${a})ⁿ u[n]?`,
-      a:`z = ${N(r)}`,w:[`z = ${a}`,`z = ${N(-r)}`,"z = 1","z = 0"],
-      s:`Z{aⁿu[n]} = z/(z − a), so the pole sits at z = a = 1/${a} = ${r}.`};},
-  ()=>{const n=R(2,4);const full=n;
-    return{t:"Controllability",q:`A system has ${n} states. What rank must the controllability matrix have for the system to be fully controllable?`,
-      a:full,w:[full-1,full+1,2*full,1].filter(v=>v!==full),
-      s:`Full controllability requires rank([B AB … Aⁿ⁻¹B]) = n = ${n}.`};},
-  ()=>{const a=R(5,40),b=R(1,4);
-    return{t:"Condition number",q:`A matrix has singular values ${a} and ${b}. What is its 2-norm condition number?`,
-      a:N(a/b),w:[N(b/a),N(a*b),N(a-b),N(a+b)],s:`κ₂ = σmax/σmin = ${a}/${b} = ${N(a/b)}.`};},
-  ()=>{const lam=R(2,9),t=R(2,6);
-    return{t:"Poisson process",q:`Events arrive as a Poisson process at ${lam} per hour. What is the variance of the count over ${t} hours?`,
-      a:lam*t,w:[lam,t,lam+t,lam*t*lam],s:`For a Poisson count both mean and variance are λt = ${lam} × ${t} = ${lam*t}.`};}
 ]}
 ];
 
@@ -1067,12 +901,6 @@ const HINTS = {
 "Partial fractions":"Cover up one factor and substitute the value that kills it.",
 "Implicit differentiation":"Differentiate both sides with respect to x and remember the chain rule on y.",
 "Area between curves":"Find where they meet, then integrate the difference between them.",
-"Matrix inverse":"The inverse swaps the diagonal, negates the off-diagonal, and divides by the determinant.",
-"Curl":"The k-component is ∂F_y/∂x − ∂F_x/∂y.",
-"Nyquist rate":"Twice the highest frequency present.",
-"RMS of a sine":"For a sine, RMS is the peak divided by √2.",
-"Condition number":"The ratio of the largest singular value to the smallest.",
-"Poisson process":"For a Poisson count, the mean and the variance are the same number.",
 "How many more":"Difference means take the smaller away from the bigger.",
 "Counting back":"Start at the number you had and step backwards.",
 "Equal groups":"Groups of the same size means multiply.",
@@ -1220,41 +1048,7 @@ const HINTS = {
 "Product rule":"(uv)′ = u′v + uv′.",
 "Exponential derivatives":"d/dx e^u = e^u · u′.",
 "L'Hôpital":"Differentiate the top and the bottom separately, then substitute.",
-"Power rule integration":"∫xⁿ dx = x^(n+1)/(n + 1).",
-"Partial derivatives":"Treat every other variable as a constant.",
-"Determinants":"ad − bc.",
-"Matrix multiplication":"Row of the first times column of the second.",
-"First-order ODEs":"Separate the variables and integrate both sides.",
-"Dot product":"Multiply matching components, then add.",
-"Taylor series":"The coefficient of xⁿ in e^x is 1/n!.",
-"Double integrals":"Do the inner integral first, treating the outer variable as constant.",
-"Cross product":"The i-component is a₂b₃ − a₃b₂.",
-"Divergence":"Add the partial derivative of each component with respect to its own variable.",
-"Second-order ODEs":"Write the auxiliary equation in m and factorise it.",
-"Geometric series":"S = a/(1 − r) when |r| < 1.",
-"Laplace transforms":"L{tⁿ} = n!/s^(n+1).",
-"Eigenvalues":"For a triangular matrix, look at the diagonal.",
-"Periodicity":"T = 2π/ω.",
-"Damping ratio":"Match the denominator to s² + 2ζωₙs + ωₙ².",
-"Final value theorem":"Multiply by s and let s → 0.",
-"Binomial variance":"np(1 − p).",
-"Inverse Laplace":"1/(s + a) comes back as a decaying exponential.",
-"DC gain":"Set s = 0 in the transfer function.",
-"Decibels":"dB = 20 log₁₀(gain) for an amplitude ratio.",
-"PDE separation":"The eigenvalues are (nπ/L)².",
-"Markov chains":"Set the two flows between states equal to each other.",
-"Routh–Hurwitz":"Build the Routh array and require every first-column entry to be positive.",
-"Reynolds number":"Re = ρvD/μ.",
-"Rank–nullity":"rank + nullity = the dimension of the domain.",
-"Constrained optimisation":"Use symmetry, or set ∇f = λ∇g.",
-"Fourier transform":"A time shift becomes a phase factor.",
-"Natural frequency":"ωₙ = √(k/m).",
-"Convolution":"Convolving with a shifted delta shifts the signal.",
-"Variance of sums":"Coefficients get squared; independent variances add.",
-"Buckingham Pi":"Variables minus independent dimensions.",
-"Biot number":"Bi = hL/k.",
-"Z-transform":"Z{aⁿu[n]} = z/(z − a).",
-"Controllability":"Full controllability needs the matrix to reach the number of states."
+"Power rule integration":"∫xⁿ dx = x^(n+1)/(n + 1)."
 };
 
 /* ---------- build a multiple-choice problem ---------- */
@@ -1359,7 +1153,9 @@ const K = {
     <path d="M-20 0 h40"/><path d="M0 -26 v-14"/></g>`,
   altar:(x,y,s)=>`<g transform="translate(${x},${y}) scale(${s})">
     <rect x="-40" y="-16" width="80" height="16" fill="#2b2530"/><rect x="-30" y="-46" width="60" height="30" fill="#221d28"/>
-    <ellipse cx="0" cy="-48" rx="22" ry="6" fill="#6b1420" opacity=".8"/></g>`
+    <ellipse cx="0" cy="-48" rx="22" ry="6" fill="#3a3442"/>
+    <path d="M0 -70 q-5 8 0 14 q5 -6 0 -14Z" fill="#ffb347" class="flick"/>
+    <circle cx="0" cy="-62" r="28" fill="url(#halo)"/></g>`
 };
 const lightAt=(x,y,r)=>`<circle cx="${x}" cy="${y}" r="${r}" fill="url(#halo)"/>`;
 const coldLight=(x,y,r)=>`<circle cx="${x}" cy="${y}" r="${r}" fill="url(#halo2)"/>`;
@@ -1764,8 +1560,7 @@ const HARD = [
   [4,7,10],        /* 1  */ [1,3,8,9],      /* 2  */ [2,4,6,7],      /* 3  */
   [0,1,4,7,9],     /* 4  */ [2,3,6,7],      /* 5  */ [1,4,7,8],      /* 6  */
   [0,1,5,7,9],     /* 7  */ [0,4,5,6,8],    /* 8  */ [0,2,8,9,10],   /* 9  */
-  [1,5,7,8,9],     /* 10 */ [2,5,8,9],      /* 11 */ [1,2,7,9],      /* 12 */
-  [0,6,7,9,10],    /* C  */ [3,7,9,10],     /* M  */ [0,1,3,9,10]    /* PhD */
+  [1,5,7,8,9],     /* 10 */ [2,5,8,9],      /* 11 */ [1,2,7,9]       /* 12 */
 ];
 /* A challenge: a hard type from the player's own grade. `tight` replaces the
    distractors with near misses, so only an exact answer gets through.
@@ -1890,7 +1685,7 @@ const AVATARS = [
    <ellipse cx="38" cy="36" rx="2" ry="2.6" fill="#1d2a1a"/>
    <path d="M24 44 q8 5 15 -1" stroke="#33421f" stroke-width="2" fill="none"/>
    <path d="M27 44 v4 M31 45 v4 M35 44 v4" stroke="#e8e6d0" stroke-width="1.4"/>
-   <path d="M40 24 l6 -4" stroke="#6b3a3a" stroke-width="2"/>`},
+   <path d="M40 24 l6 -4" stroke="#4a3a2a" stroke-width="2"/>`},
  {id:"scarecrow",name:"Scarecrow",svg:`
    <rect x="29" y="48" width="6" height="26" fill="#6b5433"/>
    <path d="M10 56 h44" stroke="#6b5433" stroke-width="5"/>
@@ -2211,18 +2006,23 @@ const SCARES = [
       ${[0,1,2].map(k=>`<g transform="translate(${x+k*34},${392+k%2*10})">
         <path d="M0 24 v-22 M-6 24 v-18 M6 24 v-18 M-11 24 v-13 M11 24 v-14" stroke="#1a1620" stroke-width="4" stroke-linecap="round"/>
         <path d="M-12 24 h24 v12 h-24Z"/></g>`).join("")}</g>`;},
-  /* something hangs from the ceiling, wrapped */
+  /* a spider's cocoon, swinging — with its owner on the thread above it, so
+     there is no mistaking what it is */
   ()=>{const x=R(150,680), l=R(40,90);
     return `<g class="sway" style="transform-origin:${x}px 0px;animation-delay:${R(0,4)}s">
-      <path d="M${x} 0 v${l}" stroke="#6b6152" stroke-width="2"/>
-      <path d="M${x} ${l} q-17 16 -13 42 q4 24 13 30 q9 -6 13 -30 q4 -26 -13 -42Z" fill="#b9b1a0" opacity=".72"/>
+      <path d="M${x} 0 v${l}" stroke="#c9d6e8" stroke-width="1.4" opacity=".55"/>
+      <g transform="translate(${x},${l-16})" fill="#17131c">
+        <ellipse cx="0" cy="0" rx="7" ry="5"/><circle cx="0" cy="-6" r="3.4"/>
+        <g stroke="#17131c" stroke-width="1.6" fill="none">
+          <path d="M-6 -2 l-9 -6 M-6 1 l-10 2 M-6 3 l-8 7 M6 -2 l9 -6 M6 1 l10 2 M6 3 l8 7"/></g></g>
+      <path d="M${x} ${l} q-17 16 -13 42 q4 24 13 30 q9 -6 13 -30 q4 -26 -13 -42Z" fill="#c9d6e8" opacity=".58"/>
       <path d="M${x-13} ${l+22} q13 8 26 0 M${x-14} ${l+36} q14 9 28 0 M${x-11} ${l+50} q11 7 22 0"
-        stroke="#7d7566" stroke-width="1.6" fill="none" opacity=".8"/></g>`;},
-  /* a stain that is still spreading */
+        stroke="#e8f0fa" stroke-width="1.4" fill="none" opacity=".6"/></g>`;},
+  /* damp coming through the plaster, and something dripping out of it */
   ()=>{const x=R(120,660);
-    return `<g opacity=".72"><path d="M${x} 130 q-7 40 0 74 q7 -34 0 -74Z" fill="#5c0c14"/>
-      <ellipse cx="${x}" cy="208" rx="3" ry="6" fill="#7d0f18" class="drip" style="animation-delay:${R(0,4)}s"/>
-      <ellipse cx="${x}" cy="330" rx="22" ry="6" fill="#3d070d"/></g>`;},
+    return `<g opacity=".7"><path d="M${x} 130 q-8 40 0 74 q8 -34 0 -74Z" fill="#2f4148"/>
+      <ellipse cx="${x}" cy="208" rx="3" ry="6" fill="#5f8590" class="drip" style="animation-delay:${R(0,4)}s"/>
+      <ellipse cx="${x}" cy="330" rx="22" ry="6" fill="#1d2a2e"/></g>`;},
   /* rats, going the other way */
   ()=>{const y=R(336,404), s=(Math.random()*0.5+0.7).toFixed(2);
     return `<g class="scuttle" style="animation-delay:${R(0,7)}s">${[0,1,2].map(k=>
@@ -2237,10 +2037,10 @@ const SCARES = [
       <ellipse cx="${x-9}" cy="${y-6}" rx="5" ry="7" fill="#0a0810"/><ellipse cx="${x+9}" cy="${y-6}" rx="5" ry="7" fill="#0a0810"/>
       <ellipse cx="${x}" cy="${y+16}" rx="7" ry="10" fill="#0a0810"/>
       <ellipse cx="${x}" cy="${y}" rx="26" ry="33" fill="none" stroke="#3d3350" stroke-width="2"/></g>`;},
-  /* handprints, going up */
+  /* sooty handprints, going up the wall */
   ()=>{const x=R(120,620);
-    return `<g fill="#4a1018" opacity=".55">${[0,1,2,3].map(k=>`<g transform="translate(${x+k*30},${300-k*44}) scale(.8)">
-      <path d="M0 14 v-16 M-7 14 v-13 M7 14 v-13 M-13 14 v-9 M12 15 v-10" stroke="#4a1018" stroke-width="3.4" stroke-linecap="round"/>
+    return `<g fill="#2b2533" opacity=".6">${[0,1,2,3].map(k=>`<g transform="translate(${x+k*30},${300-k*44}) scale(.8)">
+      <path d="M0 14 v-16 M-7 14 v-13 M7 14 v-13 M-13 14 v-9 M12 15 v-10" stroke="#2b2533" stroke-width="3.4" stroke-linecap="round"/>
       <path d="M-14 14 h27 v10 h-27Z"/></g>`).join("")}</g>`;},
   /* the candle you are not holding */
   ()=>{const x=R(200,640);
@@ -2563,7 +2363,7 @@ function musicGain(){ if(MUSIC.master){ const c=ac();
    moment it goes out. Shown on the setup screen and at the foot of the
    report card, so a player can say which build they are playing.
    ===================================================================== */
-const BUILD = 4, RELEASED = "26 Sep 2026, 19:08";
+const BUILD = 5, RELEASED = "27 Sep 2026, 10:08";
 const VERSION_LINE = `v${BUILD} · released ${RELEASED}`;
 
 /* =====================================================================
@@ -2577,6 +2377,11 @@ function load(){ try{ const j=JSON.parse(localStorage.getItem(KEY)); if(j&&j.tot
   /* older saves kept one ladder for every grade — hand it to the grade they were on */
   if(!save.unlock || typeof save.unlock!=="object"){ save.unlock={}; }
   if(!save.family || typeof save.family!=="object"){ save.family={}; }
+  /* College, Masters and PhD were dropped — a save that was sitting on one of
+     them, or carrying progress for one, must not index off the end of BANK */
+  save.level = Math.max(0, Math.min(BANK.length-1, save.level||0));
+  for(const k of Object.keys(save.unlock)) if(+k>=BANK.length) delete save.unlock[k];
+  for(const k of Object.keys(save.prog||{})) if(+k>=BANK.length) delete save.prog[k];
   if(typeof save.maxWorld==="number"){ if(save.maxWorld>0) save.unlock[save.level||0]=save.maxWorld; delete save.maxWorld; store(); }
 }
 /* how far this grade has got — every grade opens its own places */
@@ -2724,7 +2529,7 @@ function paintFamilies(){
   $("#famline").innerHTML = found.length
     ? `<b>${found.length} of ${AVATARS.length}</b> have made it out of the castle and got home:
        ${found.map(a=>esc(a.name)).join(" · ")}`
-    : `Take one face all the way through the castle and you will see who has been waiting up for them.`;
+    : `Take one character all the way through the castle and you will see who has been waiting up for them.`;
 }
 
 /* =====================================================================
@@ -3219,7 +3024,7 @@ function familyScene(){
     <div class="steps" style="color:var(--gold)">${esc(f.line)}</div>
     <div class="steps">The Pumpkin King stops at the gate. He does not come up the path. That was the whole game:
       seven places, ten rooms each, and someone at the end of it who left the light on.
-      ${firstTime?`<br><b style="color:var(--gold)">${esc(a.name)} has found their family.</b> Every face has one of their own.`:""}</div>`;
+      ${firstTime?`<br><b style="color:var(--gold)">${esc(a.name)} has found their family.</b> Every character has one of their own.`:""}</div>`;
   $("#nextwrap").classList.remove("hidden");
   $("#nextBtn").textContent="Go inside";
   $("#nextBtn").onclick=()=>endGame(true);
@@ -3411,7 +3216,7 @@ function showReport(won){
     </table>
     ${S.sawFamily?`<div class="unlock" style="background:rgba(255,138,31,.16);border-color:#b8722a">
        🏮 <b>${esc((AVATARS.find(v=>v.id===S.avatar)||AVATARS[0]).name)} got home.</b>
-       <div style="font-size:13.5px;color:var(--dim);margin-top:5px">Every face has a family of its own waiting at the
+       <div style="font-size:13.5px;color:var(--dim);margin-top:5px">Every character has a family of its own waiting at the
        end of the castle — ${Object.keys(save.family||{}).length} of ${AVATARS.length} found so far.</div></div>`:""}
     ${unlocked?`<div class="unlock">${unlocked.icon} <b>${esc(unlocked.name)}</b> is open to you
        <b style="color:var(--gold)">at ${esc(BANK[S.level].name)}</b>.
@@ -3419,7 +3224,7 @@ function showReport(won){
     ${missBlock}${nextTier}
     <div class="row" style="margin-top:20px">
       <button class="btn" id="againBtn">Go back in</button>
-      <button class="btn ghost" id="menuBtn">Change level or face</button></div>
+      <button class="btn ghost" id="menuBtn">Change level or character</button></div>
     <div class="rcfoot">${VERSION_LINE}</div>`;
   $("#overlay").classList.remove("hidden");
   const bb=$("#bonusBtn"); if(bb) bb.onclick=()=>{ SFX.click(); startBonus(); };
