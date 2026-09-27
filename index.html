@@ -436,7 +436,7 @@ table.rc td:last-child{text-align:right;font-weight:800;color:var(--gold)}
       <div class="helpcol">
         <div class="seclabel" style="margin-top:14px">🫖 If you are the grown-up</div>
         <ul class="helplist">
-          <li><b>Twelve levels</b>, Grade 1 through Grade 12, with 160+ kinds of problem generated fresh every
+          <li><b>Thirteen levels</b>, Kindergarten through Grade 12, with 175+ kinds of problem generated fresh every
               time &mdash; the questions never run out and never repeat within a run.</li>
           <li><b>The level you pick is the level you get.</b> As a level is replayed it gets harder from the
               inside: harder types, and wrong answers that sit close to the right one.</li>
@@ -484,6 +484,50 @@ const clock = m => { m=((m%720)+720)%720; const h=Math.floor(m/60)||12; return h
    ten-room run never repeats a type.
    ===================================================================== */
 const BANK = [
+
+/* ---------------- 0. Kindergarten ----------------
+   Counting, and the first sums. The counting questions show the objects
+   themselves — emoji are stripped before the question is read aloud, so a
+   child who is listening still has to look and count. Keep everything here
+   to ten or under, keep the wording to one short line. */
+{name:"Kindergarten", note:"counting to 10", gens:[
+  ()=>{const o=P([["pumpkin","🎃"],["ghost","👻"],["bat","🦇"],["cat","🐱"],["sweet","🍬"],["star","⭐"]]),n=R(2,9);
+    return{t:"Counting",q:`How many ${o[0]}s do you see?   ${o[1].repeat(n)}`,a:n,
+      w:[n+1,n-1,n+2,Math.max(1,n-2)],s:`Point at each one and count: there are ${n}.`};},
+  ()=>{const a=R(1,4),b=R(1,5-a);return{t:"Adding to five",q:`${a} + ${b} = ?`,a:a+b,
+      w:[a+b+1,a+b-1,a,b+2],s:`Start at ${a} and count on ${b} more: ${a+b}.`};},
+  ()=>{const a=R(2,6),b=R(1,a-1);return{t:"Taking away",q:`${a} − ${b} = ?`,a:a-b,
+      w:[a-b+1,a-b+2,a+b,b],s:`Hold up ${a} fingers and put ${b} down. ${a-b} left.`};},
+  ()=>{const n=R(1,9);return{t:"One more",q:`What is one more than ${n}?`,a:n+1,
+      w:[n-1,n+2,n,n+3],s:`One more than ${n} is ${n+1}.`};},
+  ()=>{const n=R(2,10);return{t:"One less",q:`What is one less than ${n}?`,a:n-1,
+      w:[n+1,n-2,n,Math.max(0,n-3)],s:`One less than ${n} is ${n-1}.`};},
+  ()=>{const n=SH([1,2,3,4,5,6,7,8,9,10]).slice(0,4), big=Math.max(...n);
+    return{t:"Which is biggest",q:`Which number is biggest?   ${n.join(", ")}`,a:String(big),
+      w:n.filter(v=>v!==big).map(String),s:`${big} is the last one you would say when counting, so it is the biggest.`};},
+  ()=>{const n=SH([1,2,3,4,5,6,7,8,9,10]).slice(0,4), small=Math.min(...n);
+    return{t:"Which is smallest",q:`Which number is smallest?   ${n.join(", ")}`,a:String(small),
+      w:n.filter(v=>v!==small).map(String),s:`${small} is the first one you would say when counting, so it is the smallest.`};},
+  ()=>{const s=R(1,6),miss=R(1,3);const run=[s,s+1,s+2,s+3,s+4];
+    return{t:"Missing number",q:`What is missing?   ${run.map((v,i)=>i===miss?"?":v).join(", ")}`,a:run[miss],
+      w:[run[miss]+1,run[miss]-1,run[miss]+2,s],s:`Counting up: ${run.join(", ")}. The missing one is ${run[miss]}.`};},
+  ()=>{const s=R(5,10);return{t:"Counting down",q:`What comes next?   ${s}, ${s-1}, ${s-2}, ?`,a:s-3,
+      w:[s-2,s-4,s+1,s],s:`Counting back one each time: ${s}, ${s-1}, ${s-2}, ${s-3}.`};},
+  ()=>{const sh=P([["3 sides","Triangle"],["4 sides the same","Square"],["no corners at all","Circle"],
+      ["5 sides","Pentagon"],["6 sides","Hexagon"]]);
+    return{t:"Shape names",q:`A shape with ${sh[0]} is called a…?`,a:sh[1],
+      w:["Triangle","Square","Circle","Pentagon","Hexagon"].filter(v=>v!==sh[1]),
+      s:`A shape with ${sh[0]} is a ${sh[1].toLowerCase()}.`};},
+  ()=>{const sh=P([["triangle",3],["square",4],["rectangle",4],["pentagon",5],["hexagon",6]]);
+    return{t:"Corners",q:`How many corners does a ${sh[0]} have?`,a:sh[1],
+      w:[sh[1]+1,sh[1]-1,sh[1]+2,0],s:`A ${sh[0]} has ${sh[1]} corners, one for every side.`};},
+  ()=>{const p=SH([["🎃","👻"],["🦇","🌙"],["🍬","⭐"],["🐱","🕷️"]])[0];
+    const reps=R(2,3);let seq="";for(let k=0;k<reps;k++) seq+=p[0]+" "+p[1]+" ";
+    return{t:"Patterns",q:`What comes next?   ${seq}${p[0]} …`,a:p[1],
+      w:[p[0],"🦇","🌙","⭐"].filter(v=>v!==p[1]),s:`It goes ${p[0]} then ${p[1]}, over and over.`};},
+  ()=>{const a=R(1,4);return{t:"Making five",q:`${a} and ? make 5`,a:5-a,
+      w:[5+a,a,5-a+1,Math.max(0,5-a-1)],s:`${a} and ${5-a} make 5. Count on from ${a} to 5.`};}
+]},
 
 /* ---------------- 1. Grade 1 ---------------- */
 {name:"Grade 1", note:"add & subtract to 20", gens:[
@@ -905,6 +949,18 @@ const BANK = [
    HINTS — a method reminder that never contains the answer.
    ===================================================================== */
 const HINTS = {
+"Counting":"Touch each one as you say the number.",
+"Adding to five":"Start at the first number and count on.",
+"One more":"One more means the next number when you count.",
+"One less":"One less means the number just before.",
+"Which is biggest":"The biggest is the one you would say last when counting.",
+"Which is smallest":"The smallest is the one you would say first when counting.",
+"Missing number":"Say the numbers out loud in order and listen for the gap.",
+"Counting down":"Each one is one less than the one before.",
+"Shape names":"Count the sides.",
+"Corners":"A corner for every side.",
+"Patterns":"Say the pattern out loud — it repeats.",
+"Making five":"Count on from your number up to five.",
 "Ratio sharing":"Add the parts of the ratio first — that tells you what one part is worth.",
 "Range and mode":"Range is the spread: biggest take away smallest.",
 "Cone volume":"A cone is a third of the cylinder that would contain it.",
@@ -1573,6 +1629,7 @@ const TOPIC = BANK.map(l => l.gens.map(g => { try { return g().t; } catch(e){ re
 /* The hardest problem types within each grade — used for the chest and the
    hatch, so a challenge is harder without leaving the player's grade. */
 const HARD = [
+  [7,11,12],       /* K  */
   [4,7,10],        /* 1  */ [1,3,8,9],      /* 2  */ [2,4,6,7],      /* 3  */
   [0,1,4,7,9],     /* 4  */ [2,3,6,7],      /* 5  */ [1,4,7,8],      /* 6  */
   [0,1,5,7,9],     /* 7  */ [0,4,5,6,8],    /* 8  */ [0,2,8,9,10],   /* 9  */
@@ -2204,9 +2261,11 @@ const unscript = s => s.split("").map(c=>{
   const i=SUBS.indexOf(c), j=SUPS.indexOf(c);
   return i>=0 ? i : j>=0 ? j : c; }).join("");
 const SAY = [
-  /* A ? that stands in for a number reads as "what"; one that merely ends a
-     sentence is silent. This has to run before the operators become words. */
-  [/([=+\-−×÷*/]\s*)\?/g,"$1 what"], [/\?(\s*[=+\-−×÷*/])/g," what$1"],
+  /* A ? touching a word, a number or a unit ends a sentence and is silent;
+     a ? standing on its own is a blank and reads as "what". Both have to run
+     before the symbols become words. */
+  [/([A-Za-z0-9\u00B2\u00B3\u2070\u00B9\u2074-\u2079\u2026%\u00B0)\]}])\?/g,"$1"],
+  [/\?/g," what "],
   /* notation unpicked before the plain symbols are, because an integral carries
      its limits as tiny digits and a log carries its base the same way */
   [new RegExp("∫("+SUBC+"+)("+SUPC+"+)","g"),(m,a,b)=>` the integral from ${unscript(a)} to ${unscript(b)} of `],
@@ -2222,7 +2281,9 @@ const SAY = [
   [new RegExp(SUPC+"+","g"),m=>" to the power "+unscript(m)+" "],
   [/°/g," degrees "], [/%/g," percent "], [/∞/g," infinity "], [/θ/g," theta "],
   [/Δ/g," delta "], [/Σ/g," the sum of "], [/∫/g," the integral of "], [/±/g," plus or minus "],
-  [/\s*\?\s*$/,""], [/\?/g," what "],
+  /* the counting questions show the objects; speech drops them so a listening
+     child still has to look and count for themselves */
+  [/[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}\u{2B00}-\u{2BFF}]/gu,""],
   [/\s*\/\s*/g," over "],              /* anything left, like A/(x + 5) */
   [/\s{2,}/g," "]
 ];
@@ -2596,26 +2657,46 @@ function applyTheme(){
    moment it goes out. Shown on the setup screen and at the foot of the
    report card, so a player can say which build they are playing.
    ===================================================================== */
-const BUILD = 6, RELEASED = "27 Sep 2026, 11:11";
+const BUILD = 7, RELEASED = "27 Sep 2026, 11:19";
 const VERSION_LINE = `v${BUILD} · released ${RELEASED}`;
 
 /* =====================================================================
    SAVE
    ===================================================================== */
 const KEY="hauntedhouse.v2";
-const blank=()=>({name:"",avatar:"witch",level:0,world:0,unlock:{},sfx:true,music:true,kid:false,family:{},help:0,theme:"auto",
+const blank=()=>({name:"",avatar:"witch",level:0,world:0,unlock:{},sfx:true,music:true,kid:false,family:{},help:0,theme:"auto",schema:2,
   best:{candy:0,rooms:0},prog:{},totals:{runs:0,rooms:0,correct:0,attempts:0,wins:0,shortcuts:0},topics:{}});
 let save=blank();
-function load(){ try{ const j=JSON.parse(localStorage.getItem(KEY)); if(j&&j.totals) save=Object.assign(blank(),j);}catch(e){}
-  /* older saves kept one ladder for every grade — hand it to the grade they were on */
+/* SCHEMA is the shape of the level list. Bump it whenever levels are added or
+   removed in front of existing ones, and migrate here — `unlock` and `prog` are
+   keyed by level index, so a save written against an older list points at the
+   wrong grades. */
+const SCHEMA = 2;
+function load(){
+  let j=null;
+  try{ j=JSON.parse(localStorage.getItem(KEY)); }catch(e){}
+  if(j && j.totals) save=Object.assign(blank(), j);
   if(!save.unlock || typeof save.unlock!=="object"){ save.unlock={}; }
   if(!save.family || typeof save.family!=="object"){ save.family={}; }
-  /* College, Masters and PhD were dropped — a save that was sitting on one of
-     them, or carrying progress for one, must not index off the end of BANK */
+  if(!save.prog   || typeof save.prog!=="object"){ save.prog={}; }
+
+  /* older saves kept one ladder for every grade — hand it to the grade they were on */
+  if(typeof save.maxWorld==="number"){ if(save.maxWorld>0) save.unlock[save.level||0]=save.maxWorld; delete save.maxWorld; }
+
+  /* Kindergarten was put in front of Grade 1, so every stored level index moved
+     up by one. Saves written before that carry no schema mark at all. */
+  if(j && j.totals && !j.schema){
+    const bump=o=>{ const n={}; for(const k of Object.keys(o)) n[+k+1]=o[k]; return n; };
+    save.level=(save.level||0)+1;
+    save.unlock=bump(save.unlock); save.prog=bump(save.prog);
+  }
+  save.schema=SCHEMA;
+
+  /* and nothing may point past the end of the list either way */
   save.level = Math.max(0, Math.min(BANK.length-1, save.level||0));
   for(const k of Object.keys(save.unlock)) if(+k>=BANK.length) delete save.unlock[k];
-  for(const k of Object.keys(save.prog||{})) if(+k>=BANK.length) delete save.prog[k];
-  if(typeof save.maxWorld==="number"){ if(save.maxWorld>0) save.unlock[save.level||0]=save.maxWorld; delete save.maxWorld; store(); }
+  for(const k of Object.keys(save.prog))   if(+k>=BANK.length) delete save.prog[k];
+  store();
 }
 /* how far this grade has got — every grade opens its own places */
 const unlockFor = lv => Math.max(0, Math.min(WORLDS.length-1, (save.unlock&&save.unlock[lv])||0));
