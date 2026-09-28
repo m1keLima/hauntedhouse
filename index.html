@@ -155,6 +155,11 @@ kbd{background:#271a38;border:1px solid var(--line);border-radius:5px;padding:2p
   text-transform:uppercase;font-weight:800;background:rgba(6,3,10,.9);border:1.5px solid;border-radius:9px;
   padding:4px 9px;white-space:nowrap}
 #chest .propbadge{color:var(--gold);border-color:#c79a2f;box-shadow:0 0 14px rgba(255,207,92,.45)}
+/* the grand chest holds a multi-step problem and pays double — it says so */
+#chest.grand{filter:drop-shadow(0 0 24px rgba(168,120,255,.9))}
+#chest.grand .propbadge{color:#d9b6ff;border-color:#8a5bd0;
+  box-shadow:0 0 18px rgba(138,91,208,.7);animation:grandpulse 2.1s ease-in-out infinite}
+@keyframes grandpulse{0%,100%{box-shadow:0 0 12px rgba(138,91,208,.45)}50%{box-shadow:0 0 26px rgba(196,150,255,.95)}}
 #hatch .propbadge{color:#ff7b86;border-color:var(--blood);box-shadow:0 0 18px rgba(196,18,31,.6);
   animation:badgepulse 1.9s ease-in-out infinite}
 @keyframes badgepulse{0%,100%{box-shadow:0 0 12px rgba(196,18,31,.45)}50%{box-shadow:0 0 26px rgba(255,77,92,.9)}}
@@ -201,6 +206,7 @@ kbd{background:#271a38;border:1px solid var(--line);border-radius:5px;padding:2p
 #topic .above{font-style:normal;background:#2a1730;border:1px solid var(--line);color:var(--dim);
   border-radius:6px;padding:2px 8px;margin-left:8px;letter-spacing:1px;font-size:11px}
 #topic .above.hard{color:#ffb0b6;border-color:#5e1620;background:#2a0d12}
+#topic .above.multi{color:#d9b6ff;border-color:#4a2c72;background:#1d1030}
 #timerwrap{display:flex;align-items:center;gap:12px;margin:12px 0 2px}
 #timerbar{flex:1;height:10px;border-radius:6px;background:#1a1224;overflow:hidden;
   border:1px solid var(--line);box-shadow:inset 0 1px 3px rgba(0,0,0,.6)}
@@ -316,8 +322,12 @@ table.rc td:last-child{text-align:right;font-weight:800;color:var(--gold)}
       You carry <b style="color:var(--gold)">3 jack-o'-lanterns</b>. A wrong answer costs <b style="color:var(--gold)">half a lantern</b>
       and you may try again &mdash; you get a hint, not the answer.<br>
       The <b style="color:var(--pumpkin)">Pumpkin King</b> is in the room with you. Every half lantern you lose, he is closer. At nothing, he has you.<br>
+      Some rooms hold a <b style="color:#d9b6ff">multi-step problem</b> &mdash; one you cannot finish in a single move. Every grade gets at
+      least one of them a run, and Grade 5 up gets two.<br>
       A <b style="color:var(--gold)">chest</b> may appear once you are below full lanterns: the hardest kind of problem your grade has,
-      worth <b style="color:var(--gold)">half a lantern</b> back. Wrong costs nothing.<br>
+      worth <b style="color:var(--gold)">half a lantern</b> back. Wrong costs nothing. Later rooms can hold a
+      <b style="color:#d9b6ff">grand chest</b> instead &mdash; a multi-step problem, and it pays
+      <b style="color:#d9b6ff">double, with a whole lantern</b>.<br>
       A red-rimmed <b style="color:var(--blood)">shortcut hatch</b> in the floor &mdash; labelled, you cannot miss it &mdash;
       skips three rooms, but a wrong answer down there costs <b style="color:var(--blood)">a whole lantern</b>.
       Opening the chest or the hatch <b style="color:var(--good)">stops the room's clock</b>; it starts again from the same
@@ -372,7 +382,7 @@ table.rc td:last-child{text-align:right;font-weight:800;color:var(--gold)}
         <rect x="27" y="20" width="10" height="14" rx="2" fill="#ffcf5c"/>
         <circle cx="32" cy="27" r="2.4" fill="#4a2e14"/>
         <g fill="#ffcf5c" opacity=".9"><circle cx="12" cy="12" r="2"/><circle cx="52" cy="14" r="2.4"/><circle cx="32" cy="6" r="1.8"/></g>
-      </svg><span class="propbadge">🎁 Bonus chest</span></div>
+      </svg><span class="propbadge" id="chestlabel">🎁 Bonus chest</span></div>
     <div id="hatch" class="hidden" title="A hatch in the floor — skip three rooms">
       <svg width="150" height="112" viewBox="0 0 104 78">
         <ellipse class="hatchring" cx="52" cy="44" rx="40" ry="18" fill="none" stroke="#ff4d5c" stroke-width="2.5"/>
@@ -426,7 +436,9 @@ table.rc td:last-child{text-align:right;font-weight:800;color:var(--gold)}
               If it all goes out, he has you.</li>
           <li>Right answers are <b style="color:var(--gold)">sweets</b>. Quick answers are more sweets &mdash;
               but taking your time never costs you anything.</li>
-          <li>A <b style="color:var(--gold)">glowing chest</b> is free to try: get it right and you win back half a lantern.</li>
+          <li>A <b style="color:var(--gold)">glowing chest</b> is free to try: get it right and you win back half a lantern.
+              A purple <b style="color:#d9b6ff">grand chest</b> holds a problem that takes more than one step &mdash;
+              and pays twice as much.</li>
           <li>The <b style="color:var(--blood)">red hatch</b> skips three rooms &mdash; but get it wrong down there
               and it costs a whole lantern.</li>
           <li>It is <b>spooky, not scary</b>. Nothing jumps out at you, and nothing in here is real.</li>
@@ -436,10 +448,13 @@ table.rc td:last-child{text-align:right;font-weight:800;color:var(--gold)}
       <div class="helpcol">
         <div class="seclabel" style="margin-top:14px">🫖 If you are the grown-up</div>
         <ul class="helplist">
-          <li><b>Thirteen levels</b>, Kindergarten through Grade 12, with 175+ kinds of problem generated fresh every
+          <li><b>Thirteen levels</b>, Kindergarten through Grade 12, with 200+ kinds of problem generated fresh every
               time &mdash; the questions never run out and never repeat within a run.</li>
           <li><b>The level you pick is the level you get.</b> As a level is replayed it gets harder from the
               inside: harder types, and wrong answers that sit close to the right one.</li>
+          <li><b>Multi-step problems are guaranteed, not random.</b> Every grade has them &mdash; one room a
+              run at the lower grades, two from Grade 5 up, plus a <b>grand chest</b> that holds another and
+              pays double. They are the ones that ask for a plan rather than a fact.</li>
           <li><b>A wrong answer gives a hint, never the answer.</b> The working is shown once they have it
               right, or when the last lantern goes.</li>
           <li><b>The clock never punishes.</b> Running it down only forfeits the speed bonus &mdash; a slow
@@ -524,9 +539,18 @@ const BANK = [
   ()=>{const p=SH([["🎃","👻"],["🦇","🌙"],["🍬","⭐"],["🐱","🕷️"]])[0];
     const reps=R(2,3);let seq="";for(let k=0;k<reps;k++) seq+=p[0]+" "+p[1]+" ";
     return{t:"Patterns",q:`What comes next?   ${seq}${p[0]} …`,a:p[1],
-      w:[p[0],"🦇","🌙","⭐"].filter(v=>v!==p[1]),s:`It goes ${p[0]} then ${p[1]}, over and over.`};},
+      /* draw the wrong answers from the whole set, so there are always three */
+      w:[p[0],...SH(["🎃","👻","🦇","🌙","⭐","🍬","🐱","🕷️"].filter(v=>v!==p[0]&&v!==p[1]))].slice(0,4),
+      s:`It goes ${p[0]} then ${p[1]}, over and over.`};},
   ()=>{const a=R(1,4);return{t:"Making five",q:`${a} and ? make 5`,a:5-a,
-      w:[5+a,a,5-a+1,Math.max(0,5-a-1)],s:`${a} and ${5-a} make 5. Count on from ${a} to 5.`};}
+      w:[5+a,a,5-a+1,Math.max(0,5-a-1)],s:`${a} and ${5-a} make 5. Count on from ${a} to 5.`};},
+  /* two-steppers: you have to finish one sum before you can start the next */
+  ()=>{const a=R(2,5),b=R(1,3),c=R(1,2);
+    return{t:"Two steps",m:true,q:`${a} bats hang in the hall. ${b} more fly in. Then ${c} flies away. How many bats now?`,a:a+b-c,
+      w:[a+b,a+b+c,a-b+c,a],s:`First ${a} + ${b} = ${a+b}. Then ${a+b} − ${c} = ${a+b-c}.`};},
+  ()=>{const s=R(3,6),a=R(1,3),b=R(1,2);
+    return{t:"Follow the path",m:true,q:`Start at ${s}. Add ${a}. Then take away ${b}. Where do you land?`,a:s+a-b,
+      w:[s+a,s+a+b,Math.max(0,s-a-b),s],s:`${s} + ${a} = ${s+a}, and then ${s+a} − ${b} = ${s+a-b}.`};}
 ]},
 
 /* ---------------- 1. Grade 1 ---------------- */
@@ -545,7 +569,14 @@ const BANK = [
   ()=>{const a=R(12,20),b=R(2,6);return{t:"Taking away",q:`You had ${a} sweets and ate ${b}. How many are left?`,a:a-b,w:[a+b,a-b-1,a-b+1,b],s:`${a} − ${b} = ${a-b}.`};},
   ()=>{const a=R(6,14),b=a+R(2,6);return{t:"How many more",q:`A ghost has ${a} candles and a witch has ${b}. How many more does the witch have?`,a:b-a,w:[a+b,b-a+1,b-a-1,b],s:`${b} − ${a} = ${b-a} more.`};},
   ()=>{const s=R(14,20),n=R(2,5);return{t:"Counting back",q:`${s} bats hang in a row. ${n} fly off. How many are still hanging?`,a:s-n,w:[s+n,s-n-1,s-n+1,n],s:`Count back ${n} from ${s}: ${s-n}.`};},
-  ()=>{const g=R(2,5),e=R(2,5);return{t:"Equal groups",q:`${g} pumpkins each have ${e} candles. How many candles altogether?`,a:g*e,w:[g+e,g*e+g,g*e-e,g*e+2],s:`${g} groups of ${e} is ${g*e}.`};}
+  ()=>{const g=R(2,5),e=R(2,5);return{t:"Equal groups",q:`${g} pumpkins each have ${e} candles. How many candles altogether?`,a:g*e,w:[g+e,g*e+g,g*e-e,g*e+2],s:`${g} groups of ${e} is ${g*e}.`};},
+  /* two-steppers */
+  ()=>{const a=R(10,18),b=R(2,6),c=R(3,8);
+    return{t:"Two-step story",m:true,q:`You have ${a} sweets. You are given ${b} more, then you hand out ${c}. How many are left?`,a:a+b-c,
+      w:[a+b,a+b+c,a-b-c,a-c],s:`${a} + ${b} = ${a+b}. Then ${a+b} − ${c} = ${a+b-c}.`};},
+  ()=>{const g=R(2,5),e=R(2,5),x=R(1,6);
+    return{t:"Groups and more",m:true,q:`${g} pumpkins have ${e} candles each, and ${x} spare candles sit on the step. How many candles altogether?`,a:g*e+x,
+      w:[g*e,g+e+x,g*(e+x),g*e-x],s:`${g} × ${e} = ${g*e} candles in the pumpkins, plus the ${x} spare ones → ${g*e+x}.`};}
 ]},
 
 /* ---------------- 2. Grade 2 ---------------- */
@@ -567,7 +598,15 @@ const BANK = [
   ()=>{let a=R(20,99),b=R(20,99);if(a===b)b++;return{t:"Comparing numbers",q:`Which is greater, ${a} or ${b}?`,a:String(Math.max(a,b)),w:[String(Math.min(a,b)),"They are equal",String(a+b)],s:`Compare the tens digits first: ${Math.max(a,b)} is greater.`};},
   ()=>{const h=R(12,40),o=R(11,30);return{t:"Trick-or-treat totals",q:`You collect ${h} sweets at the first house and ${o} at the next. How many do you have?`,a:h+o,w:[h+o+10,h-o,h+o-10,h*2],s:`${h} + ${o} = ${h+o}.`};},
   ()=>{const a=R(30,90),b=R(10,25);return{t:"Measuring length",q:`A broom is ${a} cm long and a wand is ${b} cm. How much longer is the broom?`,a:(a-b)+" cm",w:[(a+b)+" cm",(a-b+10)+" cm",(a-b-10)+" cm",b+" cm"],s:`${a} − ${b} = ${a-b} cm.`};},
-  ()=>{const n=R(3,9),each=P([2,5,10]);return{t:"Repeated addition",q:`${n} spiders each spin ${each} webs. How many webs is that?`,a:n*each,w:[n+each,n*each+each,n*each-n,n*each+1],s:`${each} + ${each} … ${n} times over is ${n} × ${each} = ${n*each}.`};}
+  ()=>{const n=R(3,9),each=P([2,5,10]);return{t:"Repeated addition",q:`${n} spiders each spin ${each} webs. How many webs is that?`,a:n*each,w:[n+each,n*each+each,n*each-n,n*each+1],s:`${each} + ${each} … ${n} times over is ${n} × ${each} = ${n*each}.`};},
+  /* two-steppers */
+  ()=>{const a=R(20,45),b=R(15,35),c=R(8,20);
+    return{t:"Multi-step totals",m:true,q:`You collect ${a} sweets at one house and ${b} at the next, then eat ${c} on the way home. How many do you have?`,a:a+b-c,
+      w:[a+b,a+b+c,a-b+c,a+b-c+10],s:`${a} + ${b} = ${a+b}. Then ${a+b} − ${c} = ${a+b-c}.`};},
+  ()=>{const n=R(3,7),e=P([2,5,10]),tot=n*e;
+    const gone=R(2,Math.min(9,tot-1));
+    return{t:"Groups then take away",m:true,q:`${n} jars each hold ${e} spiders. ${gone} spiders escape. How many are left?`,a:tot-gone,
+      w:[tot,tot+gone,n+e-gone,tot-gone-1],s:`${n} × ${e} = ${tot} spiders. Then ${tot} − ${gone} = ${tot-gone}.`};}
 ]},
 
 /* ---------------- 3. Grade 3 ---------------- */
@@ -591,7 +630,14 @@ const BANK = [
     return{t:"Reading a chart",q:`Ghosts seen: ${names.map((n,i)=>`${n} ${bars[i]}`).join(", ")}. How many more were seen on the busiest day than the quietest?`,
       a:mx-Math.min(...bars),w:[mx,bars.reduce((x,y)=>x+y,0),mx-Math.min(...bars)+1,Math.min(...bars)],s:`Busiest ${mx}, quietest ${Math.min(...bars)}. ${mx} − ${Math.min(...bars)} = ${mx-Math.min(...bars)}.`};},
   ()=>{const start=R(1,9),mins=P([20,25,40,45]);const end=start*60+mins;
-    return{t:"Elapsed time",q:`The hunt starts at ${clock(start*60)} and lasts ${mins} minutes. When does it finish?`,a:clock(end),w:[clock(end+15),clock(end-15),clock(start*60+60),clock(end+60)],s:`${clock(start*60)} plus ${mins} minutes is ${clock(end)}.`};}
+    return{t:"Elapsed time",q:`The hunt starts at ${clock(start*60)} and lasts ${mins} minutes. When does it finish?`,a:clock(end),w:[clock(end+15),clock(end-15),clock(start*60+60),clock(end+60)],s:`${clock(start*60)} plus ${mins} minutes is ${clock(end)}.`};},
+  /* multi-steppers */
+  ()=>{const s=R(4,8),j=R(5,9),b=R(3,12),n=R(2,8);const tot=s*j;
+    return{t:"Three-step problem",m:true,q:`${s} shelves hold ${j} jars each. ${b} jars are broken, then ${n} new ones are put up. How many jars are there now?`,a:tot-b+n,
+      w:[tot,tot-b,tot+n,tot-b-n],s:`${s} × ${j} = ${tot}. Then ${tot} − ${b} = ${tot-b}, and + ${n} → ${tot-b+n}.`};},
+  ()=>{const k=P([2,3,4,5]),m=R(1,3),b=R(2,6);const e=k*m,tot=b*e,each=b*m;
+    return{t:"Multiply and share",m:true,q:`${b} boxes hold ${e} candles each. The candles are shared equally between ${k} rooms. How many does each room get?`,a:each,
+      w:[tot,e,each+1,tot-each],s:`${b} × ${e} = ${tot} candles altogether. Then ${tot} ÷ ${k} = ${each} for each room.`};}
 ]},
 
 /* ---------------- 4. Grade 4 ---------------- */
@@ -617,7 +663,15 @@ const BANK = [
   ()=>{const n=R(120,980),d=P([10,100]);const v=Math.round(n/d)*d;
     return{t:"Rounding big numbers",q:`Round ${n} to the nearest ${d}.`,a:v,w:[v+d,v-d,n,v+d*2].filter(x=>x!==v),s:`${n} sits ${n-v>0?"just above":"just below"} ${v}, and ${v} is the nearest ${d}.`};},
   ()=>{const tot=R(3,9)*4,part=tot/4;
-    return{t:"Fraction word problems",q:`A quarter of the ${tot} candles in the hall have gone out. How many are still burning?`,a:tot-part,w:[part,tot,tot-part-1,tot-part+1],s:`A quarter of ${tot} is ${part}, so ${tot} − ${part} = ${tot-part} still burn.`};}
+    return{t:"Fraction word problems",q:`A quarter of the ${tot} candles in the hall have gone out. How many are still burning?`,a:tot-part,w:[part,tot,tot-part-1,tot-part+1],s:`A quarter of ${tot} is ${part}, so ${tot} − ${part} = ${tot-part} still burn.`};},
+  /* multi-steppers */
+  ()=>{const c=R(4,8),bo=R(6,12),r=P([2,3,4,5]);const tot=c*bo;let br=R(3,12);while((tot-br)%r!==0) br++;
+    const each=(tot-br)/r;
+    return{t:"Three-step problem",m:true,q:`${c} crates hold ${bo} bottles each. ${br} bottles break, and the rest are shared equally between ${r} rooms. How many bottles does each room get?`,a:each,
+      w:[tot-br,each+1,each-1,each+r],s:`${c} × ${bo} = ${tot}. Then ${tot} − ${br} = ${tot-br}, and ${tot-br} ÷ ${r} = ${each}.`};},
+  ()=>{const x=R(3,12),k=R(2,5),b=R(3,20);const out=k*x+b;
+    return{t:"Working backwards",m:true,q:`A number is multiplied by ${k}, then ${b} is added. The answer is ${out}. What was the number?`,a:x,
+      w:[out-b,N(out/k),x+1,out-k],s:`Undo it backwards: ${out} − ${b} = ${k*x}, then ${k*x} ÷ ${k} = ${x}.`};}
 ]},
 
 /* ---------------- 5. Grade 5 ---------------- */
@@ -651,7 +705,19 @@ const BANK = [
   ()=>{const v=(R(100,999)/100);const dp=P([1,2]);const r=dp===1?Math.round(v*10)/10:Math.round(v*100)/100;
     return{t:"Rounding decimals",q:`Round ${v.toFixed(2)} to ${dp} decimal place${dp===1?"":"s"}.`,a:N(r),w:[N(r+0.1),N(r-0.1),N(Math.floor(v)),N(r+0.01)].filter(x=>x!==N(r)),s:`Look at the next digit along and round ${dp===1?"the tenths":"the hundredths"} accordingly → ${N(r)}.`};},
   ()=>{const d=P([4,6,8,10]),a=R(3,d-1),b=R(1,a-1);
-    return{t:"Subtracting fractions",q:`${a}/${d} − ${b}/${d} = ?`,a:frac(a-b,d),w:[frac(a+b,d),frac(a-b,d*2),frac(a-b+1,d),frac(b,d)],s:`Same bottom number, so take the tops: ${a} − ${b} = ${a-b}, giving ${frac(a-b,d)}.`};}
+    return{t:"Subtracting fractions",q:`${a}/${d} − ${b}/${d} = ?`,a:frac(a-b,d),w:[frac(a+b,d),frac(a-b,d*2),frac(a-b+1,d),frac(b,d)],s:`Same bottom number, so take the tops: ${a} − ${b} = ${a-b}, giving ${frac(a-b,d)}.`};},
+  /* multi-steppers — from here up, every grade carries three of these */
+  ()=>{const c=R(12,45)/10,n=R(2,4);const t=Math.round(c*n*100)/100;const paid=t<9.5?10:20;
+    const ch=Math.round((paid-t)*100)/100;
+    return{t:"Multi-step decimals",m:true,q:`A lantern costs £${c.toFixed(2)}. You buy ${n} of them and pay with £${paid}. How much change do you get?`,a:N(ch),
+      w:[N(t),N(Math.round((paid-c)*100)/100),N(Math.round((ch+1)*100)/100),N(Math.round((paid-t-0.1)*100)/100)],
+      s:`${n} × £${c.toFixed(2)} = £${N(t)}. Then £${paid} − £${N(t)} = £${N(ch)}.`};},
+  ()=>{const d=P([4,5,8]),k=R(3,9),n=R(1,d-1),add=R(3,12);const tot=d*k,left=tot-n*k+add;
+    return{t:"Multi-step fractions",m:true,q:`${n}/${d} of the ${tot} ghosts in the hall drift away, then ${add} more arrive. How many ghosts are in the hall now?`,a:left,
+      w:[tot-n*k,n*k+add,tot+add,left+1],s:`${n}/${d} of ${tot} is ${n*k}. So ${tot} − ${n*k} = ${tot-n*k}, and + ${add} → ${left}.`};},
+  ()=>{const b=R(4,9),e=P([8,12,16,20]);const tot=b*e,brk=tot/4;
+    return{t:"Multi-step word problems",m:true,q:`${b} boxes hold ${e} candles each. A quarter of all the candles are broken. How many are still good?`,a:tot-brk,
+      w:[tot,brk,tot-brk-e,tot/2],s:`${b} × ${e} = ${tot} candles. A quarter of ${tot} is ${brk}, so ${tot} − ${brk} = ${tot-brk} are good.`};}
 ]},
 
 /* ---------------- 6. Grade 6 ---------------- */
@@ -680,7 +746,21 @@ const BANK = [
   ()=>{const a=-R(2,15),b=R(3,20);
     return{t:"Temperature change",q:`The crypt is ${a}°C. It warms by ${b}°C. What is the temperature now?`,a:(a+b)+"°C",w:[(a-b)+"°C",(b-a)+"°C",(a+b+2)+"°C",(-a+b)+"°C"],s:`${a} + ${b} = ${a+b}°C.`};},
   ()=>{const w=R(2,9),l=R(2,9),h=R(2,9);
-    return{t:"Volume of a box",q:`A crate measures ${w} × ${l} × ${h} feet. What is its volume, in cubic feet?`,a:w*l*h,w:[w+l+h,2*(w*l+l*h+w*h),w*l,w*l*h+w],s:`Volume = ${w} × ${l} × ${h} = ${w*l*h}.`};}
+    return{t:"Volume of a box",q:`A crate measures ${w} × ${l} × ${h} feet. What is its volume, in cubic feet?`,a:w*l*h,w:[w+l+h,2*(w*l+l*h+w*h),w*l,w*l*h+w],s:`Volume = ${w} × ${l} × ${h} = ${w*l*h}.`};},
+  /* multi-steppers */
+  ()=>{const base=P([40,60,80,120,200]),p=P([10,20,25,50]),d=P([5,10]);
+    const off=base*p/100,v=base-off+d;
+    return{t:"Multi-step percent",m:true,q:`A £${base} cloak is reduced by ${p}%, then £${d} is added for delivery. What do you pay?`,a:N(v),
+      w:[N(base-off),N(base+d),N(off+d),N(base-off-d)],s:`${p}% of ${base} is ${off}. So ${base} − ${off} = ${base-off}, then + ${d} → ${v}.`};},
+  ()=>{const a=R(1,4),b=a+R(1,4),k=P([2,3,4]),part=R(3,9)*k;const tot=(a+b)*part;
+    return{t:"Multi-step ratio",m:true,q:`£${tot} is shared in the ratio ${a}:${b}. The larger share is then split equally between ${k} people. How much does each of them get?`,
+      /* part is a whole multiple of k, so every distractor here stays a whole
+         number of pounds — and none of them can land on the answer */
+      a:"£"+N(b*part/k),w:["£"+N(b*part),"£"+N(a*part/k),"£"+N(tot/k),"£"+N(b*part/k+1)],
+      s:`${a} + ${b} = ${a+b} parts, so one part is £${part}. The larger share is ${b} × £${part} = £${b*part}, and £${b*part} ÷ ${k} = £${b*part/k}.`};},
+  ()=>{const x=R(2,12),a=R(2,6),b=R(3,15);const out=a*(x+b);
+    return{t:"Working backwards",m:true,q:`A number has ${b} added to it, and the answer is then multiplied by ${a}, giving ${out}. What was the number?`,a:x,
+      w:[x+b,out-b,N(out/(a*b)),x+1],s:`Undo it backwards: ${out} ÷ ${a} = ${x+b}, then ${x+b} − ${b} = ${x}.`};}
 ]},
 
 /* ---------------- 7. Grade 7 ---------------- */
@@ -709,7 +789,20 @@ const BANK = [
       w:["£"+a*k,"£"+tot/2,"£"+(b*k+k),"£"+k],s:`${a} + ${b} = ${a+b} parts, so one part is £${k}. The larger share is ${b} × £${k} = £${b*k}.`};},
   ()=>{const m=R(2,9),xs=SH([m,m,R(10,19),R(20,29),R(30,44)]);const hi=Math.max(...xs),lo=Math.min(...xs);
     return{t:"Range and mode",q:`For the data ${xs.join(", ")} — what is the range?`,a:hi-lo,
-      w:[hi,lo,hi+lo,m],s:`Range = largest − smallest = ${hi} − ${lo} = ${hi-lo}. (The mode, the repeated value, is ${m}.)`};}
+      w:[hi,lo,hi+lo,m],s:`Range = largest − smallest = ${hi} − ${lo} = ${hi-lo}. (The mode, the repeated value, is ${m}.)`};},
+  /* multi-steppers */
+  ()=>{const x=R(2,9),a=R(2,5),b=R(2,7),c=R(2,12);const rhs=a*(b*x+c);
+    return{t:"Multi-step equations",m:true,q:`Solve for x:  ${a}(${b}x + ${c}) = ${rhs}`,a:x,
+      w:[x+1,x-1,N(rhs/a),N(rhs/(a*b))],s:`Divide by ${a}: ${b}x + ${c} = ${rhs/a}. Subtract ${c}: ${b}x = ${b*x}. Divide by ${b}: x = ${x}.`};},
+  ()=>{const base=P([200,400,500,800]),p=P([10,20,25]),q=P([10,50]);
+    const up=base*(1+p/100),v=Math.round(up*(1-q/100)*100)/100;
+    return{t:"Multi-step percent",m:true,q:`A £${base} relic rises by ${p}%, then falls by ${q}%. What is it worth now?`,a:N(v),
+      w:[N(base),N(up),N(Math.round(base*(1+p/100-q/100)*100)/100),N(Math.round((v+base*q/100)*100)/100)],
+      s:`After the rise it is £${N(up)}. Taking ${q}% off that: ${N(up)} × ${N(1-q/100)} = £${N(v)}.`};},
+  ()=>{const l=R(6,15),w=R(4,12),c=R(2,9);const per=2*(l+w);
+    return{t:"Multi-step geometry",m:true,q:`A rectangular yard is ${l} m by ${w} m. Fencing costs £${c} a metre. What does it cost to fence all the way round?`,
+      a:"£"+per*c,w:["£"+l*w*c,"£"+per,"£"+(l+w)*c,"£"+(per*c+c)],
+      s:`Perimeter = 2 × (${l} + ${w}) = ${per} m. Then ${per} × £${c} = £${per*c}.`};}
 ]},
 
 /* ---------------- 8. Grade 8 ---------------- */
@@ -751,7 +844,18 @@ const BANK = [
   ()=>{const n=R(1200,98000),sf=P([2,3]);const d=Math.floor(Math.log10(n))+1,f=Math.pow(10,d-sf),v=Math.round(n/f)*f;
     return{t:"Significant figures",q:`Round ${n} to ${sf} significant figures.`,a:v,
       w:[v+f,v-f,n,Math.round(n/(f*10))*f*10].filter(x=>x!==v),
-      s:`Keep the first ${sf} digits and let the rest go to zero → ${v}.`};}
+      s:`Keep the first ${sf} digits and let the rest go to zero → ${v}.`};},
+  /* multi-steppers */
+  ()=>{const m=R(2,5),c=R(-6,8),x1=R(1,4),x2=x1+R(2,5),x3=x2+R(1,5);
+    return{t:"Multi-step linear",m:true,q:`A line passes through (${x1}, ${m*x1+c}) and (${x2}, ${m*x2+c}). What is y when x = ${x3}?`,a:m*x3+c,
+      w:[m*x3,m*x3+c+m,m*(x3-x1)+c,c],s:`Slope = ${m*x2+c-(m*x1+c)}/${x2-x1} = ${m}, and the line is y = ${m}x ${signed(c)}. At x = ${x3}: ${m*x3+c}.`};},
+  ()=>{const t=P([[3,4,5],[6,8,10],[5,12,13],[8,15,17],[9,12,15]]),k=R(1,3);
+    const a=t[0]*k,b=t[1]*k,c=t[2]*k;
+    return{t:"Multi-step Pythagoras",m:true,q:`A right triangle has legs ${a} and ${b}. What is its perimeter?`,a:a+b+c,
+      w:[a+b,c,a*b/2,a+b+c+k],s:`The hypotenuse is √(${a*a} + ${b*b}) = ${c}. Perimeter = ${a} + ${b} + ${c} = ${a+b+c}.`};},
+  ()=>{const x=R(1,7),y=R(1,7);const s=2*x+3*y,d=x-y;
+    return{t:"Multi-step systems",m:true,q:`2x + 3y = ${s} and x − y = ${d}. What is xy?`,a:x*y,
+      w:[x+y,s-d,x*y+x,6*x*y],s:`x − y = ${d} gives x = y ${signed(d)}. Substituting: y = ${y}, x = ${x}, so xy = ${x*y}.`};}
 ]},
 
 /* ---------------- 9. Grade 9 — Algebra I ---------------- */
@@ -799,7 +903,17 @@ const BANK = [
       s:`Two numbers that multiply to ${p*q} and add to ${p+q}: ${p} and ${q}.`};},
   ()=>{const b=R(1,7),c=R(1,24);const k=c-b*b;
     return{t:"Completing the square",q:`x² + ${2*b}x + ${c} is written as (x + a)² + k. What is k?`,a:k,
-      w:[c,b*b,c+b*b,-k].filter(v=>v!==k),s:`a is half of ${2*b}, so a = ${b}, and k = ${c} − ${b}² = ${k}.`};}
+      w:[c,b*b,c+b*b,-k].filter(v=>v!==k),s:`a is half of ${2*b}, so a = ${b}, and k = ${c} − ${b}² = ${k}.`};},
+  /* multi-steppers */
+  ()=>{const x=R(2,9),a=R(2,6),b=R(1,12),k=R(2,5),c=R(1,9);
+    return{t:"Multi-step algebra",m:true,q:`If ${a}x − ${b} = ${a*x-b}, what is ${k}x + ${c}?`,a:k*x+c,
+      w:[x,k*x,k*x+c+k,a*x+c],s:`${a}x = ${a*x}, so x = ${x}. Then ${k}(${x}) + ${c} = ${k*x+c}.`};},
+  ()=>{const p=R(1,7),q=p+R(1,6);
+    return{t:"Multi-step quadratics",m:true,q:`Factorise x² + ${p+q}x + ${p*q}, then give the difference between its two roots.`,a:q-p,
+      w:[p+q,p*q,-(p+q),q-p+1],s:`It factorises as (x + ${p})(x + ${q}), so the roots are −${p} and −${q}. Their difference is ${q-p}.`};},
+  ()=>{const a=R(2,5),b=R(1,9),c=R(2,4),d=R(1,7),x=R(1,5);const g=c*x+d,v=a*g+b;
+    return{t:"Multi-step functions",m:true,q:`f(x) = ${a}x + ${b} and g(x) = ${c}x + ${d}. What is f(g(${x}))?`,a:v,
+      w:[a*x+b,c*(a*x+b)+d,a*c*x+b+d,v+b],s:`g(${x}) = ${g}. Then f(${g}) = ${a}(${g}) + ${b} = ${v}.`};}
 ]},
 
 /* ---------------- 10. Grade 10 — Geometry ---------------- */
@@ -821,7 +935,9 @@ const BANK = [
     return{t:"Sectors",q:`A circle of radius ${r} has a ${ang}° sector. What is the sector's area? (2 d.p.)`,a:N(v),
       w:[N(Math.round(Math.PI*r*r*100)/100),N(Math.round(v*2*100)/100),N(Math.round(2*Math.PI*r*ang/360*100)/100),N(Math.round(v/2*100)/100)],
       s:`Area = (${ang}/360) × π × ${r*r} = ${v}.`};},
-  ()=>{const x1=R(-8,8),y1=R(-8,8),x2=x1+2*R(1,6),y2=y1+2*R(1,6);
+  ()=>{const x1=R(-8,8),y1=R(-8,8);let x2=x1+2*R(1,6);const y2=y1+2*R(1,6);
+    /* a midpoint at the origin would collide with the (x₁+x₂, y₁+y₂) distractor */
+    if(x1+x2===0 && y1+y2===0) x2+=2;
     return{t:"Midpoint",q:`Find the midpoint of (${x1}, ${y1}) and (${x2}, ${y2}).`,a:`(${(x1+x2)/2}, ${(y1+y2)/2})`,
       w:[`(${x2-x1}, ${y2-y1})`,`(${x1+x2}, ${y1+y2})`,`(${(x1+x2)/2}, ${y1+y2})`,`(${y1}, ${x1})`],
       s:`Average each coordinate: ((${x1}+${x2})/2, (${y1}+${y2})/2) = (${(x1+x2)/2}, ${(y1+y2)/2}).`};},
@@ -847,7 +963,21 @@ const BANK = [
   ()=>{const t=P([[1,2,2,3],[2,3,6,7],[1,4,8,9],[4,4,7,9],[2,6,9,11]]),k=R(1,4);
     return{t:"Space diagonal",q:`A box measures ${t[0]*k} × ${t[1]*k} × ${t[2]*k}. How long is its longest internal diagonal?`,
       a:t[3]*k,w:[(t[0]+t[1]+t[2])*k,t[2]*k,(t[3]+1)*k,t[3]*k*2],
-      s:`√(${t[0]*k}² + ${t[1]*k}² + ${t[2]*k}²) = √${(t[3]*k)*(t[3]*k)} = ${t[3]*k}.`};}
+      s:`√(${t[0]*k}² + ${t[1]*k}² + ${t[2]*k}²) = √${(t[3]*k)*(t[3]*k)} = ${t[3]*k}.`};},
+  /* multi-steppers */
+  ()=>{const l=R(8,16),w=R(6,12),s=R(2,5);
+    return{t:"Multi-step geometry",m:true,q:`A ${l} × ${w} rectangle has a ${s} × ${s} square cut out of one corner. What area is left?`,a:l*w-s*s,
+      w:[l*w,s*s,l*w-4*s,2*(l+w)-4*s],s:`The rectangle is ${l} × ${w} = ${l*w}, and the square is ${s*s}. So ${l*w} − ${s*s} = ${l*w-s*s}.`};},
+  ()=>{const h=P([10,20,30,40]);const o=h/2,adj=Math.round(h*Math.sqrt(3)/2*100)/100;
+    const ar=Math.round(o*adj/2*100)/100;
+    return{t:"Multi-step trigonometry",m:true,q:`A right triangle has hypotenuse ${h} and one angle of 30°. What is its area? (2 d.p.)`,a:N(ar),
+      w:[N(Math.round(o*adj*100)/100),N(Math.round(h*o/2*100)/100),N(Math.round(h*h/4*100)/100),N(Math.round(ar/2*100)/100)],
+      s:`The side opposite the 30° is ${o}, and the other is ${adj}. Area = ½ × ${o} × ${adj} = ${N(ar)}.`};},
+  ()=>{const x1=R(-6,2),y1=R(-6,2),t=P([[3,4],[6,8],[5,12],[8,6]]);const dx=t[0],dy=t[1];
+    const d=Math.hypot(dx,dy);
+    return{t:"Multi-step coordinate geometry",m:true,q:`Find the midpoint of (${x1}, ${y1}) and (${x1+dx}, ${y1+dy}), then say how far that midpoint is from (${x1}, ${y1}).`,
+      a:N(d/2),w:[N(d),N((dx+dy)/2),N(d/4),N(d+1)],
+      s:`The midpoint is (${N((2*x1+dx)/2)}, ${N((2*y1+dy)/2)}). It sits half way along, so the distance is ½ × ${N(d)} = ${N(d/2)}.`};}
 ]},
 
 /* ---------------- 11. Grade 11 — Algebra II / Precalc ---------------- */
@@ -892,7 +1022,19 @@ const BANK = [
   ()=>{const a=R(1,5),b=a+R(1,5);
     return{t:"Partial fractions",q:`1/((x + ${a})(x + ${b})) is written as A/(x + ${a}) + B/(x + ${b}). What is A?`,
       a:frac(1,b-a),w:[frac(-1,b-a),frac(1,a+b),frac(1,a*b),frac(b-a,1)],
-      s:`Cover up (x + ${a}) and set x = −${a}: A = 1/(${b} − ${a}) = ${frac(1,b-a)}.`};}
+      s:`Cover up (x + ${a}) and set x = −${a}: A = 1/(${b} − ${a}) = ${frac(1,b-a)}.`};},
+  /* multi-steppers */
+  ()=>{const b=P([2,3,5]),n=R(2,5),k=R(2,6),c=R(1,9);
+    return{t:"Multi-step logs",m:true,q:`If ${b}${sup("x")} = ${Math.pow(b,n)}, what is ${k}x + ${c}?`,a:k*n+c,
+      w:[n,k*n,Math.pow(b,n),k*n+c+k],s:`${b}${sup(n)} = ${Math.pow(b,n)}, so x = ${n}. Then ${k}(${n}) + ${c} = ${k*n+c}.`};},
+  ()=>{const a1=R(2,9),d=R(2,7),n=R(5,10);const an=a1+(n-1)*d,sum=n*(a1+an)/2;
+    return{t:"Multi-step sequences",m:true,q:`An arithmetic sequence starts at ${a1} with common difference ${d}. Find term ${n}, then the sum of the first ${n} terms.`,a:sum,
+      w:[an,a1+n*d,sum-an,n*an],s:`Term ${n} is ${a1} + ${(n-1)*d} = ${an}. Then Sₙ = (${n}/2)(${a1} + ${an}) = ${sum}.`};},
+  ()=>{const a=R(1,5),b=R(1,5),c=R(1,5),d=R(1,5);const re=a*c-b*d,im=a*d+b*c;const m2=re*re+im*im;
+    const mod=Math.round(Math.sqrt(m2)*1000)/1000;
+    return{t:"Multi-step complex",m:true,q:`Multiply (${cplx(a,b)})(${cplx(c,d)}), then give the modulus of the result. (3 d.p. if needed)`,a:N(mod),
+      w:[N(m2),N(Math.round(Math.hypot(a,b)*1000)/1000),N(Math.round(Math.hypot(c,d)*1000)/1000),N(Math.abs(re)+Math.abs(im))],
+      s:`The product is ${cplx(re,im)}. Its modulus is √(${re*re} + ${im*im}) = ${N(mod)}.`};}
 ]},
 
 /* ---------------- 12. Grade 12 — Calculus ---------------- */
@@ -941,7 +1083,18 @@ const BANK = [
   ()=>{const a=R(2,6);const num=a*a*a;
     return{t:"Area between curves",q:`Find the area enclosed between y = ${a}x and y = x².`,a:frac(num,6),
       w:[frac(num,3),frac(num,2),frac(a*a,6),frac(num,12)],
-      s:`They cross at x = 0 and x = ${a}. ∫₀${sup(a)}(${a}x − x²)dx = ${a}³/6 = ${frac(num,6)}.`};}
+      s:`They cross at x = 0 and x = ${a}. ∫₀${sup(a)}(${a}x − x²)dx = ${a}³/6 = ${frac(num,6)}.`};},
+  /* multi-steppers */
+  ()=>{const a=R(2,6),b=R(2,9),x=R(1,4);const f1=3*a*x*x+2*b*x,f2=6*a*x+2*b;
+    return{t:"Multi-step calculus",m:true,q:`f(x) = ${a}x³ + ${b}x². Find f′(${x}) + f″(${x}).`,a:f1+f2,
+      w:[f1,f2,f1-f2,f1+f2+x],s:`f′(x) = ${3*a}x² + ${2*b}x, so f′(${x}) = ${f1}. f″(x) = ${6*a}x + ${2*b}, so f″(${x}) = ${f2}. Together: ${f1+f2}.`};},
+  ()=>{const p=R(3,12)*4;const side=p/4;
+    return{t:"Multi-step optimisation",m:true,q:`A rectangle has perimeter ${p}. What is the largest area it can have?`,a:side*side,
+      w:[p*p,p*side,side*side/2,side*4],s:`The two sides sum to ${p/2}, so the area is x(${p/2} − x). That is largest at x = ${side}, giving ${side*side}.`};},
+  ()=>{const a=R(2,6),u=R(2,4);const A=a*u*u*u/3;const avg=Math.round(A/u*1000)/1000;
+    return{t:"Multi-step integration",m:true,q:`Find the average value of y = ${a}x² between x = 0 and x = ${u}. (3 d.p. if needed)`,a:N(avg),
+      w:[N(Math.round(A*1000)/1000),N(a*u*u),N(Math.round(avg*2*1000)/1000),N(Math.round(avg/2*1000)/1000)],
+      s:`∫₀${sup(u)} ${a}x² dx = ${a}(${u}³)/3 = ${N(Math.round(A*1000)/1000)}. Divide by the width ${u} → ${N(avg)}.`};}
 ]}
 ];
 
@@ -1120,7 +1273,39 @@ const HINTS = {
 "Product rule":"(uv)′ = u′v + uv′.",
 "Exponential derivatives":"d/dx e^u = e^u · u′.",
 "L'Hôpital":"Differentiate the top and the bottom separately, then substitute.",
-"Power rule integration":"∫xⁿ dx = x^(n+1)/(n + 1)."
+"Power rule integration":"∫xⁿ dx = x^(n+1)/(n + 1).",
+
+/* multi-step hints: each one names the steps, in order, and stops there */
+"Two steps":"Do the adding first. Whatever you get, take the last number away from that.",
+"Follow the path":"One move at a time. Add first, and only then take away.",
+"Two-step story":"Add what you were given before you take away what you gave out.",
+"Groups and more":"Work out the groups first, then add the spare ones on.",
+"Multi-step totals":"Add the two collections together first, then take away what went.",
+"Groups then take away":"Multiply to get the total, then subtract the ones that left.",
+"Three-step problem":"Three steps in order: the total, then the loss, then the last change.",
+"Multiply and share":"Find the whole amount first, then divide it up.",
+"Working backwards":"Start from the answer and undo each step in reverse order.",
+"Multi-step decimals":"Work out the full cost first, then subtract it from what you handed over.",
+"Multi-step fractions":"Find the fraction of the total first, then apply the second change.",
+"Multi-step word problems":"Total first, then the fraction of it, then the subtraction.",
+"Multi-step percent":"Do one percentage at a time, on the amount you have at that moment.",
+"Multi-step ratio":"Find the value of one part first, then build up the share you need.",
+"Multi-step equations":"Undo the outside of the bracket before you touch what is inside it.",
+"Multi-step geometry":"Find the length or area first, then do the second calculation on it.",
+"Multi-step linear":"Get the slope from the two points, write the line, then substitute.",
+"Multi-step Pythagoras":"Find the missing side first, then add all three together.",
+"Multi-step systems":"Solve for both letters, then do what the question actually asks for.",
+"Multi-step algebra":"Solve for x first. Only then put it into the second expression.",
+"Multi-step quadratics":"Factorise first, read off the roots, then compare them.",
+"Multi-step functions":"Work the inner function out first, then feed that number into the outer one.",
+"Multi-step trigonometry":"Find both sides first, then use ½ × base × height.",
+"Multi-step coordinate geometry":"Average the coordinates for the midpoint, then use the distance formula.",
+"Multi-step logs":"Match the powers to find x, then substitute it in.",
+"Multi-step sequences":"aₙ = a₁ + (n−1)d first, then Sₙ = (n/2)(a₁ + aₙ).",
+"Multi-step complex":"FOIL the product out first, then take the modulus of what you get.",
+"Multi-step calculus":"Differentiate once, differentiate again, then evaluate both.",
+"Multi-step optimisation":"Write the area in terms of one side, then find its maximum.",
+"Multi-step integration":"Integrate first, then divide by the width of the interval."
 };
 
 /* ---------- build a multiple-choice problem ---------- */
@@ -1137,7 +1322,7 @@ function makeProblem(levelIdx, genIdx){
     const c = isNaN(n) ? ans+" "+"·".repeat(out.length) : N(n + P([1,-1,2,-2,3,-3,5,10]));
     if(!out.includes(c)) out.push(c);
   }
-  return {topic:p.t, question:p.q, answer:ans, steps:p.s,
+  return {topic:p.t, question:p.q, answer:ans, steps:p.s, multi:!!p.m,
           hint:HINTS[p.t]||"Work through it one step at a time.", choices:SH(out)};
 }
 /* =====================================================================
@@ -1626,6 +1811,12 @@ const esc = s => String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>
    genuinely different problem types. */
 const TOPIC = BANK.map(l => l.gens.map(g => { try { return g().t; } catch(e){ return "?"; } }));
 
+/* Which generators in each grade are multi-step — a question you cannot finish
+   in one move. Every grade has some; Grade 5 up has three. They fill the
+   guaranteed multi-step rooms and they are what the grand chest holds. */
+const MULTI = BANK.map(l => l.gens.map((g,i) => { try { return g().m ? i : -1; } catch(e){ return -1; } })
+                           .filter(i => i >= 0));
+
 /* The hardest problem types within each grade — used for the chest and the
    hatch, so a challenge is harder without leaving the player's grade. */
 const HARD = [
@@ -1655,6 +1846,26 @@ function challengeProblem(level, tight, avoid){
   const p = makeProblem(level, gi);
   if(tight) tighten(p);
   return p;
+}
+
+/* The grand chest: a multi-step problem, worth double, from the player's own
+   grade. buildPlan holds one multi type back so there is always something
+   here the rooms have not already handed out. If every multi type has somehow
+   been used, fall back to an ordinary hard challenge rather than repeat one. */
+function grandProblem(level, avoid){
+  let pool = MULTI[level] || [];
+  if(avoid && avoid.size){
+    const fresh = pool.filter(g=>!avoid.has(TOPIC[level][g]));
+    pool = fresh;
+  }
+  if(!pool.length) return null;
+  const gi = P(pool);
+  if(avoid) avoid.add(TOPIC[level][gi]);
+  return makeProblem(level, gi);
+}
+/* is there an unused multi-step type left for a grand chest? */
+function grandLeft(level, avoid){
+  return (MULTI[level]||[]).some(g => !avoid || !avoid.has(TOPIC[level][g]));
 }
 
 /* ---------- difficulty tiers ----------
@@ -2277,7 +2488,10 @@ const SAY = [
   [/\s*≤\s*/g," is less than or equal to "], [/\s*≥\s*/g," is greater than or equal to "],
   [/\s*<\s*/g," is less than "], [/\s*>\s*/g," is greater than "],
   [/(\d)\s*\/\s*(\d)/g,"$1 over $2"], [/√/g," the square root of "], [/π/g," pi "],
-  [/²/g," squared "], [/³/g," cubed "], [/ⁿ/g," to the power n "], [/⁻/g," minus "],
+  [/²/g," squared "], [/³/g," cubed "], [/ⁿ/g," to the power n "], [/ˣ/g," to the power x "], [/⁻/g," minus "],
+  /* money, and the primes on a derivative — both silent to a speech engine */
+  /* the amount stops before a full stop, or "£3.40." reads as "3.40. pounds" */
+  [/£\s*(\d[\d,]*(?:\.\d+)?)/g," $1 pounds "], [/″/g," double prime "], [/′/g," prime "],
   [new RegExp(SUPC+"+","g"),m=>" to the power "+unscript(m)+" "],
   [/°/g," degrees "], [/%/g," percent "], [/∞/g," infinity "], [/θ/g," theta "],
   [/Δ/g," delta "], [/Σ/g," the sum of "], [/∫/g," the integral of "], [/±/g," plus or minus "],
@@ -2657,7 +2871,7 @@ function applyTheme(){
    moment it goes out. Shown on the setup screen and at the foot of the
    report card, so a player can say which build they are playing.
    ===================================================================== */
-const BUILD = 7, RELEASED = "27 Sep 2026, 11:19";
+const BUILD = 8, RELEASED = "28 Sep 2026, 11:24";
 const VERSION_LINE = `v${BUILD} · released ${RELEASED}`;
 
 /* =====================================================================
@@ -2708,6 +2922,7 @@ function store(){ try{ localStorage.setItem(KEY,JSON.stringify(save)); }catch(e)
 const S={room:0,lanterns:3,candy:0,level:0,world:0,escapeBonus:0,speedCandy:0,avatar:"witch",name:"",tries:0,
   qStart:0,roomQStart:0,roomHeld:0,timerId:null,lastTick:99,
   current:null,bonus:null,shortcut:null,chestUsed:false,hatchUsed:false,hatchShown:false,
+  grand:false,bonusGrand:false,
   plan:[],slot:null,started:0,log:[],jump:0,tier:0,
   /* every room type answered wrong first time, kept so the bonus round can
      hand the same kinds of problem back at the end */
@@ -2882,16 +3097,28 @@ function buildPlan(level, used){
   /* two hard types are held back for the chest and the hatch */
   const wantHard = Math.max(0, Math.min(spec.hard, hard.length-2));
   const fresh = g => !usedTopics.has(TOPIC[level][g]);
+  const multiTypes = MULTI[level] || [];
+  const slot = g => { pool.splice(pool.indexOf(g),1); usedTopics.add(TOPIC[level][g]);
+                      return {lvl:level, gen:g, hard:hard.indexOf(g)>=0, tight:false}; };
   const take = wantsHard => {
-    let idx = wantsHard ? pool.findIndex(g=>fresh(g) && hard.indexOf(g)>=0) : -1;
-    if(idx<0) idx = pool.findIndex(g=>fresh(g) && (wantsHard || hard.indexOf(g)<0));
+    /* ordinary rooms never take a multi-step type: those are dealt out
+       deliberately below, and one is always left over for the grand chest */
+    const ok = g => fresh(g) && multiTypes.indexOf(g)<0;
+    let idx = wantsHard ? pool.findIndex(g=>ok(g) && hard.indexOf(g)>=0) : -1;
+    if(idx<0) idx = pool.findIndex(g=>ok(g) && (wantsHard || hard.indexOf(g)<0));
+    if(idx<0) idx = pool.findIndex(ok);
     if(idx<0) idx = pool.findIndex(fresh);
     if(idx<0) return null;
-    const g=pool.splice(idx,1)[0]; usedTopics.add(TOPIC[level][g]);
-    return {lvl:level, gen:g, hard:hard.indexOf(g)>=0, tight:false};
+    return slot(pool[idx]);
   };
+  /* multi-step rooms are guaranteed, not left to chance: one at the lower
+     grades, two from Grade 5 up. One multi type is always held back so the
+     grand chest has something the rooms have not already used. */
+  const multi = SH(multiTypes.filter(fresh));
+  const wantMulti = Math.max(0, Math.min(level>=5?2:1, multi.length-1));
   const plan=[];
-  for(let i=0;i<10;i++){ const slot=take(i<wantHard); if(slot) plan.push(slot); }
+  for(let i=0;i<wantMulti;i++) plan.push(slot(multi[i]));
+  for(let i=plan.length,h=0;i<10;i++){ const s=take(h++<wantHard); if(s) plan.push(s); }
   SH(plan.map((_,i)=>i)).slice(0, Math.min(spec.tight, plan.length))
     .forEach(i=>{ plan[i].tight=true; });
   return SH(plan);
@@ -2926,6 +3153,7 @@ function startGame(){
 
 function loadRoom(){
   S.tries=0; S.bonus=null; S.shortcut=null; S.chestUsed=false; S.jump=0;
+  S.grand=false; S.bonusGrand=false;
   S.roomQStart=Date.now(); S.roomHeld=0;
   const slot=S.plan[Math.min(S.plan.length-1,S.room)];
   S.slot=slot;
@@ -2940,6 +3168,13 @@ function loadRoom(){
   $("#candynum").textContent=S.candy;
 
   const chest = S.lanterns<3 && Math.random()<0.65;
+  /* from the third room on, a chest may be a *grand* chest: one multi-step
+     problem, and it pays double. It looks different, so the choice to open it
+     is made knowing what is in there. */
+  S.grand = chest && S.room>=2 && Math.random()<0.5
+            && grandLeft(S.level,S.usedTopics);
+  $("#chest").classList.toggle("grand", !!S.grand);
+  $("#chestlabel").textContent = S.grand ? "✨ Grand chest · multi-step" : "🎁 Bonus chest";
   $("#chest").classList.toggle("hidden",!chest);
 
   const hatch = !S.hatchUsed && S.room>=1 && S.room<=5 && Math.random()<0.45;
@@ -2994,13 +3229,14 @@ function resumeRoomClock(){
 
 function askQuestion(p,mode){
   S.spoken=p;
-  const label = mode==="bonus" ? "Bonus chest · " : mode==="shortcut" ? "The hatch · "
+  const label = mode==="bonus" ? (p.multi?"Grand chest · ":"Bonus chest · ") : mode==="shortcut" ? "The hatch · "
               : mode==="practice" ? "Bonus round · " : "";
   $("#topic").innerHTML = label + esc(p.topic) +
     (mode==="normal" ? ` <i class="above">${esc(BANK[S.level].name)}</i>` : "") +
     (mode==="normal" && p.hardType ? ` <i class="above hard">a hard one</i>`
       : mode==="normal" && p.tightened ? ` <i class="above hard">close answers</i>` : "") +
-    (mode==="bonus" ? ` <i class="above hard">hard · ${esc(BANK[S.level].name)}</i>` : "") +
+    (mode==="normal" && p.multi ? ` <i class="above multi">more than one step</i>` : "") +
+    (mode==="bonus" ? ` <i class="above ${p.multi?"multi":"hard"}">${p.multi?"multi-step · double":"hard"} · ${esc(BANK[S.level].name)}</i>` : "") +
     (mode==="practice" ? ` <i class="above">${esc(BANK[S.level].name)}</i> <i class="above hard">you missed this one</i>` : "") +
     (mode==="shortcut" ? ` <i class="above hard">very hard · exact answer · ${esc(BANK[S.level].name)}</i>` : "");
   $("#question").textContent = p.question;
@@ -3040,11 +3276,14 @@ function answer(btn,mode){
     SFX.right();
 
     if(mode==="bonus"){
-      S.lanterns=Math.min(3,S.lanterns+0.5); S.candy+=2+spd; S.speedCandy+=spd;
+      /* a grand chest — a multi-step problem — is worth double, and a whole lantern */
+      const g=S.bonusGrand, gain=(g?4:2)+spd;
+      S.lanterns=Math.min(3,S.lanterns+(g?1:0.5)); S.candy+=gain; S.speedCandy+=spd;
       $("#candynum").textContent=S.candy; renderLanterns(); renderChase();
       $("#chest").classList.add("hidden");
       fb.className="ok show";
-      fb.innerHTML=`<div class="ft">The lid gives. Half a lantern, and something sweet. +${2+spd} ${TH.treat}${spd?` <span style="color:var(--gold)">(${spd} for speed)</span>`:""}</div>${fbSteps(p)}`;
+      fb.innerHTML=`<div class="ft">${g?"Every step of it, right. The grand chest opens: a whole lantern, and a double handful."
+        :"The lid gives. Half a lantern, and something sweet."} +${gain} ${TH.treat}${spd?` <span style="color:var(--gold)">(${spd} for speed)</span>`:""}</div>${fbSteps(p)}`;
       $("#nextwrap").classList.remove("hidden");
       $("#nextBtn").textContent="Back to the room";
       $("#nextBtn").onclick=()=>askQuestion(S.current,"normal");
@@ -3181,7 +3420,9 @@ function wireProps(){
   $("#chest").onclick=()=>{
     if(S.chestUsed) return; S.chestUsed=true; SFX.chest();
     holdRoomClock();                       /* the room clock waits for you */
-    S.bonus=challengeProblem(S.level,false,S.usedTopics);
+    S.bonus = (S.grand && grandProblem(S.level,S.usedTopics))
+              || challengeProblem(S.level,false,S.usedTopics);
+    S.bonusGrand = !!S.bonus.multi;
     askQuestion(S.bonus,"bonus");
   };
   $("#hatch").onclick=()=>{
