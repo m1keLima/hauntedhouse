@@ -109,6 +109,16 @@ input[type=text]::placeholder{color:#5c5070}
 .kidrow[aria-pressed="true"] .kidicon{filter:none;opacity:1}
 .kidrow[aria-pressed="true"] b{color:#7fd7ff}
 #version{text-align:center;margin:18px 0 0;font-size:12px;letter-spacing:2.5px;text-transform:uppercase;color:#5c5070}
+.ledger{margin:14px 0 4px}
+.ledger table{width:100%;border-collapse:collapse;font-size:15.5px}
+.ledger td{padding:8px 4px;border-bottom:1px solid var(--line);vertical-align:top}
+.ledger td .how{display:block;font-size:13px;color:var(--dim);margin-top:2px;font-weight:400}
+.ledger td.v{text-align:right;font-weight:800;white-space:nowrap;padding-left:12px}
+.ledger .plus{color:var(--gold)} .ledger .minus{color:#ff8a94}
+.ledger tr.total td{border-top:2px solid #c79a2f;border-bottom:none;font-size:17px;padding-top:10px}
+.ledger tr.total.miss td{border-top-color:#6e2a33;font-size:15.5px}
+.ledhead{font-size:12px;letter-spacing:2.5px;text-transform:uppercase;font-weight:800;color:var(--gold);margin:4px 0 2px}
+.ledhead.miss{color:#ff8a94;margin-top:16px}
 .rcfoot{text-align:center;margin-top:16px;font-size:11.5px;letter-spacing:2px;text-transform:uppercase;color:#5c5070}
 .misslist{margin:14px 0 0;padding:14px 16px;border-radius:12px;background:rgba(196,18,31,.09);
   border:1px solid rgba(196,18,31,.34);font-size:16px;line-height:1.7}
@@ -2878,7 +2888,7 @@ function applyTheme(){
    moment it goes out. Shown on the setup screen and at the foot of the
    report card, so a player can say which build they are playing.
    ===================================================================== */
-const BUILD = 10, RELEASED = "3 Oct 2026, 09:21";
+const BUILD = 11, RELEASED = "3 Oct 2026, 11:18";
 const COPYRIGHT = "© 2026 m1keLima. All rights reserved.";
 const VERSION_LINE = `v${BUILD} · released ${RELEASED} · ${COPYRIGHT}`;
 
@@ -3147,6 +3157,7 @@ function startGame(){
   S.level=save.level; S.world=Math.min(save.world||0, unlockFor(save.level)); S.avatar=save.avatar; S.name=(save.name||"").trim()||"the visitor";
   S.tier=tierFor(S.level); S.usedTopics=new Set(); S.plan=buildPlan(S.level,S.usedTopics);
   S.room=0; S.lanterns=3; S.candy=0; S.escapeBonus=0; S.speedCandy=0; S.started=Date.now(); S.log=[]; S.jump=0;
+  S.tally=newTally();
   S.hatchUsed=false; S.sawFamily=false;
   S.missed={}; S.br=null; S.brCandy=0; S.brDone=false; S.reported=false; S.won=false; S.unlocked=null;
   $("#chase").classList.remove("hidden"); $("#lanterns").parentNode.classList.remove("hidden");
@@ -3199,6 +3210,19 @@ function loadRoom(){
 const QSECS = 30, SPEED_MAX = 5;
 function remaining(){ return Math.max(0, QSECS - (Date.now()-S.qStart)/1000); }
 function speedBonus(){ return kidMode ? 0 : Math.round(remaining()/QSECS*SPEED_MAX); }
+
+/* The candy ledger. Every sweet that is won, and every sweet that slips away,
+   is written down as it happens, so the report card can show exactly where the
+   bucket came from — not a total reconstructed after the fact.
+   Earned lines add up to the bucket to the sweet; missed lines are what was on
+   offer and did not come home. */
+function newTally(){
+  return {first:0, retry:0, speed:0, slow:0, wrongs:0,
+          chestN:0, chest:0, grandN:0, grand:0, chestShut:0, chestShutN:0,
+          hatch:0, hatchFell:false, lanternWon:0, lanternLost:0};
+}
+/* speed is offered on every question you answer; what you did not take is "slow" */
+function tallySpeed(spd){ const t=S.tally; if(!t) return; t.speed+=spd; if(!kidMode) t.slow+=SPEED_MAX-spd; }
 function paintTimer(){
   const r=remaining(), w=$("#timerwrap");
   $("#timerfill").style.width=(r/QSECS*100).toFixed(1)+"%";
@@ -3285,8 +3309,10 @@ function answer(btn,mode){
 
     if(mode==="bonus"){
       /* a grand chest — a multi-step problem — is worth double, and a whole lantern */
-      const g=S.bonusGrand, gain=(g?4:2)+spd;
+      const g=S.bonusGrand, gain=(g?4:2)+spd, lit=S.lanterns;
       S.lanterns=Math.min(3,S.lanterns+(g?1:0.5)); S.candy+=gain; S.speedCandy+=spd;
+      if(g){ S.tally.grandN++; S.tally.grand+=4; } else { S.tally.chestN++; S.tally.chest+=2; }
+      S.tally.lanternWon+=S.lanterns-lit; tallySpeed(spd);
       $("#candynum").textContent=S.candy; renderLanterns(); renderChase();
       $("#chest").classList.add("hidden");
       fb.className="ok show";
@@ -3313,6 +3339,7 @@ function answer(btn,mode){
 
     if(mode==="shortcut"){
       S.jump=3; S.candy+=5+spd; S.speedCandy+=spd; $("#candynum").textContent=S.candy;
+      S.tally.hatch+=5; tallySpeed(spd);
       save.totals.shortcuts++; store();
       $("#hatch").classList.add("hidden");
       fb.className="ok show";
@@ -3325,6 +3352,8 @@ function answer(btn,mode){
 
     const base = S.tries===0?3:1, gain = base+spd;
     S.candy+=gain; S.speedCandy+=spd; $("#candynum").textContent=S.candy;
+    if(S.tries===0) S.tally.first++; else S.tally.retry++;
+    tallySpeed(spd);
     S.log.push({topic:p.topic,firstTry:S.tries===0,secs:secs,spd:spd});
     fb.className="ok show";
     const speedWord = kidMode ? "Take all the time you want — the door opens either way."
@@ -3364,6 +3393,7 @@ function answer(btn,mode){
   if(mode==="bonus"){
     [...$("#choices").children].forEach(c=>c.disabled=true);
     $("#chest").classList.add("hidden");
+    S.tally.chestShutN++; S.tally.chestShut+=S.bonusGrand?4:2;
     fb.className="no show";
     fb.innerHTML=`<div class="ft">The lid slams. It keeps what it had.</div>
       <div class="steps"><b>Hint:</b> ${esc(p.hint)}</div>`;
@@ -3376,6 +3406,7 @@ function answer(btn,mode){
   if(mode==="shortcut"){
     [...$("#choices").children].forEach(c=>c.disabled=true);
     $("#hatch").classList.add("hidden");
+    S.tally.hatchFell=true; S.tally.lanternLost+=Math.min(1,S.lanterns);
     S.lanterns=Math.max(0,S.lanterns-1);
     renderLanterns(); renderChase(); SFX.king();
     if(S.lanterns<=0){
@@ -3398,6 +3429,7 @@ function answer(btn,mode){
   miss.n++;
 
   S.tries++;
+  S.tally.wrongs++; S.tally.lanternLost+=Math.min(0.5,S.lanterns);
   S.lanterns=Math.max(0,S.lanterns-0.5);
   renderLanterns(); renderChase();
 
@@ -3750,6 +3782,59 @@ function endGame(won){
   showReport(won);
 }
 
+/* ---------- the candy count ----------
+   Two lists. "How you got it" adds up to the bucket exactly, sweet for sweet —
+   including the one real loss, everything dropped when he catches you.
+   "What got away" is candy that was on offer and did not come home: it is not
+   taken off the total, it is there so a player can see what to do next time. */
+function candyLedger(won){
+  const t=S.tally||newTally(), T=TH.treat;
+  const plural=(n,w)=>`${n} ${w}${n===1?"":"s"}`;
+  const inside=S.candy-(S.escapeBonus||0);
+  const got=[], gone=[];
+  const add=(what,how,n)=>{ if(n) got.push({what,how,n}); };
+  const miss=(what,how,n)=>{ if(n>0) gone.push({what,how,n}); };
+
+  add("Right first time", `${plural(t.first,"room")} × 3`, t.first*3);
+  add("Right on a later try", `${plural(t.retry,"room")} × 1`, t.retry);
+  add("Speed", "the faster you answered, the more — up to 5 a question", t.speed);
+  add("Bonus chests", `${plural(t.chestN,"chest")} opened × 2`, t.chest);
+  add("Grand chests", `${plural(t.grandN,"grand chest")} opened × 4`, t.grand);
+  add("The hatch", "solved it — three rooms skipped", t.hatch);
+  if(!won && inside>0)
+    got.push({what:"Dropped when he caught you", how:"everything picked up inside the house", n:-inside});
+  if(won) add("Getting out", `${S.lanterns} lantern${S.lanterns===1?"":"s"} still lit × 10`, S.escapeBonus||0);
+  if(S.brDone) add("Bonus round", `${S.br.right} of ${S.br.q.length} put right`, S.br.candy);
+
+  miss("Not right first time", `${plural(t.retry,"room")} paid 1 instead of 3`, t.retry*2);
+  if(!kidMode) miss("Slow answers", "speed candy still on the clock when you answered", t.slow);
+  if(won) miss("Lanterns that went out",
+    `${t.wrongs?plural(t.wrongs,"wrong answer")+" (½ each)":""}${t.wrongs&&t.hatchFell?", ":""}${t.hatchFell?"the hatch (a whole one)":""}`
+    + `${t.lanternWon?` — chests won back ${t.lanternWon}`:""} · 10 a lantern`,
+    30-(S.escapeBonus||0));            /* exact: the escape bonus you did not get */
+  else miss("Never got out", "no escape bonus — that is 10 for every lantern you carry out", 30);
+  miss("Chests that stayed shut", `${plural(t.chestShutN,"chest")} answered wrong`, t.chestShut);
+  miss("The hatch", "fell through — it would have paid 5", t.hatchFell?5:0);
+
+  const total=got.reduce((a,r)=>a+r.n,0);
+  const away=gone.reduce((a,r)=>a+r.n,0);
+  const row=(r,cls)=>`<tr><td><b>${esc(r.what)}</b><span class="how">${esc(r.how)}</span></td>
+     <td class="v ${cls}">${r.n<0?"−":cls==="minus"?"−":"+"}${Math.abs(r.n)}</td></tr>`;
+  return `
+    <div class="ledger">
+      <div class="ledhead">How you got your ${T}</div>
+      <table>${got.length?got.map(r=>row(r,r.n<0?"minus":"plus")).join("")
+              :`<tr><td colspan="2"><span class="how">Nothing yet.</span></td></tr>`}
+        <tr class="total"><td><b>In the bucket</b></td><td class="v plus">${T} ${total}</td></tr></table>
+      ${gone.length?`
+      <div class="ledhead miss">What got away</div>
+      <table>${gone.map(r=>row(r,"minus")).join("")}
+        <tr class="total miss"><td><b>Left in the house</b>
+          <span class="how">not taken off your total — this is what there was still to win</span></td>
+          <td class="v minus">${T} ${away}</td></tr></table>`:""}
+    </div>`;
+}
+
 function showReport(won){
   const unlocked=S.unlocked;
   const secs=Math.round((Date.now()-S.started)/1000), mins=Math.floor(secs/60), rem=secs%60;
@@ -3786,16 +3871,12 @@ function showReport(won){
       ${won?`Ten rooms of ${W().name} behind you, at ${BANK[S.level].name}, ${TIERS[S.tier].name}.`
            :`You got as far as ${W().rooms[Math.min(9,S.room)]}.`}</p>
     <div class="rank">${rankFor((won?S.candy:0)+S.brCandy)}</div>
+    ${candyLedger(won)}
     <table class="rc">
       <tr><td>Rooms cleared</td><td>${cleared} / 10</td></tr>
       <tr><td>First-try accuracy</td><td>${acc}%</td></tr>
-      <tr><td>Candy picked up inside</td><td>${TH.treat} ${S.candy-(S.escapeBonus||0)}</td></tr>
-      <tr><td>&nbsp;&nbsp;of that, won on the clock</td><td>${TH.treat} ${S.speedCandy||0}</td></tr>
       <tr><td>Average time a room</td><td>${avgSecs}</td></tr>
       <tr><td>Lanterns left</td><td>${S.lanterns} of 3</td></tr>
-      <tr><td>Escape bonus (10 a lantern)</td><td>${won?"${TH.treat} "+(S.escapeBonus||0):"— none, you never got out"}</td></tr>
-      ${S.brDone?`<tr><td>Bonus round</td><td>${TH.treat} ${S.br.candy}</td></tr>`:""}
-      <tr><td>Candy in the bucket</td><td>${TH.treat} ${(won?S.candy:0)+S.brCandy}</td></tr>
       <tr><td>Time</td><td>${mins}m ${rem}s</td></tr>
       <tr><td>Where</td><td>${esc(W().name)}</td></tr>
       <tr><td>Level</td><td>${BANK[S.level].name} · ${TIERS[S.tier].name}</td></tr>
