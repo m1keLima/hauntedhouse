@@ -286,7 +286,7 @@ kbd{background:#271a38;border:1px solid var(--line);border-radius:5px;padding:2p
 @keyframes dgFire{0%{transform:scaleX(0);opacity:0}15%{opacity:1}35%{transform:scaleX(1);opacity:1}75%{transform:scaleX(1.04);opacity:.9}100%{transform:scaleX(1);opacity:0}}
 .dg-bolt{opacity:0}
 .dg-bolt.on{animation:dgBolt .55s ease-in}
-@keyframes dgBolt{0%{opacity:1;transform:translate(0,0) scale(.6)}90%{opacity:1}100%{opacity:0;transform:translate(214px,-84px) scale(1.6)}}
+@keyframes dgBolt{0%{opacity:1;transform:translate(0,0) scale(.6)}90%{opacity:1}100%{opacity:0;transform:translate(var(--tx,214px),var(--ty,-84px)) scale(1.6)}}
 .dg-body{transform-box:fill-box;transform-origin:50% 60%}
 .dg-body.hit{animation:dgHit .5s ease-out}
 @keyframes dgHit{0%,100%{transform:translateX(0)}20%{transform:translateX(16px) rotate(2deg)}45%{transform:translateX(-8px)}70%{transform:translateX(5px)}}
@@ -309,6 +309,55 @@ kbd{background:#271a38;border:1px solid var(--line);border-radius:5px;padding:2p
 @keyframes dgRing{0%{opacity:0;transform:scale(.3)}20%{opacity:.9}100%{opacity:0;transform:scale(2.4) translateY(-30px)}}
 .dg-dragon.roar{animation:dgRoar .9s ease-out}
 @keyframes dgRoar{0%,100%{transform:scale(1)}30%{transform:scale(1.08) translateX(-10px)}60%{transform:scale(1.04)}}
+
+/* ---- the twenty final challenges: shared idles, pieces, exits ---- */
+.bk-bob{animation:bkBob 2.4s ease-in-out infinite alternate}
+@keyframes bkBob{from{transform:translateY(0)}to{transform:translateY(-10px)}}
+.bk-sway{animation:bkSway 2.2s ease-in-out infinite alternate}
+.bk-sway.s{animation-name:bkSwayS;animation-duration:2.8s}
+@keyframes bkSway{from{transform:rotate(-7deg)}to{transform:rotate(7deg)}}
+@keyframes bkSwayS{from{transform:rotate(-3deg)}to{transform:rotate(3deg)}}
+.bk-breathe{animation:bkBreathe 3s ease-in-out infinite}
+@keyframes bkBreathe{0%,100%{transform:scale(1)}50%{transform:scale(1.03,1.05)}}
+.bk-rise{animation:bkRise 2.4s ease-out infinite}
+@keyframes bkRise{0%{opacity:0;transform:translateY(0)}25%{opacity:1}100%{opacity:0;transform:translateY(-46px)}}
+.bk-spin{animation:bkSpin 2.4s linear infinite}
+@keyframes bkSpin{to{transform:rotate(360deg)}}
+.bk-turn{animation:bkTurn 1.6s ease-in-out infinite alternate}
+@keyframes bkTurn{from{transform:scaleY(1)}to{transform:scaleY(-1)}}
+.bk-rock{animation:bkRock 3.2s ease-in-out infinite alternate}
+@keyframes bkRock{from{transform:rotate(-2.5deg) translateY(0)}to{transform:rotate(2.5deg) translateY(-6px)}}
+.bk-flap{animation:bkFlap .32s ease-in-out infinite alternate}
+@keyframes bkFlap{from{transform:scaleY(1)}to{transform:scaleY(.45)}}
+.bk-pulse{animation:bkPulse 1.4s ease-in-out infinite alternate}
+@keyframes bkPulse{from{opacity:.5}to{opacity:1}}
+.bk-drift{animation:bkDrift 5s ease-in-out infinite alternate}
+@keyframes bkDrift{from{transform:translateX(-18px)}to{transform:translateX(18px)}}
+.bk-rain{animation:bkRain .7s linear infinite}
+@keyframes bkRain{from{transform:translateY(0);opacity:.9}to{transform:translateY(120px);opacity:0}}
+#scene [data-off]{transition:opacity .7s}
+#scene [data-off].bk-off{opacity:0}
+#scene [data-on]{opacity:0;transition:opacity .7s}
+#scene [data-on].bk-shown{opacity:1}
+.dg-pop{opacity:0;transform-box:fill-box;transform-origin:center}
+.dg-pop.on{animation:bkPop 1.1s ease-out}
+@keyframes bkPop{0%{opacity:0;transform:scale(.3)}22%{opacity:1;transform:scale(1.15)}70%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(1)}}
+.dg-dragon.x-fly{animation:dgTamed 2.4s cubic-bezier(.5,0,.6,1) forwards}
+.dg-dragon.x-sink{animation:bkSink 2.4s ease-in forwards}
+@keyframes bkSink{0%{transform:translateY(0)}20%{transform:translateY(-8px)}100%{transform:translateY(240px);opacity:0}}
+.dg-dragon.x-poof{animation:bkPoof 1.2s ease-out forwards}
+@keyframes bkPoof{0%{transform:scale(1)}35%{transform:scale(1.12)}100%{transform:scale(.15);opacity:0}}
+.dg-dragon.x-walk{animation:bkWalk 2.6s ease-in forwards}
+@keyframes bkWalk{0%{transform:translate(0,0)}20%{transform:translate(90px,-12px)}40%{transform:translate(200px,0)}60%{transform:translate(310px,-12px)}80%{transform:translate(420px,0)}100%{transform:translate(560px,-6px);opacity:.8}}
+.dg-dragon.x-climb{animation:bkClimb 2.2s ease-in forwards}
+@keyframes bkClimb{0%{transform:translateY(0)}15%{transform:translateY(10px)}100%{transform:translateY(-480px)}}
+.dg-dragon.x-slump{transform-origin:50% 100%;animation:bkSlump 1.4s ease-in-out forwards}
+@keyframes bkSlump{to{transform:rotate(-5deg) translateY(10px)}}
+.dg-dragon.x-stone{animation:bkStone 1.8s ease-in forwards}
+@keyframes bkStone{to{filter:grayscale(1) brightness(.75)}}
+.dg-dragon.x-stone .bk-pulse{animation:none;opacity:.15}
+.dg-dragon.x-fade{animation:bkFade 2s ease-in forwards}
+@keyframes bkFade{to{opacity:0}}
 
 @media (prefers-reduced-motion: reduce){
   #scene .hh-anim, #scene .hh-anim *{animation:none !important}
@@ -3045,7 +3094,7 @@ function applyTheme(){
    moment it goes out. Shown on the setup screen and at the foot of the
    report card, so a player can say which build they are playing.
    ===================================================================== */
-const BUILD = 16, RELEASED = "3 Oct 2026, 12:14";
+const BUILD = 17, RELEASED = "3 Oct 2026, 12:50";
 const COPYRIGHT = "© 2026 m1keLima. All rights reserved.";
 const VERSION_LINE = `v${BUILD} · released ${RELEASED} · ${COPYRIGHT}`;
 
@@ -3079,6 +3128,8 @@ function load(){
     save.level=(save.level||0)+1;
     save.unlock=bump(save.unlock); save.prog=bump(save.prog);
   }
+  if(save.dragons && !(save.bossBeaten&&save.bossBeaten.dragon))
+    save.bossBeaten=Object.assign({}, save.bossBeaten, {dragon:save.dragons});
   save.schema=SCHEMA;
 
   /* and nothing may point past the end of the list either way */
@@ -3274,6 +3325,10 @@ function paintFamilies(){
     ? `<b>${found.length} of ${AVATARS.length}</b> have made it out of the castle and got home:
        ${found.map(a=>esc(a.name)).join(" · ")}`
     : `Take one character all the way through the castle and you will see who has been waiting up for them.`;
+  /* the final challenges, as a collection */
+  const beat=BOSSES.filter(b=>save.bossBeaten&&save.bossBeaten[b.id]);
+  if(beat.length) $("#famline").innerHTML += `<br><b>${beat.length} of ${BOSSES.length}</b> final challenges beaten:
+    ${beat.map(b=>`<span title="${esc(b.name)}">${b.icon}</span>`).join(" ")}`;
 }
 
 /* =====================================================================
@@ -3335,7 +3390,7 @@ function startGame(){
   S.tier=tierFor(S.level); S.usedTopics=new Set(); S.plan=buildPlan(S.level,S.usedTopics);
   S.room=0; S.lanterns=3; S.candy=0; S.escapeBonus=0; S.speedCandy=0; S.started=Date.now(); S.log=[]; S.jump=0;
   S.tally=newTally();
-  S.hatchUsed=false; S.sawFamily=false; S.dragonWon=false; S.rodeCoach=false; S.dragon=null;
+  S.hatchUsed=false; S.sawFamily=false; S.dragonWon=false; S.rodeCoach=false; S.dragon=null; S.boss=null;
   S.missed={}; S.br=null; S.brCandy=0; S.brDone=false; S.reported=false; S.won=false; S.unlocked=null;
   $("#chase").classList.remove("hidden"); $("#lanterns").parentNode.classList.remove("hidden");
   save.totals.runs++; save.prog[S.level]=(save.prog[S.level]||0)+1; store();
@@ -3758,59 +3813,612 @@ function escapeScene(){
 }
 
 /* =====================================================================
-   THE DRAGON — the special challenge at the very end. Out of the castle,
-   a dragon is lying across the bridge, and the princess's coach is waiting
-   on the road beyond it. The game asks: face it, or go home the long way.
-   Five flames to put out, three shields to keep: every right answer is a
-   burst of lantern light, every wrong one a jet of fire that burns a shield
-   (and a hint, and the same problem again). Beat it and it shrinks to the
-   size of a cat and flies off — nothing is hurt — and the bridge is open to
-   the carriage. Lose and you can try again with fresh problems, or walk home
-   without the coach. No candy changes hands: the score stays out of 100.
+   THE FINAL CHALLENGE — at the very end, out of the castle, something
+   stands between the player and the princess's coach. There are twenty of
+   them (BOSSES), dealt from a shuffled pile with the best grade match first
+   (pickBoss), so finishing again brings a different one.
+
+   One engine runs them all: HP points to win (5), 3 tries to lose, the
+   hardest kinds of problem the grade has, the same problem again after a
+   wrong answer, and no candy either way — the score stays out of 100.
+   Each challenge brings its own art, background, words, progress pieces
+   and exit. Nothing is ever hurt: they are paid, tricked, sung to sleep,
+   wound down, sent home or turned back to stone.
+
+   Art conventions (all on the 800 × 460 stage, ground at y 330):
+   - the root <g class="dg-dragon"> takes the exit animation (.x-*),
+     <g class="dg-body"> inside it the hit shake;
+   - an element with class "dg-fire" is a beam that grows out of its origin
+     on a wrong answer (shape pointing left, the wrapper aims it), one with
+     "dg-pop" pops up instead; "dg-flash" whitens on a hit;
+   - data-off="k" hides a piece once k hits have landed, data-on="k" shows
+     one — that is how a web loses its rings or a pouch fills with coins;
+   - animated elements carry no transform attribute; pivots sit at their
+     wrapper's origin (same rule as the carriage).
    ===================================================================== */
-const DRAGON_HP = 5, DRAGON_SHIELDS = 3;
+const BOSS_HP = 5, BOSS_TRIES = 3;
+const DRAGON_HP = BOSS_HP, DRAGON_SHIELDS = BOSS_TRIES;     /* older names, still read below */
 
 /* restart a one-shot CSS effect on an element */
 function replay(el, cls){ if(!el) return; el.classList.remove(cls); void el.getBoundingClientRect(); el.classList.add(cls); }
 
-function dragonSVG(){
-  const a=AVATARS.find(v=>v.id===S.avatar)||AVATARS[0];
+/* small drawing kit for the challenges */
+const BK = {
+  eye:(x,y,r,c)=>`<circle cx="${x}" cy="${y}" r="${r}" fill="#fff"/><circle cx="${x-r*.15}" cy="${y+r*.12}" r="${r*.55}" fill="${c||"#1a1420"}"/>
+    <circle cx="${x-r*.38}" cy="${y-r*.25}" r="${r*.22}" fill="#fff"/>`,
+  at:(x,y,cls,inner,style)=>`<g transform="translate(${x},${y})"><g class="${cls}"${style?` style="${style}"`:""}>${inner}</g></g>`,
+  /* a beam from (x,y) aimed at the player */
+  beam:(x,y,fill,w)=>{ const dx=150-x, dy=286-y, len=Math.hypot(dx,dy)-34, rot=Math.atan2(dy,dx)*180/Math.PI-180;
+    w=w||30; return `<g transform="translate(${x},${y}) rotate(${rot.toFixed(1)})"><path class="dg-fire"
+      d="M0 0 L-${len.toFixed(0)} -${w} Q-${(len+w*1.1).toFixed(0)} 0 -${len.toFixed(0)} ${w} Z" fill="${fill}"/></g>`; },
+  bubble:(x,y,txt,col)=>`<g transform="translate(${x},${y})"><g class="dg-pop">
+    <path d="M-46 -22 h92 a12 12 0 0 1 12 12 v20 a12 12 0 0 1 -12 12 h-60 l-14 14 v-14 h-18 a12 12 0 0 1 -12 -12 v-20 a12 12 0 0 1 12 -12Z" fill="#fff"/>
+    <text y="7" text-anchor="middle" font-size="19" font-weight="800" fill="${col||"#2a1830"}">${txt}</text></g></g>`,
+  shadow:(x,w)=>`<ellipse cx="${x}" cy="334" rx="${w}" ry="10" fill="#000" opacity=".4"/>`,
+  zzz:(x,y,k)=>`<g data-on="${k}">${[0,1,2].map(i=>BK.at(x+i*14,y-i*14,"bk-rise",
+    `<text font-size="${16+i*5}" font-weight="800" fill="#cfc6ff">z</text>`,`animation-delay:${i*0.6}s`)).join("")}</g>`
+};
+
+/* ---------- the three places a challenge can happen ---------- */
+function bossBackdrop(kind){
+  if(kind==="gate") return `
+    <rect width="800" height="460" fill="#120d1e"/>
+    <rect x="0" y="0" width="800" height="70" fill="#1d1638"/>${stars(18,60)}
+    <rect x="0" y="40" width="800" height="292" fill="#2a2434"/>
+    ${Array.from({length:7},(_,r)=>`<path d="M0 ${70+r*38} H800" stroke="#1e1a26" stroke-width="3"/>`
+      +Array.from({length:9},(_,c)=>`<path d="M${(c*100+(r%2)*50)} ${70+r*38} v38" stroke="#1e1a26" stroke-width="3"/>`).join("")).join("")}
+    ${Array.from({length:17},(_,k)=>`<rect x="${k*50}" y="22" width="30" height="22" fill="#2a2434"/>`).join("")}
+    <path d="M466 332 V176 A134 134 0 0 1 734 176 V332Z" fill="#3a3346"/>
+    <path d="M480 332 V180 A120 120 0 0 1 720 180 V332Z" fill="#0b0812"/>
+    <g stroke="#3a3040" stroke-width="5">${Array.from({length:9},(_,k)=>`<path d="M${496+k*26} 60 v${[58,40,30,26,24,26,30,40,58][k]+50}"/>`).join("")}</g>
+    ${[[436,170],[764,170]].map(([x,y])=>`<g><rect x="${x-4}" y="${y}" width="8" height="26" fill="#3a2a18"/>
+      <path d="M${x} ${y-28} q-11 12 0 26 q11 -14 0 -26Z" fill="#ff8a1f" class="flick"/>
+      <circle cx="${x}" cy="${y-14}" r="36" fill="url(#halo2)"/></g>`).join("")}
+    <rect x="0" y="330" width="800" height="130" fill="#2a2330"/>
+    ${Array.from({length:24},(_,k)=>`<ellipse cx="${(k*37)%800+10}" cy="${352+(k%4)*24}" rx="16" ry="6" fill="#352c3c"/>`).join("")}`;
+  if(kind==="hall") return `
+    <rect width="800" height="460" fill="#1c1428"/>
+    <rect x="0" y="0" width="800" height="332" fill="#241a30"/>
+    <path d="M200 220 V90 A40 40 0 0 1 280 90 V220Z" fill="#141030"/>${moon(240,110,18)}
+    <path d="M200 220 V90 A40 40 0 0 1 280 90 V220Z" fill="none" stroke="#3a2c48" stroke-width="6"/>
+    ${[0,1].map(i=>`<path d="M${330+i*170} 30 h44 v120 l-22 -16 l-22 16Z" fill="${i?"#5a2f7a":"#7a2f3a"}"/>
+      <path d="M${330+i*170} 44 h44" stroke="#ffcf5c" stroke-width="3"/>`).join("")}
+    ${[20,760].map(x=>`<rect x="${x}" y="0" width="40" height="332" fill="#2e2240"/><rect x="${x-6}" y="0" width="52" height="18" fill="#3a2c50"/>`).join("")}
+    ${[[150,180],[460,180]].map(([x,y])=>`<g><rect x="${x-4}" y="${y}" width="8" height="24" fill="#3a2a18"/>
+      <path d="M${x} ${y-26} q-10 12 0 24 q10 -13 0 -24Z" fill="#ff8a1f" class="flick"/>
+      <circle cx="${x}" cy="${y-12}" r="34" fill="url(#halo2)"/></g>`).join("")}
+    <rect x="0" y="330" width="800" height="130" fill="#2c2236"/>
+    ${Array.from({length:40},(_,k)=>`<rect x="${(k%10)*80+((k/10|0)%2)*40}" y="${330+(k/10|0)*33}" width="40" height="33" fill="#3a2e46"/>`).join("")}
+    <path d="M250 352 h420 l30 70 h-480Z" fill="#5a1f2c" opacity=".55"/>`;
+  /* the bridge over the moat, the castle behind */
+  return `
+    <rect width="800" height="460" fill="url(#dgsky)"/>
+    ${stars(60,220)}
+    ${moon(90,70,30)}
+    <g transform="translate(330,40) scale(.62)">${outsideKit("castle")}</g>
+    <rect x="0" y="352" width="800" height="108" fill="#0d1a24"/>
+    <path d="M0 372 q60 -6 120 0 t120 0 t120 0 t120 0 t120 0 t120 0 t120 0" stroke="#24405a" stroke-width="2" fill="none" opacity=".6"/>
+    <path d="M0 330 H800 V356 H0Z" fill="#3a3340"/>
+    <path d="M0 330 H800" stroke="#5c5268" stroke-width="3"/>
+    ${Array.from({length:9},(_,k)=>`<path d="M${k*100} 356 q50 -26 100 0" fill="#0d1a24"/>`).join("")}
+    ${Array.from({length:17},(_,k)=>`<rect x="${k*50+6}" y="316" width="30" height="14" rx="2" fill="#4a4152"/>`).join("")}`;
+}
+
+/* ---------- the twenty ---------- */
+const PIP = {
+  flame:`<path d="M0 -12 C8 -4 10 4 6 10 C4 13 -4 13 -6 10 C-10 4 -6 -2 0 -12Z" fill="#ff7a1f" stroke="#ffd27a" stroke-width="1.4"/>`,
+  coin:`<circle r="10" fill="#ffcf5c" stroke="#c9952c" stroke-width="2"/><path d="M-3 -5 h6 M-3 5 h6 M0 -6 v12" stroke="#c9952c" stroke-width="1.6"/>`,
+  web:`<circle r="10" fill="none" stroke="#e8e4f0" stroke-width="1.6"/><path d="M-11 0 h22 M0 -11 v22 M-8 -8 l16 16 M8 -8 l-16 16" stroke="#e8e4f0" stroke-width="1.4"/>`,
+  eye:`<path d="M-12 0 Q0 -10 12 0 Q0 10 -12 0Z" fill="#ffcf5c" stroke="#c9952c" stroke-width="1.4"/><circle r="3.4" fill="#5a2f1a"/>`,
+  bottle:`<path d="M-3 -12 h6 v5 l5 6 v11 h-16 v-11 l5 -6Z" fill="#ff8ad8" stroke="#ffd0f0" stroke-width="1.4"/>`,
+  plank:`<rect x="-12" y="-5" width="24" height="10" rx="2" fill="#8a5a34" stroke="#c99a64" stroke-width="1.4"/>`,
+  cog:`<circle r="8" fill="#c9952c" stroke="#ffe08a" stroke-width="1.4"/><circle r="3" fill="#2a2030"/>
+    ${[0,45,90,135].map(a=>`<rect x="-2" y="-12" width="4" height="24" fill="#c9952c" transform="rotate(${a})"/>`).join("")}`,
+  foot:`<ellipse cx="0" cy="2" rx="6" ry="9" fill="#ffcf5c"/>${[-5,-2,2,5].map(x=>`<circle cx="${x}" cy="-9" r="2" fill="#ffcf5c"/>`).join("")}`,
+  bat:`<path d="M0 -3 q-6 -6 -14 -4 q4 3 4 8 q5 -3 10 -2 q5 -1 10 2 q0 -5 4 -8 q-8 -2 -14 4Z" fill="#b48cff"/>`,
+  pumpkin:`<ellipse rx="11" ry="9" fill="#ff8a1f" stroke="#ffcf5c" stroke-width="1.2"/><path d="M0 -9 v-4" stroke="#4a7a2a" stroke-width="3"/>`,
+  snow:`<path d="M0 -11 v22 M-10 -6 l20 12 M-10 6 l20 -12" stroke="#dff4ff" stroke-width="2.6" stroke-linecap="round"/>`,
+  tentacle:`<path d="M-6 10 q-6 -14 4 -20 q10 -4 10 6 q0 6 -6 4" fill="none" stroke="#b46be0" stroke-width="5" stroke-linecap="round"/>`,
+  paw:`<ellipse cx="0" cy="3" rx="7" ry="6" fill="#ffcf5c"/>${[[-7,-5],[-2,-9],[3,-9],[8,-5]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="2.6" fill="#ffcf5c"/>`).join("")}`,
+  rune:`<path d="M0 -11 L9 0 L0 11 L-9 0Z" fill="#5fe0ff" stroke="#c8f6ff" stroke-width="1.4"/>`,
+  jar:`<rect x="-8" y="-9" width="16" height="20" rx="4" fill="#5fe0c0" stroke="#c8fff0" stroke-width="1.4"/><rect x="-6" y="-12" width="12" height="4" fill="#c8a06a"/>`,
+  note:`<path d="M-4 8 a5 4 0 1 1 0.1 0 M1 8 V-10 l8 3" fill="#ffcf5c" stroke="#ffcf5c" stroke-width="2.6"/>`,
+  roll:`<circle r="9" fill="#efe6d0" stroke="#b8aa8a" stroke-width="1.6"/><circle r="3" fill="#b8aa8a"/>`,
+  firefly:`<circle r="6" fill="#e8ff7a"/><circle r="11" fill="#e8ff7a" opacity=".3"/>`,
+  cloud:`<path d="M-12 6 a6 6 0 0 1 2 -12 a8 8 0 0 1 15 -2 a6 6 0 0 1 7 14Z" fill="#9aa0c8" stroke="#d0d4f0" stroke-width="1.4"/>`,
+  fog:`<path d="M-13 -3 q6 -6 13 0 t13 0 M-13 4 q6 -6 13 0 t13 0" stroke="#c8d0e8" stroke-width="3" fill="none" stroke-linecap="round"/>`
+};
+
+const BOSSES = [
+ /* 1 — the dragon */
+ {id:"dragon", name:"The Dragon", who:"the dragon", icon:"🐉", lo:3, hi:12, bg:"bridge", mode:"drain", pip:PIP.flame, label:"DRAGON",
+  intro:"A dragon is lying across the bridge — and it has seen you.",
+  how:"Every right answer is a burst of lantern light that puts out one of its five flames. Every wrong one, it breathes fire and burns one of your three shields",
+  hits:["A hit — one flame goes out.","Straight to the nose. It flinches.","The light lands. The dragon blinks.","Another flame out — it backs up a step."],
+  miss:"Fire! A shield is gone", win:["The bridge is open.","The last flame goes out. The dragon shrinks to the size of a cat, sneezes a smoke ring, and flies off over the castle."],
+  lose:"Your last shield is gone, and the dragon chases you back off the bridge. It does not follow you far.",
+  exit:"fly", target:[420,212], art:()=>dragonArt()},
+
+ /* 2 — the troll */
+ {id:"troll", name:"The Troll", who:"the troll", icon:"🧌", lo:0, hi:4, bg:"bridge", mode:"fill", pip:PIP.coin, label:"TROLL'S TOLL",
+  intro:"A troll is sitting in the middle of the bridge, next to a sign that says TOLL.",
+  how:"He wants five coins. Every right answer drops one into his pouch. Every wrong one, he grumbles and takes one of your three chances",
+  hits:["Clink — a coin in the pouch.","He bites the coin to check it. It is a real one.","Clink! He counts it twice, just to be sure.","He grins. The pouch is getting heavy."],
+  miss:"“Grrr — that is not a coin!”", win:["The pouch is full.","The troll counts every coin, bows very low, and stomps off the bridge to buy himself a pie."],
+  lose:"“No more coins, no more bridge,” says the troll, and folds his arms.",
+  exit:"walk", target:[600,184], art:()=>`
+  <g class="dg-dragon"><g class="dg-body">
+    ${BK.shadow(640,120)}
+    <rect x="742" y="200" width="8" height="132" fill="#4a3220"/>
+    <rect x="706" y="196" width="80" height="34" rx="4" fill="#8a6a3a" stroke="#4a3220" stroke-width="3"/>
+    <text x="746" y="219" text-anchor="middle" font-size="16" font-weight="800" fill="#2a1a10">TOLL</text>
+    <path d="M598 300 q-6 30 -22 32 h44 q4 -18 0 -32Z" fill="#6d7c4e"/><path d="M672 300 q6 30 22 32 h-44 q-4 -18 0 -32Z" fill="#6d7c4e"/>
+    ${BK.at(636,328,"bk-breathe",`<ellipse cx="0" cy="-66" rx="82" ry="66" fill="#7f8f5c"/>
+      <ellipse cx="-6" cy="-46" rx="52" ry="36" fill="#9aa874"/>
+      <path d="M-70 -28 q70 26 140 0 l-6 22 q-64 16 -128 0Z" fill="#6b4a2a"/>`)}
+    <path d="M572 240 q-40 20 -50 50" stroke="#7f8f5c" stroke-width="22" stroke-linecap="round" fill="none"/>
+    <path d="M496 302 q-6 -34 20 -40 h28 q26 6 20 40 q-34 14 -68 0Z" fill="#a0784a" stroke="#6b4a2a" stroke-width="3"/>
+    <path d="M512 264 q18 8 36 0" stroke="#6b4a2a" stroke-width="3" fill="none"/>
+    ${[[512,258],[528,254],[544,258],[520,245],[536,243]].map(([x,y],k)=>`<g data-on="${k+1}"><circle cx="${x}" cy="${y}" r="7" fill="#ffcf5c" stroke="#c9952c" stroke-width="1.6"/></g>`).join("")}
+    <path d="M700 236 q36 18 40 52" stroke="#7f8f5c" stroke-width="22" stroke-linecap="round" fill="none"/>
+    ${BK.at(600,184,"bk-sway s",`<ellipse cx="-44" cy="-4" rx="14" ry="9" fill="#7f8f5c"/><ellipse cx="44" cy="-4" rx="14" ry="9" fill="#7f8f5c"/>
+      <ellipse rx="44" ry="40" fill="#8a9a64"/>
+      <path d="M-10 -40 q4 -16 12 -14 q-2 8 4 14" fill="#4a3a2a"/>
+      ${BK.eye(-16,-8,9)}${BK.eye(16,-8,9)}
+      <path d="M-24 -22 l16 5 M24 -22 l-16 5" stroke="#4a5a32" stroke-width="4" stroke-linecap="round"/>
+      <ellipse cx="0" cy="10" rx="12" ry="14" fill="#9aaa70"/>
+      <path d="M-20 26 q20 12 40 0" stroke="#3a2a1a" stroke-width="3" fill="none"/>
+      <path d="M-14 28 l3 -8 l3 8Z M8 28 l3 -8 l3 8Z" fill="#fff8e0"/>
+      <ellipse class="dg-flash" rx="48" ry="44" fill="#fff"/>`)}
+  </g></g>${BK.bubble(520,120,"Grrr!")}`},
+
+ /* 3 — the giant spider */
+ {id:"spider", name:"The Giant Spider", who:"the giant spider", icon:"🕷️", lo:1, hi:6, bg:"gate", mode:"drain", pip:PIP.web, label:"THE WEB",
+  intro:"A giant spider has spun a web right across the castle gate. She looks friendly. The web does not.",
+  how:"Every right answer snips away part of the web, one ring at a time. Every wrong one, she shoots a sticky thread and takes one of your three chances",
+  hits:["Snip — a whole ring of web drifts away.","Another ring gone. She looks impressed.","Snip! The gate is starting to show through.","Nearly through. She taps two legs together."],
+  miss:"Splat — a sticky thread", win:["The web is gone.","The spider waves all eight legs, climbs up her last thread, and disappears into the dark at the top of the gate."],
+  lose:"The web is thicker than ever. She tucks a leg under her chin and waits.",
+  exit:"climb", target:[600,214], art:()=>{
+    const cx=600, cy=214, ang=Array.from({length:10},(_,k)=>k*36);
+    const ring=(r,k)=>`<polygon data-off="${k}" points="${ang.map(a=>`${(cx+r*Math.cos(a*Math.PI/180)).toFixed(0)},${(cy+r*Math.sin(a*Math.PI/180)*0.95).toFixed(0)}`).join(" ")}"
+      fill="none" stroke="#e8e4f0" stroke-width="2.4" opacity=".85"/>`;
+    return `<g class="dg-dragon"><g class="dg-body">
+      <g data-off="5">${ang.map(a=>`<path d="M${cx} ${cy} L${(cx+150*Math.cos(a*Math.PI/180)).toFixed(0)} ${(cy+150*Math.sin(a*Math.PI/180)).toFixed(0)}" stroke="#e8e4f0" stroke-width="2" opacity=".8"/>`).join("")}</g>
+      ${ring(138,1)}${ring(106,2)}${ring(74,3)}${ring(42,4)}
+      <path d="M600 60 V196" stroke="#e8e4f0" stroke-width="2"/>
+      ${BK.at(cx,cy,"bk-bob",`
+        ${[-1,1].map(s=>[0,1,2,3].map(i=>`<path d="M${s*14} ${-4+i*7} q${s*34} ${-26+i*10} ${s*52} ${-2+i*18}" stroke="#2a1a3a" stroke-width="6" fill="none" stroke-linecap="round"/>`).join("")).join("")}
+        <ellipse cx="0" cy="-16" rx="30" ry="26" fill="#2a1a3a"/>
+        <path d="M-12 -30 q12 -8 24 0" stroke="#4a3260" stroke-width="5" fill="none"/>
+        <circle cx="0" cy="14" r="20" fill="#3a2650"/>
+        ${BK.eye(-8,12,7)}${BK.eye(8,12,7)}
+        <path d="M-6 24 q6 5 12 0" stroke="#ff9ab0" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+        <path d="M-6 -4 l-10 -6 v12Z M6 -4 l10 -6 v12Z" fill="#ff6aa8"/><circle cx="0" cy="-4" r="4" fill="#ff6aa8"/>
+        <ellipse class="dg-flash" cx="0" cy="0" rx="40" ry="42" fill="#fff"/>`)}
+    </g>${BK.beam(600,236,"#efeaf6",9)}</g>`; }},
+
+ /* 4 — the sphinx */
+ {id:"sphinx", name:"The Sphinx", who:"the sphinx", icon:"🦁", lo:5, hi:12, bg:"gate", mode:"fill", pip:PIP.eye, label:"THE DOOR'S EYES",
+  intro:"A great stone cat lies in front of the gate. Above it, five carved eyes are dark. “Answer me,” it says, “and the door will see you.”",
+  how:"Every right answer lights one of the five eyes above the door. Every wrong one, it blows a gust of sand and takes one of your three chances",
+  hits:["One eye opens, gold.","Another eye lights. The sphinx nods, very slowly.","The door is watching you now.","Four eyes. The sphinx almost smiles."],
+  miss:"“No.” A gust of sand", win:["All five eyes are open.","“Well answered,” says the sphinx, and settles back down into the stone it came from."],
+  lose:"The eyes go dark again. “Come back when you are ready,” says the sphinx.",
+  exit:"sink", target:[560,212], art:()=>`
+  <g>${[[520,128],[560,112],[600,106],[640,112],[680,128]].map(([x,y],k)=>`<g>
+      <path d="M${x-16} ${y} Q${x} ${y-12} ${x+16} ${y} Q${x} ${y+12} ${x-16} ${y}Z" fill="#4a4258" stroke="#6a6278" stroke-width="2"/>
+      <g data-on="${k+1}"><path d="M${x-16} ${y} Q${x} ${y-12} ${x+16} ${y} Q${x} ${y+12} ${x-16} ${y}Z" fill="#ffcf5c"/>
+        <circle cx="${x}" cy="${y}" r="4.4" fill="#5a2f1a"/><circle cx="${x}" cy="${y}" r="24" fill="url(#halo2)"/></g></g>`).join("")}</g>
+  <g class="dg-dragon"><g class="dg-body">
+    ${BK.shadow(630,140)}
+    ${BK.at(744,300,"bk-sway",`<path d="M0 0 q40 -10 34 -56 q-2 -10 6 -10" stroke="#c99a52" stroke-width="10" fill="none" stroke-linecap="round"/>`)}
+    <path d="M520 332 q-6 -26 30 -30 h70 q10 -70 80 -70 q60 4 60 60 v40Z" fill="#d9b46a"/>
+    <path d="M500 332 h80 q6 -12 -6 -18 h-66 q-14 6 -8 18Z" fill="#e6c27a"/>
+    <path d="M590 332 h70 q6 -12 -6 -18 h-56 q-14 6 -8 18Z" fill="#e6c27a"/>
+    ${BK.at(562,210,"dg-head",`
+      <path d="M-46 -20 q46 -44 92 0 l10 70 h-112Z" fill="#3a6ab0"/>
+      ${[-36,-20,-4,12,28].map(x=>`<path d="M${x} -24 l-4 74" stroke="#ffcf5c" stroke-width="5"/>`).join("")}
+      <ellipse cx="0" cy="4" rx="32" ry="36" fill="#e2c07c"/>
+      <path d="M-18 -4 q8 -6 14 0 M4 -4 q8 -6 14 0" stroke="#5a3a1a" stroke-width="3" fill="none"/>
+      <ellipse cx="-11" cy="2" rx="5" ry="3" fill="#5a3a1a"/><ellipse cx="11" cy="2" rx="5" ry="3" fill="#5a3a1a"/>
+      <path d="M-4 14 h8 l-4 6Z" fill="#a8783a"/><path d="M-10 26 q10 6 20 0" stroke="#7a5a2a" stroke-width="2.4" fill="none"/>
+      <path d="M-26 -28 h52 v-8 h-52Z" fill="#ffcf5c"/>
+      <ellipse class="dg-flash" rx="40" ry="44" fill="#fff"/>`)}
+  </g></g>${BK.beam(530,226,"#e8c98a",22)}`},
+
+ /* 5 — the rival witch */
+ {id:"witch", name:"The Rival Witch", who:"the rival witch", icon:"🧪", lo:4, hi:10, bg:"hall", mode:"fill", pip:PIP.bottle, label:"COUNTER-SPELL",
+  intro:"In the great hall, a witch is stirring a cauldron. “One more ingredient,” she cackles, “and you stay in this castle for ever.”",
+  how:"Every right answer slips one of your ingredients into her brew and turns it a little pinker. Every wrong one, it splashes you and takes one of your three chances",
+  hits:["Plop — the brew goes a little less green.","Fizz! It is turning orange. She frowns at it.","Bloop. Definitely pink now.","She sniffs the brew. It smells of strawberries."],
+  miss:"Splosh — green brew", win:["The spell is ruined.","The brew turns bright pink and goes PFFT. The witch vanishes in a puff of glitter, leaving only her hat behind."],
+  lose:"The brew bubbles green and smug. “Try again, little one,” she says.",
+  exit:"poof", target:[600,262], art:()=>`
+  <g class="dg-dragon"><g class="dg-body">
+    ${BK.shadow(620,120)}
+    ${BK.at(690,330,"bk-sway s",`
+      <path d="M-50 0 q10 -130 50 -150 q40 20 50 150Z" fill="#3a2258"/>
+      <ellipse cx="0" cy="-150" rx="28" ry="30" fill="#9ab88a"/>
+      ${BK.eye(-10,-156,6)}${BK.eye(10,-156,6)}
+      <path d="M0 -150 q-6 16 -18 18 q10 2 16 -6" fill="#8aa87a"/>
+      <path d="M-10 -134 q10 6 20 0" stroke="#3a2a2a" stroke-width="2.4" fill="none"/>
+      <path d="M-46 -172 h92 l-10 -6 h-72Z" fill="#2a1840"/><path d="M-26 -176 l26 -74 l22 74Z" fill="#2a1840"/>
+      <path d="M-24 -184 h48" stroke="#a46be0" stroke-width="5"/>
+      <ellipse class="dg-flash" cx="0" cy="-150" rx="36" ry="38" fill="#fff"/>`)}
+    ${BK.at(650,250,"bk-sway",`<path d="M0 0 L-60 30" stroke="#5a3a20" stroke-width="7" stroke-linecap="round"/>`)}
+    <path d="M540 282 q-8 52 60 54 q68 -2 60 -54Z" fill="#1a1420"/>
+    <path d="M556 330 l-8 18 M644 330 l8 18" stroke="#1a1420" stroke-width="8"/>
+    <ellipse cx="600" cy="276" rx="66" ry="16" fill="#2a2030"/>
+    <ellipse cx="600" cy="272" rx="58" ry="12" fill="#6ad16a"/>
+    ${["#9ad18a","#d1c27a","#f0a070","#f08fb8","#ff8ad8"].map((c,k)=>`<ellipse data-on="${k+1}" cx="600" cy="272" rx="58" ry="12" fill="${c}"/>`).join("")}
+    ${[0,1,2,3].map(k=>BK.at(570+k*20,266,"bk-rise",`<circle r="${4+k%2*2}" fill="#bfffbf" opacity=".8"/>`,`animation-delay:${k*0.4}s`)).join("")}
+    <g data-on="5">${[0,1,2].map(k=>BK.at(560+k*40,240,"bk-rise",`<path d="M0 -6 L1.6 -1.6 L6 0 L1.6 1.6 L0 6 L-1.6 1.6 L-6 0 L-1.6 -1.6Z" fill="#ffd0f0"/>`,`animation-delay:${k*0.5}s`)).join("")}</g>
+  </g></g>${BK.bubble(200,200,"Splosh!","#2a8a3a")}`},
+
+ /* 6 — the ghost ship */
+ {id:"ship", name:"The Ghost Ship", who:"the ghost ship", icon:"🏴‍☠️", lo:3, hi:9, bg:"bridge", mode:"drain", pip:PIP.plank, label:"GHOST SHIP",
+  intro:"A ghost ship has drifted into the moat, right under the bridge. Its captain raises a spyglass at you. “Ahoy! Nobody crosses without a duel of sums!”",
+  how:"Every right answer is a cannonball of light that knocks a plank off his hull. Every wrong one, his cannon soaks you and takes one of your three chances",
+  hits:["Thunk — a plank flies off.","Another plank! The captain clutches his hat.","Thunk! Water is starting to slosh in.","The ship is leaning now. The crew look worried."],
+  miss:"Splash — the cannon soaks you", win:["The ship is going down — slowly, politely.","The ghost ship sinks bubbling into the moat. The captain and his crew paddle off in a rowing boat, singing."],
+  lose:"The captain bows. “A fine duel! Come back and try again.”",
+  exit:"sink", target:[640,290], art:()=>`
+  <g class="dg-dragon"><g class="dg-body">
+  ${BK.at(612,334,"bk-rock",`
+    <path d="M-4 0 V-172" stroke="#3a2416" stroke-width="10"/>
+    <path d="M0 -160 q70 20 64 90 q-30 -14 -64 -6Z" fill="#cfd8e6" opacity=".8"/>
+    <path d="M0 -160 q-56 22 -52 86 q24 -12 52 -8Z" fill="#b8c4d6" opacity=".75"/>
+    <circle cx="10" cy="-112" r="12" fill="#ff8a1f" opacity=".9"/><path d="M4 -112 l3 -3 3 3 M10 -106 q4 3 6 0" stroke="#3a2416" stroke-width="2" fill="none"/>
+    <path d="M-4 -172 l30 8 l-30 8Z" fill="#2a1a10"/>
+    <path d="M-150 -6 Q-140 60 -100 72 H110 Q150 52 160 -6 Z" fill="#3a2416"/>
+    ${[0,1,2,3,4].map(k=>`<path data-off="${k+1}" d="M${-146+k*3} ${4+k*13} H${152-k*6}" stroke="#7a5434" stroke-width="9" stroke-linecap="round"/>`).join("")}
+    <path d="M-160 -12 H170" stroke="#5a3a24" stroke-width="8" stroke-linecap="round"/>
+    <rect x="-176" y="-24" width="40" height="16" rx="7" fill="#2a2a32"/>
+    ${BK.at(60,-26,"bk-bob",`<path d="M-24 0 C-24 -40 24 -40 24 0 v26 l-8 -6 -8 6 -8 -6 -8 6 -8 -6 -8 6Z" fill="#e6f0ff" opacity=".95"/>
+      ${BK.eye(-8,-12,6)}${BK.eye(8,-12,6)}<path d="M-6 2 q6 5 12 0" stroke="#3a3a5a" stroke-width="2" fill="none"/>
+      <path d="M-30 -30 q30 -22 60 0 q-30 -6 -60 0Z" fill="#1a1420"/>
+      <path d="M22 -6 l22 -10" stroke="#b8862c" stroke-width="5" stroke-linecap="round"/>
+      <ellipse class="dg-flash" cx="0" cy="-10" rx="34" ry="34" fill="#fff"/>`)}
+  `)}
+  </g></g>${BK.beam(440,318,"#9fd8ff",20)}`},
+
+ /* 7 — the clockwork knight */
+ {id:"knight", name:"The Clockwork Knight", who:"the clockwork knight", icon:"⚙️", lo:2, hi:8, bg:"gate", mode:"drain", pip:PIP.cog, label:"CLOCKWORK",
+  intro:"A knight made of clockwork is guarding the gate. A big brass key turns slowly in his back. Tick. Tock.",
+  how:"Every right answer winds him down a turn — one of the five lights on his chest goes out. Every wrong one, he puffs steam and takes one of your three chances",
+  hits:["Click — a light on his chest goes out.","He is ticking slower now. Tick… tock.","Another light out. His key is barely turning.","He creaks. He yawns. Knights do not usually yawn."],
+  miss:"Pssssh — a jet of steam", win:["Tick… tock… tick.","The key stops. The clockwork knight bows with a long creak, and goes perfectly still."],
+  lose:"His key spins happily. Tick-tock-tick-tock. He is fully wound again.",
+  exit:"slump", target:[612,170], art:()=>`
+  <g class="dg-dragon"><g class="dg-body">
+    ${BK.shadow(620,80)}
+    ${BK.at(684,226,"bk-turn",`<rect x="0" y="-6" width="30" height="12" rx="3" fill="#c9952c"/>
+      <path d="M30 -18 q22 0 22 18 q0 18 -22 18Z" fill="none" stroke="#c9952c" stroke-width="8"/>`)}
+    <rect x="588" y="270" width="22" height="62" rx="5" fill="#8a94a6"/><rect x="630" y="270" width="22" height="62" rx="5" fill="#8a94a6"/>
+    <rect x="582" y="322" width="32" height="12" rx="4" fill="#6a7486"/><rect x="626" y="322" width="32" height="12" rx="4" fill="#6a7486"/>
+    <path d="M572 190 h96 l-8 86 h-80Z" fill="#a7b0bf" stroke="#c9952c" stroke-width="3"/>
+    <rect x="594" y="206" width="52" height="44" rx="8" fill="#2a2030"/>
+    ${[[606,218],[634,218],[620,230],[606,242],[634,242]].map(([x,y],k)=>`<circle data-off="${k+1}" cx="${x}" cy="${y}" r="5" fill="#ffd27a" class="flick"/>`).join("")}
+    ${BK.at(620,228,"bk-spin",`<circle r="14" fill="none" stroke="#c9952c" stroke-width="3" stroke-dasharray="5 4"/>`)}
+    <path d="M572 200 q-30 20 -26 60" stroke="#a7b0bf" stroke-width="16" stroke-linecap="round" fill="none"/>
+    <path d="M668 200 q30 20 26 60" stroke="#a7b0bf" stroke-width="16" stroke-linecap="round" fill="none"/>
+    <rect x="540" y="120" width="8" height="150" fill="#6a4a2a"/><path d="M548 124 h42 l-10 14 l10 14 h-42Z" fill="#7a2f3a"/>
+    ${BK.at(620,160,"bk-sway s",`
+      <path d="M-28 30 v-40 q28 -26 56 0 v40Z" fill="#b8c0ce" stroke="#c9952c" stroke-width="3"/>
+      <rect x="-22" y="-2" width="44" height="8" rx="3" fill="#2a2030"/><rect x="-18" y="0" width="36" height="4" rx="2" fill="#ffb12e" class="flick"/>
+      <path d="M0 -30 q10 -26 34 -30 q-14 14 -24 34Z" fill="#a46be0"/>
+      <ellipse class="dg-flash" cx="0" cy="6" rx="34" ry="32" fill="#fff"/>`)}
+  </g></g>${BK.beam(600,162,"#e8eef6",24)}`},
+
+ /* 8 — the sleeping giant */
+ {id:"giant", name:"The Sleeping Giant", who:"the sleeping giant", icon:"💤", lo:0, hi:3, bg:"hall", mode:"fill", pip:PIP.foot, label:"TIPTOE PAST", bolt:false,
+  intro:"A giant is fast asleep in the great hall, right in front of the way out. You will have to tiptoe past.",
+  how:"Every right answer is one quiet step past him. Every wrong one is a creaky floorboard — he snorts, and you lose one of your three chances",
+  hits:["One quiet step. He snores on.","Tiptoe… tiptoe. Still snoring.","Another step. He mumbles something about cake.","Nearly past. Do not breathe."],
+  miss:"CREAK! He snorts", win:["You are past him.","Five quiet steps, and you are through the door. Behind you, the giant snores on, dreaming about cake."],
+  lose:"The giant sits up, yawns, and blinks at you. “Hello. Go back and try again — quietly.”",
+  exit:"stay", art:()=>`
+  ${[[250,352],[310,342],[370,352],[430,342],[490,352]].map(([x,y],k)=>`<g data-on="${k+1}" transform="translate(${x},${y}) rotate(90)">${PIP.foot}</g>`).join("")}
+  <g class="dg-dragon"><g class="dg-body">
+    <path d="M760 330 V100 h40 v230Z" fill="#3a2c50"/>
+    <path d="M540 332 q-20 -10 -10 -40 l120 -6 l10 46Z" fill="#4a5a8a"/>
+    <ellipse cx="520" cy="324" rx="26" ry="14" fill="#6a4a2a"/>
+    ${BK.at(680,330,"bk-breathe",`
+      <path d="M-90 0 q-10 -120 60 -150 q80 -20 110 40 l10 110Z" fill="#6a5a9a"/>
+      <path d="M-60 -60 h120" stroke="#ffcf5c" stroke-width="6"/>`)}
+    ${BK.at(640,150,"bk-sway s",`
+      <ellipse rx="50" ry="46" fill="#e6b896"/>
+      <path d="M-26 -4 q8 6 16 0 M10 -4 q8 6 16 0" stroke="#5a3a2a" stroke-width="3.4" fill="none" stroke-linecap="round"/>
+      <ellipse cx="0" cy="12" rx="12" ry="10" fill="#d89a80"/>
+      <path d="M-24 22 q12 10 24 2 q12 8 24 -2" stroke="#7a4a2a" stroke-width="6" fill="none" stroke-linecap="round"/>
+      <path d="M-50 -20 q40 -60 100 -10 q-20 -30 -10 -50 l40 -10 q-6 22 4 32" fill="#5a7ad0"/>
+      <circle cx="96" cy="-60" r="10" fill="#fff"/>
+      <ellipse class="dg-flash" rx="54" ry="50" fill="#fff"/>`)}
+    ${BK.zzz(700,80,0)}
+  </g></g>${BK.bubble(540,80,"SNORT!","#5a3a8a")}`},
+
+ /* 9 — the bat swarm */
+ {id:"bats", name:"The Bat Swarm", who:"the bat swarm", icon:"🦇", lo:0, hi:5, bg:"bridge", mode:"drain", pip:PIP.bat, label:"BATS",
+  intro:"A swarm of bats is swirling round a lamp on the bridge. They are very small, very loud, and in the way.",
+  how:"Every right answer sends one bat home to bed. Every wrong one, a bat swoops at you — EEK — and you lose one of your three chances",
+  hits:["One bat yawns and flaps off home.","Another one gone. It waves a wing.","Off to bed! The swarm is thinning out.","Only one left. It looks lonely."],
+  miss:"EEK — a bat swoops", win:["The bridge is clear.","The last bat hangs upside down, says goodnight, and flies off after the others."],
+  lose:"The bats swirl back in a big squeaky cloud. They think this is a game.",
+  exit:"fly", target:[620,190], art:()=>{
+    const bat=(x,y,k,d)=>`<g data-off="${k}">${BK.at(x,y,"bk-bob",`<g transform="scale(1.7)">
+      <circle r="30" fill="#b48cff" opacity=".14"/>
+      <g class="bk-flap"><path d="M-4 -2 q-20 -22 -44 -10 q12 6 12 18 q14 -8 26 -4Z M4 -2 q20 -22 44 -10 q-12 6 -12 18 q-14 -8 -26 -4Z" fill="#5a3a8a"/></g>
+      <ellipse cx="0" cy="2" rx="13" ry="16" fill="#6a4a9a"/>
+      <path d="M-9 -12 l-3 -10 l8 6Z M9 -12 l3 -10 l-8 6Z" fill="#6a4a9a"/>
+      ${BK.eye(-5,-1,4.4)}${BK.eye(5,-1,4.4)}<path d="M-3 8 l1.5 3 l1.5 -3 M1 8 l1.5 3 l1.5 -3" stroke="#fff" stroke-width="1.2" fill="#fff"/></g>`,
+      `animation-delay:${d}s`)}</g>`;
+    return `<rect x="694" y="160" width="10" height="172" fill="#2a2430"/>
+      <path d="M682 160 h34 l-6 -26 h-22Z" fill="#3a3040"/><rect x="688" y="138" width="22" height="18" fill="#ffd27a" class="flick"/>
+      <circle cx="699" cy="146" r="54" fill="url(#halo2)"/>
+      <g class="dg-dragon"><g class="dg-body">
+      ${bat(520,160,1,0)}${bat(620,96,2,-.6)}${bat(610,236,3,-1.1)}${bat(510,262,4,-.3)}${bat(740,110,5,-.8)}
+      <ellipse class="dg-flash" cx="640" cy="180" rx="140" ry="90" fill="#fff"/>
+    </g></g>${BK.at(196,206,"dg-pop",`<path d="M-4 -2 q-20 -22 -44 -10 q12 6 12 18 q14 -8 26 -4Z M4 -2 q20 -22 44 -10 q-12 6 -12 18 q-14 -8 -26 -4Z" fill="#2a1a3a"/>
+      <ellipse cx="0" cy="2" rx="13" ry="16" fill="#3a2650"/><text x="0" y="-30" text-anchor="middle" font-size="18" font-weight="800" fill="#fff">EEK!</text>`)}`; }},
+
+ /* 10 — the pumpkin golem */
+ {id:"golem", name:"The Pumpkin Golem", who:"the pumpkin golem", icon:"🎃", lo:1, hi:6, bg:"gate", mode:"drain", pip:PIP.pumpkin, label:"PUMPKIN GOLEM",
+  intro:"A giant made of pumpkins is standing in the gateway, grinning a big candle-lit grin.",
+  how:"Every right answer knocks one of the little pumpkins off him. Every wrong one, he flings seeds at you and takes one of your three chances",
+  hits:["Bonk — a pumpkin rolls off.","Another one! He catches it, sadly.","Bonk! He is looking a lot less lumpy.","One pumpkin left. He holds on to it tight."],
+  miss:"Pitoo — a spray of seeds", win:["The golem is down to one pumpkin.","With a soft POP he turns back into one ordinary, smiling pumpkin, and rolls happily out of the gate."],
+  lose:"The pumpkins roll back up and stack themselves on again, grinning.",
+  exit:"poof", target:[620,172], art:()=>`
+  <g class="dg-dragon"><g class="dg-body">
+    ${BK.shadow(620,90)}
+    <ellipse cx="620" cy="298" rx="74" ry="40" fill="#e8741c"/><path d="M572 298 q48 -50 96 0 M620 258 v80" stroke="#b9530f" stroke-width="4" fill="none"/>
+    <ellipse cx="620" cy="238" rx="58" ry="36" fill="#f08a2a"/><path d="M584 238 q36 -40 72 0" stroke="#b9530f" stroke-width="4" fill="none"/>
+    <path d="M566 236 q-40 4 -50 40" stroke="#3f6b2a" stroke-width="9" fill="none" stroke-linecap="round"/>
+    <path d="M674 236 q40 4 50 40" stroke="#3f6b2a" stroke-width="9" fill="none" stroke-linecap="round"/>
+    ${[[548,222,14],[692,222,14],[516,276,12],[724,276,12],[620,126,15]].map(([x,y,r],k)=>`<g data-off="${k+1}">
+      <ellipse cx="${x}" cy="${y}" rx="${r}" ry="${r*.8}" fill="#ff9a33" stroke="#b9530f" stroke-width="2"/>
+      <path d="M${x} ${y-r*.8} v-6" stroke="#3f6b2a" stroke-width="3"/></g>`).join("")}
+    ${BK.at(620,172,"bk-sway s",`
+      <ellipse rx="46" ry="36" fill="#ff8a1f"/><path d="M-24 0 q24 -40 48 0" stroke="#b9530f" stroke-width="3" fill="none"/>
+      <path d="M-26 -10 l10 -14 l10 14Z M6 -10 l10 -14 l10 14Z" fill="#ffd27a" class="flick"/>
+      <path d="M-26 10 l8 6 l8 -6 l8 6 l8 -6 l8 6 l8 -6 l-4 12 h-40Z" fill="#ffd27a" class="flick"/>
+      <ellipse class="dg-flash" rx="50" ry="40" fill="#fff"/>`)}
+  </g></g>${BK.at(200,240,"dg-pop",[[-14,-8],[6,-16],[14,4],[-6,12],[-20,8],[20,-6]].map(([x,y])=>`<ellipse cx="${x}" cy="${y}" rx="5" ry="3.4" fill="#fff4c8" transform="rotate(${x*3} ${x} ${y})"/>`).join(""))}`},
+
+ /* 11 — the yeti */
+ {id:"yeti", name:"The Yeti", who:"the yeti", icon:"❄️", lo:2, hi:7, bg:"bridge", mode:"drain", pip:PIP.snow, label:"SNOWBALLS",
+  intro:"A yeti has come down from the mountain and built a huge pile of snowballs on the bridge. He looks like he wants a snowball fight.",
+  how:"Every right answer knocks a snowball off his pile. Every wrong one, he throws one at you and takes one of your three chances",
+  hits:["Thwump — a snowball off the pile.","Another one gone. He scratches his head.","Thwump! The pile is getting small.","One snowball left. He hugs it."],
+  miss:"Whoomf — a snowball", win:["No snowballs left.","The yeti shrugs, grins, and stomps off back towards the mountain to make some more."],
+  lose:"He builds the pile right back up, humming to himself.",
+  exit:"walk", target:[600,196], art:()=>`
+  <g class="dg-dragon"><g class="dg-body">
+    ${BK.shadow(640,120)}
+    ${[[722,318],[752,318],[782,318],[737,294],[767,294]].map(([x,y],k)=>`<circle data-off="${5-k}" cx="${x}" cy="${y}" r="14" fill="#eef8ff" stroke="#b8d4ec" stroke-width="2"/>`).join("")}
+    <path d="M580 332 v-24 h26 v24Z M636 332 v-24 h26 v24Z" fill="#dfe8f2"/>
+    ${BK.at(620,316,"bk-breathe",`<path d="M-66 -4 q-14 -110 66 -136 q80 26 66 136 q-20 10 -30 0 q-20 10 -36 0 q-18 10 -36 0 q-14 10 -30 0Z" fill="#f2f6fc"/>`)}
+    <path d="M556 220 q-30 30 -18 70" stroke="#e6eef8" stroke-width="22" stroke-linecap="round" fill="none"/>
+    ${BK.at(686,214,"bk-sway",`<path d="M0 0 q30 -30 20 -60" stroke="#e6eef8" stroke-width="22" stroke-linecap="round" fill="none"/>
+      <circle cx="20" cy="-66" r="14" fill="#eef8ff" stroke="#b8d4ec" stroke-width="2"/>`)}
+    ${BK.at(612,196,"bk-sway s",`
+      <path d="M-26 -30 l-8 -16 l14 8Z M26 -30 l8 -16 l-14 8Z" fill="#c8d8ea"/>
+      <ellipse rx="34" ry="30" fill="#8ab4e0"/>
+      ${BK.eye(-12,-6,8)}${BK.eye(12,-6,8)}
+      <path d="M-14 12 q14 12 28 0" stroke="#2a3a5a" stroke-width="3" fill="#2a3a5a"/><path d="M-8 13 l3 5 l3 -5 M4 13 l3 5 l3 -5" fill="#fff"/>
+      <ellipse class="dg-flash" rx="38" ry="34" fill="#fff"/>`)}
+  </g></g>${BK.beam(590,206,"#eef8ff",22)}`},
+
+ /* 12 — the kraken */
+ {id:"kraken", name:"The Kraken", who:"the kraken", icon:"🐙", lo:4, hi:12, bg:"bridge", mode:"drain", pip:PIP.tentacle, label:"KRAKEN",
+  intro:"Something big lives in the moat. Five purple tentacles curl up over the bridge, and two enormous eyes blink at you from the water.",
+  how:"Every right answer makes one tentacle let go of the bridge. Every wrong one, it squirts ink and takes one of your three chances",
+  hits:["One tentacle lets go and slides back in.","Another one lets go. Blub.","Splash! Only three still holding on.","The last tentacle wiggles, unsure."],
+  miss:"Splurt — a jet of ink", win:["The bridge is free.","The kraken blows one big bubble, waves a tentacle, and sinks back to the bottom of the moat for a nap."],
+  lose:"All five tentacles curl back over the bridge. The kraken looks pleased.",
+  exit:"sink", target:[680,386], art:()=>{
+    const ten=(x,k,flip,d)=>`<g data-off="${k}">${BK.at(x,380,"bk-sway",`
+      <path d="M0 0 q${flip*-20} -60 ${flip*10} -110 q${flip*30} -40 ${flip*-6} -60 q${flip*-20} -6 ${flip*-14} 14" fill="none" stroke="#9a4ad0" stroke-width="22" stroke-linecap="round"/>
+      ${[-20,-50,-80].map(y=>`<circle cx="${flip*-6}" cy="${y}" r="4" fill="#e0b0ff"/>`).join("")}`,`animation-delay:${d}s`)}</g>`;
+    return `<g class="dg-dragon"><g class="dg-body">
+      ${ten(470,1,1,0)}${ten(540,2,-1,-.5)}${ten(600,3,1,-1)}${ten(746,4,-1,-.3)}${ten(780,5,1,-.8)}
+      <ellipse cx="680" cy="410" rx="86" ry="70" fill="#7a3ab0"/>
+      <ellipse cx="680" cy="400" rx="70" ry="50" fill="#8a4ac0"/>
+      ${BK.eye(652,386,16,"#2a1040")}${BK.eye(708,386,16,"#2a1040")}
+      <ellipse class="dg-flash" cx="680" cy="400" rx="90" ry="60" fill="#fff"/>
+    </g></g>${BK.beam(660,372,"#3a1a5a",24)}`; }},
+
+ /* 13 — the giant cat */
+ {id:"cat", name:"The Giant Cat", who:"the giant cat", icon:"🐈‍⬛", lo:0, hi:3, bg:"gate", mode:"fill", pip:PIP.paw, label:"SLEEPY CAT",
+  intro:"An enormous black cat is sitting in the gateway, swishing her tail. She is not moving for anyone — unless she falls asleep.",
+  how:"Every right answer is a line of a lullaby, and her eyes get a little heavier. Every wrong one, she hisses and takes one of your three chances",
+  hits:["Her eyes droop a little.","She yawns an enormous yawn.","Her eyes are half closed now. Purrrr.","She is nearly asleep. Keep going, softly."],
+  miss:"HISS!", win:["She is fast asleep.","The giant cat curls into a ball, tail over her nose, and purrs in her sleep. You tiptoe round her."],
+  lose:"She is wide awake again, and her tail is swishing faster.",
+  exit:"stay", target:[600,186], art:()=>`
+  <g class="dg-dragon"><g class="dg-body">
+    ${BK.shadow(610,110)}
+    ${BK.at(680,320,"bk-sway",`<path d="M0 0 q60 -10 50 -80 q-4 -20 10 -24" stroke="#1c1626" stroke-width="18" fill="none" stroke-linecap="round"/>`)}
+    ${BK.at(600,332,"bk-breathe",`<path d="M-80 0 q-10 -110 80 -130 q90 20 80 130Z" fill="#1c1626"/>
+      <path d="M-34 0 v-24 M34 0 v-24" stroke="#2a2236" stroke-width="16" stroke-linecap="round"/>`)}
+    ${BK.at(600,186,"bk-sway s",`
+      <path d="M-48 -20 l-6 -46 l34 22Z M48 -20 l6 -46 l-34 22Z" fill="#1c1626"/><path d="M-42 -28 l-3 -26 l18 13Z M42 -28 l3 -26 l-18 13Z" fill="#ff9ab0"/>
+      <ellipse rx="54" ry="46" fill="#1c1626"/>
+      <ellipse cx="-20" cy="-4" rx="14" ry="16" fill="#ffd23a"/><ellipse cx="20" cy="-4" rx="14" ry="16" fill="#ffd23a"/>
+      <ellipse cx="-20" cy="-4" rx="4" ry="13" fill="#1a1420"/><ellipse cx="20" cy="-4" rx="4" ry="13" fill="#1a1420"/>
+      ${[1,2,3,4].map(k=>`<g data-on="${k}"><path d="M-35 -20 h30 v${k*8} h-30Z M5 -20 h30 v${k*8} h-30Z" fill="#1c1626"/></g>`).join("")}
+      <g data-on="5"><path d="M-32 -2 q12 8 24 0 M8 -2 q12 8 24 0" stroke="#ffd23a" stroke-width="3" fill="none"/></g>
+      <path d="M-5 14 h10 l-5 6Z" fill="#ff9ab0"/><path d="M-12 24 q6 6 12 0 q6 6 12 0" stroke="#fff" stroke-width="2" fill="none"/>
+      <path d="M-30 16 h-30 M-30 22 h-28 M30 16 h30 M30 22 h28" stroke="#fff" stroke-width="1.4" opacity=".7"/>
+      <ellipse class="dg-flash" rx="58" ry="50" fill="#fff"/>`)}
+    ${BK.zzz(650,120,5)}
+  </g></g>${BK.bubble(500,110,"HISS!","#8a1a3a")}`},
+
+ /* 14 — the gargoyles */
+ {id:"gargoyles", name:"The Gargoyles", who:"the gargoyles", icon:"🗿", lo:6, hi:12, bg:"gate", mode:"drain", pip:PIP.rune, label:"RUNES",
+  intro:"Two gargoyles have woken up on top of the gate. Five glowing runes keep them awake — and keep the gate shut.",
+  how:"Every right answer puts out one of the runes. Every wrong one, a gargoyle glares a red beam and takes one of your three chances",
+  hits:["A rune flickers and goes dark.","Another rune out. The gargoyles look at each other.","Three dark. Their wings are getting stiff.","One rune left. They are going grey round the edges."],
+  miss:"ZAP — a red glare", win:["The last rune goes out.","The gargoyles stretch, yawn, and turn slowly back into stone — wings folded, perfectly still."],
+  lose:"All five runes flare back to life, and the gargoyles grin stony grins.",
+  exit:"stone", target:[600,140], art:()=>{
+    const garg=(x,flip)=>BK.at(x,140,"bk-bob",`
+      <path d="M0 -6 q${flip*-46} -40 ${flip*-60} -4 q${flip*20} -2 ${flip*24} 16Z" fill="#5a5866"/>
+      <path d="M-26 40 q-4 -44 26 -52 q30 8 26 52Z" fill="#6a6872"/>
+      <ellipse cx="0" cy="-18" rx="22" ry="20" fill="#74727e"/>
+      <path d="M-14 -34 l-6 -16 l12 8Z M14 -34 l6 -16 l-12 8Z" fill="#5a5866"/>
+      <circle cx="-8" cy="-20" r="5" fill="#ff5a4a" class="bk-pulse"/><circle cx="8" cy="-20" r="5" fill="#ff5a4a" class="bk-pulse"/>
+      <path d="M-8 -4 q8 6 16 0" stroke="#3a3842" stroke-width="3" fill="none"/>`,"");
+    return `<g class="dg-dragon"><g class="dg-body">
+      <rect x="436" y="176" width="68" height="16" fill="#3a3346"/><rect x="696" y="176" width="68" height="16" fill="#3a3346"/>
+      ${garg(470,1)}${garg(730,-1)}
+      ${[[540,96],[570,78],[600,72],[630,78],[660,96]].map(([x,y],k)=>`<g data-off="${k+1}" transform="translate(${x},${y})">${PIP.rune}<circle r="20" fill="url(#halo3)"/></g>`).join("")}
+      <ellipse class="dg-flash" cx="600" cy="110" rx="200" ry="60" fill="#fff"/>
+    </g>${BK.beam(478,120,"#ff5a4a",8)}</g>`; }},
+
+ /* 15 — the will-o'-wisps */
+ {id:"wisps", name:"The Will-o'-Wisps", who:"the will-o'-wisps", icon:"✨", lo:2, hi:7, bg:"bridge", mode:"fill", pip:PIP.jar, label:"JARS",
+  intro:"Five little lights are dancing over the bridge, leading anyone who follows them the wrong way. You have five jars.",
+  how:"Every right answer catches one wisp in a jar. Every wrong one, a wisp zaps you and takes one of your three chances",
+  hits:["Got one! It glows happily in its jar.","Another! The jar hums.","Three jars glowing.","Four. The last one is circling, curious."],
+  miss:"Zzzap — a wisp", win:["Five jars, five lights.","You hold the jars up, and the wisps light the way across the bridge instead of the wrong way. Then you let them go."],
+  lose:"The wisps wriggle out of their jars and dance off, giggling.",
+  exit:"fade", target:[640,190], art:()=>`
+  ${[262,292,322,352,382].map((x,k)=>`<g transform="translate(${x},318)">${`<rect x="-10" y="-12" width="20" height="26" rx="5" fill="#2a3a44" opacity=".6" stroke="#9ad0e0" stroke-width="1.6"/><rect x="-8" y="-16" width="16" height="5" fill="#8a6a3a"/>`}
+    <g data-on="${k+1}"><circle cy="1" r="7" fill="#9affd8"/><circle cy="1" r="18" fill="url(#halo3)"/></g></g>`).join("")}
+  <g class="dg-dragon"><g class="dg-body">
+    ${[[520,190],[590,140],[660,210],[720,150],[770,240]].map(([x,y],k)=>`<g data-off="${k+1}">${BK.at(x,y,"bk-bob",`
+      <circle r="34" fill="url(#halo3)"/><circle r="15" fill="#c8fff0"/><circle r="10" fill="#9affd8"/>
+      <circle cx="-4" cy="-2" r="2" fill="#1a3a3a"/><circle cx="4" cy="-2" r="2" fill="#1a3a3a"/><path d="M-3 4 q3 3 6 0" stroke="#1a3a3a" stroke-width="1.4" fill="none"/>`,
+      `animation-delay:${-k*0.5}s`)}</g>`).join("")}
+    <ellipse class="dg-flash" cx="640" cy="190" rx="150" ry="80" fill="#fff"/>
+  </g></g>${BK.at(196,220,"dg-pop",`<path d="M-4 -30 l14 18 h-10 l12 22 l-26 -24 h10 l-12 -16Z" fill="#9affd8"/><circle r="30" fill="url(#halo3)"/>`)}`},
+
+ /* 16 — the phantom organist */
+ {id:"phantom", name:"The Phantom Organist", who:"the phantom organist", icon:"🎹", lo:7, hi:12, bg:"hall", mode:"fill", pip:PIP.note, label:"THE RIGHT NOTES",
+  intro:"In the great hall, a phantom in a cape is playing a huge organ. “Play the five right notes,” he says, “and I shall let you leave.”",
+  how:"Every right answer is a right note, and one of the organ's pipes lights up. Every wrong one is a sour note — he winces, and you lose one of your three chances",
+  hits:["A perfect note. A pipe glows gold.","Another! He nods along.","The organ is starting to play a tune.","Four notes. He has stopped playing to listen."],
+  miss:"A sour note — BLAAARP", win:["The tune is complete.","The phantom stands, bows very deeply, and fades away mid-bow — leaving the last chord ringing round the hall."],
+  lose:"He sighs and starts the piece again from the very beginning.",
+  exit:"fade", target:[612,206], art:()=>`
+  <g>${[0,1,2,3,4,5,6].map(k=>{ const x=560+k*30, h=[150,190,220,240,220,190,150][k];
+    return `<rect x="${x-10}" y="${300-h}" width="20" height="${h}" rx="4" fill="#8a6a2a" stroke="#c9952c" stroke-width="2"/>
+      ${k>=1&&k<=5?`<rect data-on="${k}" x="${x-10}" y="${300-h}" width="20" height="${h}" rx="4" fill="#ffd27a"/>`:""}`; }).join("")}</g>
+  <rect x="610" y="260" width="170" height="72" rx="6" fill="#3a2418"/><rect x="616" y="262" width="158" height="14" fill="#f2ecd4"/>
+  ${Array.from({length:11},(_,k)=>`<rect x="${622+k*14}" y="262" width="7" height="8" fill="#1a1420"/>`).join("")}
+  <g class="dg-dragon"><g class="dg-body">
+    <rect x="540" y="300" width="80" height="12" fill="#3a2418"/><rect x="548" y="312" width="8" height="20" fill="#3a2418"/><rect x="604" y="312" width="8" height="20" fill="#3a2418"/>
+    ${BK.at(592,300,"bk-breathe",`<path d="M-44 0 q-4 -90 44 -110 q50 20 46 110Z" fill="#2a1840"/><path d="M-44 0 q20 -70 44 -100 v100Z" fill="#7a1a2a"/>`)}
+    ${BK.at(630,226,"bk-bob",`<path d="M0 0 q14 10 20 30" stroke="#e6f0ff" stroke-width="8" stroke-linecap="round" fill="none"/>`,"animation-duration:.6s")}
+    ${BK.at(592,180,"bk-sway s",`
+      <ellipse rx="26" ry="30" fill="#e6f0ff" opacity=".95"/>
+      <path d="M0 -26 q24 2 24 26 q0 22 -24 26Z" fill="#fff"/>
+      ${BK.eye(-9,-4,5)}<ellipse cx="9" cy="-4" rx="5" ry="3.4" fill="#1a1420"/>
+      <path d="M-8 14 q8 5 16 0" stroke="#3a3a5a" stroke-width="2" fill="none"/>
+      <path d="M-30 -24 h60 v-8 h-60Z M-20 -32 h40 v-30 h-40Z" fill="#1a1420"/>
+      <ellipse class="dg-flash" rx="32" ry="34" fill="#fff"/>`)}
+  </g></g>${BK.bubble(200,200,"BLAAARP","#7a1a2a")}`},
+
+ /* 17 — the mummy */
+ {id:"mummy", name:"The Mummy", who:"the mummy", icon:"🩹", lo:2, hi:8, bg:"hall", mode:"drain", pip:PIP.roll, label:"BANDAGES",
+  intro:"A mummy is blocking the hall, arms out, wobbling. He is mostly bandages, and the bandages are mostly loose.",
+  how:"Every right answer unwinds one of his bandages. Every wrong one, he flicks a bandage at you and takes one of your three chances",
+  hits:["A bandage unravels. He looks down at it.","Another one comes loose. He tries to tuck it back in.","Flap, flap. He is getting very draughty.","He is holding his last bandage up with one hand."],
+  miss:"Thwap — a loose bandage", win:["He has run out of bandages.","The mummy blushes, gathers up all his bandages in a big bundle, and shuffles off to wind himself back up."],
+  lose:"He winds every bandage back on, very neatly, and wobbles back into place.",
+  exit:"walk", target:[612,170], art:()=>`
+  <g class="dg-dragon"><g class="dg-body">
+    ${BK.shadow(620,70)}
+    ${[[548,236,0],[692,236,1],[598,300,2],[650,300,3],[620,206,4]].map(([x,y,i],k)=>`<g data-on="${k+1}">
+      <path d="M${x} ${y} q${i%2?20:-20} 30 ${i%2?6:-6} 70 q${i%2?-10:10} 10 ${i%2?14:-14} 24" stroke="#efe6d0" stroke-width="8" fill="none" stroke-linecap="round"/></g>`).join("")}
+    <rect x="592" y="268" width="24" height="64" rx="6" fill="#e2d8c2"/><rect x="626" y="268" width="24" height="64" rx="6" fill="#e2d8c2"/>
+    ${BK.at(620,280,"bk-sway s",`<path d="M-44 0 q-6 -86 44 -96 q50 10 44 96Z" fill="#e2d8c2"/>
+      ${[-80,-62,-44,-26,-10].map((y,i)=>`<path d="M-44 ${y} q44 ${i%2?8:-8} 88 ${i%2?-6:6}" stroke="#c8bca2" stroke-width="3" fill="none"/>`).join("")}`)}
+    <path d="M578 206 q-34 4 -46 30" stroke="#e2d8c2" stroke-width="18" stroke-linecap="round" fill="none"/>
+    <path d="M662 206 q34 4 46 30" stroke="#e2d8c2" stroke-width="18" stroke-linecap="round" fill="none"/>
+    ${BK.at(620,166,"bk-sway s",`
+      <ellipse rx="34" ry="36" fill="#e2d8c2"/>
+      ${[-20,-6,8,22].map((y,i)=>`<path d="M-34 ${y} q34 ${i%2?6:-6} 68 0" stroke="#c8bca2" stroke-width="3" fill="none"/>`).join("")}
+      <circle cx="-12" cy="-2" r="11" fill="#fff"/><circle cx="12" cy="-2" r="11" fill="#fff"/>
+      <circle cx="-9" cy="2" r="4.4" fill="#1a1420"/><circle cx="15" cy="-4" r="4.4" fill="#1a1420"/>
+      <path d="M-8 18 q8 4 16 0" stroke="#7a6a52" stroke-width="2.4" fill="none"/>
+      <ellipse class="dg-flash" rx="38" ry="40" fill="#fff"/>`)}
+  </g></g>${BK.beam(560,226,"#efe6d0",7)}`},
+
+ /* 18 — the giant toad */
+ {id:"toad", name:"The Giant Toad", who:"the giant toad", icon:"🐸", lo:0, hi:3, bg:"bridge", mode:"fill", pip:PIP.firefly, label:"FIREFLIES",
+  intro:"A toad as big as a cart is sitting on the bridge, and she will not budge. But toads do love fireflies.",
+  how:"Every right answer lets a firefly out of your lantern, over by the far end of the bridge. Every wrong one, she croaks so loud you lose one of your three chances",
+  hits:["A firefly floats off. Her eyes follow it.","Another firefly. She licks her lips.","Three fireflies. She shuffles a bit.","She is leaning right over, watching them."],
+  miss:"CROAK!", win:["Five fireflies — she cannot resist.","The toad hops off after the fireflies — boing, boing, boing — all the way to the other side and into the moat."],
+  lose:"The fireflies all fly back to your lantern. The toad settles down again.",
+  exit:"walk", target:[620,232], art:()=>`
+  ${[[560,160],[620,120],[690,150],[750,110],[720,200]].map(([x,y],k)=>`<g data-on="${k+1}">${BK.at(x,y,"bk-bob",`<circle r="5" fill="#f2ff9a"/><circle r="16" fill="#e8ff7a" opacity=".25"/>`,`animation-delay:${-k*0.4}s`)}</g>`).join("")}
+  <g class="dg-dragon"><g class="dg-body">
+    ${BK.shadow(620,120)}
+    ${BK.at(620,332,"bk-breathe",`<path d="M-110 0 q-10 -100 110 -110 q120 10 110 110Z" fill="#6a8a3a"/>
+      ${[[-60,-40],[-20,-70],[30,-50],[70,-30],[-80,-16],[50,-80]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="7" fill="#5a7a2e"/>`).join("")}
+      <ellipse cx="0" cy="-8" rx="70" ry="20" fill="#c8d68a"/>`)}
+    <path d="M520 332 q-10 -20 14 -26 l20 26Z M720 332 q10 -20 -14 -26 l-20 26Z" fill="#5a7a2e"/>
+    ${BK.at(620,232,"bk-sway s",`
+      <ellipse cx="-34" cy="-30" rx="22" ry="22" fill="#7a9a46"/><ellipse cx="34" cy="-30" rx="22" ry="22" fill="#7a9a46"/>
+      ${BK.eye(-34,-30,14,"#3a2a10")}${BK.eye(34,-30,14,"#3a2a10")}
+      <path d="M-60 10 q60 30 120 0" stroke="#3a4a1a" stroke-width="5" fill="none" stroke-linecap="round"/>
+      <circle cx="-56" cy="0" r="6" fill="#ff9ab0" opacity=".5"/><circle cx="56" cy="0" r="6" fill="#ff9ab0" opacity=".5"/>
+      <ellipse class="dg-flash" cy="-10" rx="80" ry="44" fill="#fff"/>`)}
+  </g></g>${BK.bubble(500,130,"CROAK!","#3a6a1a")}`},
+
+ /* 19 — the storm cloud */
+ {id:"storm", name:"The Storm Cloud", who:"the storm cloud", icon:"⛈️", lo:7, hi:12, bg:"bridge", mode:"drain", pip:PIP.cloud, label:"STORM",
+  intro:"A grumpy storm cloud is sitting over the bridge, raining on it on purpose.",
+  how:"Every right answer is a ray of sunshine that blows one cloud puff away. Every wrong one, it throws a lightning bolt and takes one of your three chances",
+  hits:["A puff of cloud blows away. The rain eases.","Another one gone. A bit of sky shows through.","Three gone. It is only drizzling now.","One puff left, raining sulkily."],
+  miss:"CRACK — lightning", win:["The sky is clear.","The last of the storm cloud fades away, and a rainbow comes out right over the bridge."],
+  lose:"The cloud puffs itself back up, bigger and greyer, and the rain comes down hard.",
+  exit:"fade", target:[624,140], art:()=>`
+  <g data-on="5">${["#ff5a5a","#ffb12e","#ffe66a","#7ad17a","#6ab0ff","#a46be0"].map((c,k)=>`<path d="M${440+k*9} 330 A${180-k*9} ${170-k*9} 0 0 1 ${800-k*9} 330" stroke="${c}" stroke-width="9" fill="none" opacity=".75"/>`).join("")}</g>
+  <g class="dg-dragon"><g class="dg-body">
+    <g opacity=".6">${Array.from({length:16},(_,k)=>BK.at(520+k*16,190+(k%3)*12,"bk-rain",`<path d="M0 0 l-4 14" stroke="#9ad0ff" stroke-width="2"/>`,`animation-delay:${-(k%5)*0.13}s`)).join("")}</g>
+    ${[[540,150,40],[700,146,44],[580,104,42],[668,100,40],[624,80,36]].map(([x,y,r],k)=>`<circle data-off="${k+1}" cx="${x}" cy="${y}" r="${r}" fill="#5a5a78"/>`).join("")}
+    ${BK.at(624,140,"bk-sway s",`<ellipse rx="70" ry="44" fill="#6a6a8a"/>
+      <path d="M-30 -12 l18 6 M30 -12 l-18 6" stroke="#2a2a40" stroke-width="4" stroke-linecap="round"/>
+      <circle cx="-18" cy="2" r="5" fill="#2a2a40"/><circle cx="18" cy="2" r="5" fill="#2a2a40"/>
+      <path d="M-14 22 q14 -8 28 0" stroke="#2a2a40" stroke-width="3" fill="none"/>
+      <ellipse class="dg-flash" rx="74" ry="48" fill="#fff"/>`)}
+  </g></g>
+  <g transform="translate(570,176) rotate(${(Math.atan2(286-176,150-570)*180/Math.PI-180).toFixed(1)})"><path class="dg-fire"
+    d="M0 0 L-100 -18 L-150 8 L-250 -16 L-310 12 L-410 -6 L-310 24 L-250 2 L-150 28 L-100 4 Z" fill="#fff27a"/></g>`},
+
+ /* 20 — the fog beast */
+ {id:"fog", name:"The Fog Beast", who:"the fog beast", icon:"🌫️", lo:3, hi:9, bg:"bridge", mode:"drain", pip:PIP.fog, label:"FOG",
+  intro:"A thick fog has rolled over the far end of the bridge. Two pale eyes look out of it. Somewhere behind, you can just hear horses.",
+  how:"Every right answer clears one bank of fog. Every wrong one, it breathes a cold mist on you and takes one of your three chances",
+  hits:["A bank of fog lifts. You can see a little further.","Another clears. Something golden is waiting behind.","Three gone — that is a coach!","Nearly clear. The eyes are getting smaller."],
+  miss:"Whoooo — a cold mist", win:["The fog is gone.","The last of the fog drifts away like a sigh, and there is the pumpkin coach, waiting on the road just across the bridge."],
+  lose:"The fog rolls back in, thicker than ever. The eyes blink.",
+  exit:"fade", target:[620,210], art:()=>`
+  <g transform="translate(700,300) scale(.32)">
+    <ellipse cx="0" cy="-10" rx="100" ry="76" fill="#e8741c"/><circle cx="-70" cy="70" r="40" fill="none" stroke="#ffcf5c" stroke-width="8"/>
+    <circle cx="70" cy="70" r="46" fill="none" stroke="#ffcf5c" stroke-width="8"/></g>
+  <g class="dg-dragon"><g class="dg-body">
+    ${[0,1,2,3,4].map(k=>`<g data-off="${5-k}">${BK.at(0,0,"bk-drift",`<path d="M${380+k*8} ${130+k*44} q60 -30 120 0 t120 0 t120 0 t120 0 V${190+k*44} H${380+k*8}Z" fill="#b8b4c8" opacity="${0.42+k*0.05}"/>`,`animation-delay:${-k*0.9}s`)}</g>`).join("")}
+    ${BK.at(620,210,"bk-bob",`<ellipse cx="-28" rx="12" ry="9" fill="#dff8ff"/><ellipse cx="28" rx="12" ry="9" fill="#dff8ff"/>
+      <ellipse cx="-28" cy="0" rx="36" ry="30" fill="#dff8ff" opacity=".15"/><ellipse cx="28" cy="0" rx="36" ry="30" fill="#dff8ff" opacity=".15"/>
+      <path d="M-20 34 q20 14 40 0" stroke="#dff8ff" stroke-width="3" fill="none" opacity=".6"/>
+      <ellipse class="dg-flash" rx="80" ry="50" fill="#fff"/>`)}
+  </g></g>${BK.beam(590,222,"#c8d4e8",26)}`}
+];
+
+/* the dragon's own drawing, unchanged from v15 */
+function dragonArt(){
   const spikes=[[508,236],[530,250],[556,246],[584,244],[612,244],[640,248],[666,256]]
     .map(([x,y])=>`<path d="M${x-9} ${y+6} L${x} ${y-14} L${x+9} ${y+6}Z" fill="#6b3fa0"/>`).join("");
   const wing=(cls,fill,bone)=>`<g class="dg-wing ${cls}">
       <path d="M0 0 L54 -128 L76 -96 L104 -122 L118 -78 L150 -94 L134 -26 Z" fill="${fill}"/>
       <path d="M0 0 L54 -128 M0 0 L104 -122 M0 0 L150 -94" stroke="${bone}" stroke-width="4" fill="none"/></g>`;
-  return `
-  <defs>
-    <linearGradient id="dgsky" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#160f30"/><stop offset="70%" stop-color="#2c1530"/><stop offset="1" stop-color="#3a1a22"/></linearGradient>
-    <linearGradient id="dgfire" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0" stop-color="#fff2a8"/><stop offset=".35" stop-color="#ffb12e"/><stop offset=".8" stop-color="#ff5a1f"/>
-      <stop offset="1" stop-color="#c4121f" stop-opacity="0"/></linearGradient>
-    <radialGradient id="dgorb"><stop offset="0" stop-color="#fffbe0"/><stop offset=".45" stop-color="#ffd27a"/>
-      <stop offset="1" stop-color="#ff9a33" stop-opacity="0"/></radialGradient>
-    <radialGradient id="dgeye"><stop offset="0" stop-color="#fff3a0"/><stop offset="1" stop-color="#ff9a1f"/></radialGradient>
-    <radialGradient id="moong2"><stop offset="0" stop-color="#fff7d8" stop-opacity=".45"/>
-      <stop offset="1" stop-color="#fff7d8" stop-opacity="0"/></radialGradient>
-    <radialGradient id="dgvig" cx="50%" cy="55%" r="80%">
-      <stop offset="55%" stop-color="#000" stop-opacity="0"/><stop offset="100%" stop-color="#000" stop-opacity=".75"/></radialGradient>
-  </defs>
-  <g class="dg-anim">
-  <rect width="800" height="460" fill="url(#dgsky)"/>
-  ${stars(60,220)}
-  ${moon(90,70,30)}
-  <!-- the castle behind, and the moat under the bridge -->
-  <g transform="translate(330,40) scale(.62)">${outsideKit("castle")}</g>
-  <rect x="0" y="352" width="800" height="108" fill="#0d1a24"/>
-  <path d="M0 372 q60 -6 120 0 t120 0 t120 0 t120 0 t120 0 t120 0 t120 0" stroke="#24405a" stroke-width="2" fill="none" opacity=".6"/>
-  <!-- the bridge -->
-  <path d="M0 330 H800 V356 H0Z" fill="#3a3340"/>
-  <path d="M0 330 H800" stroke="#5c5268" stroke-width="3"/>
-  ${Array.from({length:9},(_,k)=>`<path d="M${k*100} 356 q50 -26 100 0" fill="#0d1a24"/>`).join("")}
-  ${Array.from({length:17},(_,k)=>`<rect x="${k*50+6}" y="316" width="30" height="14" rx="2" fill="#4a4152"/>`).join("")}
-
-  <!-- the dragon -->
-  <g class="dg-dragon"><g class="dg-body">
+  return `  <g class="dg-dragon"><g class="dg-body">
     <ellipse cx="610" cy="334" rx="140" ry="12" fill="#000" opacity=".4"/>
     <g transform="translate(600,250)">${wing("b","#3b2160","#2a1748")}</g>
     <g transform="translate(694,318)"><g class="dg-tail">
@@ -3842,21 +4450,59 @@ function dragonSVG(){
       <ellipse class="dg-flash" cx="-20" cy="-2" rx="64" ry="34" fill="#fff"/>
     </g></g>
     <g transform="translate(582,244)">${wing("","#5a35a0","#3b2160")}</g>
-  </g></g>
-  <g transform="translate(470,210)"><circle class="dg-ring" r="16" fill="none" stroke="#c8c0d4" stroke-width="5"/></g>
+  </g></g>`;
+}
+
+/* Deal the next challenge: a shuffled pile, no repeat until all twenty have come
+   up, and within the pile the best grade match first — exact matches, then one
+   grade away, and so on. Never the same one twice running across a reshuffle. */
+function pickBoss(level){
+  let seen=new Set(save.bossSeen||[]);
+  let pool=BOSSES.filter(b=>!seen.has(b.id));
+  if(!pool.length){ save.bossSeen=[]; seen=new Set(); pool=BOSSES.filter(b=>b.id!==save.bossLast); }
+  const off=b=> level<b.lo ? b.lo-level : level>b.hi ? level-b.hi : 0;
+  const best=Math.min(...pool.map(off));
+  const b=P(pool.filter(x=>off(x)===best));
+  save.bossSeen=[...(save.bossSeen||[]), b.id]; save.bossLast=b.id; store();
+  return b;
+}
+
+function bossSVG(){
+  const a=AVATARS.find(v=>v.id===S.avatar)||AVATARS[0], b=S.boss;
+  const [tx,ty]=b.target||[420,212];
+  return `
+  <defs>
+    <linearGradient id="dgsky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#160f30"/><stop offset="70%" stop-color="#2c1530"/><stop offset="1" stop-color="#3a1a22"/></linearGradient>
+    <linearGradient id="dgfire" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#fff2a8"/><stop offset=".35" stop-color="#ffb12e"/><stop offset=".8" stop-color="#ff5a1f"/>
+      <stop offset="1" stop-color="#c4121f" stop-opacity="0"/></linearGradient>
+    <radialGradient id="dgorb"><stop offset="0" stop-color="#fffbe0"/><stop offset=".45" stop-color="#ffd27a"/>
+      <stop offset="1" stop-color="#ff9a33" stop-opacity="0"/></radialGradient>
+    <radialGradient id="dgeye"><stop offset="0" stop-color="#fff3a0"/><stop offset="1" stop-color="#ff9a1f"/></radialGradient>
+    <radialGradient id="moong2"><stop offset="0" stop-color="#fff7d8" stop-opacity=".45"/>
+      <stop offset="1" stop-color="#fff7d8" stop-opacity="0"/></radialGradient>
+    <radialGradient id="halo2"><stop offset="0" stop-color="#ffb347" stop-opacity=".5"/><stop offset="1" stop-color="#ffb347" stop-opacity="0"/></radialGradient>
+    <radialGradient id="halo3"><stop offset="0" stop-color="#9affd8" stop-opacity=".55"/><stop offset="1" stop-color="#9affd8" stop-opacity="0"/></radialGradient>
+    <radialGradient id="dgvig" cx="50%" cy="55%" r="80%">
+      <stop offset="55%" stop-color="#000" stop-opacity="0"/><stop offset="100%" stop-color="#000" stop-opacity=".75"/></radialGradient>
+  </defs>
+  <g class="dg-anim">
+  ${bossBackdrop(b.bg)}
+  ${b.art()}
+  <g transform="translate(${tx},${ty})"><circle class="dg-ring" r="16" fill="none" stroke="#c8c0d4" stroke-width="5"/></g>
 
   <!-- you -->
   <ellipse cx="148" cy="334" rx="52" ry="9" fill="#000" opacity=".45"/>
   <g class="dg-me"><g transform="translate(92,212) scale(1.55)">${a.svg}</g></g>
-  <g transform="translate(206,296)"><circle class="dg-bolt" r="16" fill="url(#dgorb)"/></g>
+  ${b.bolt===false?"":`<g transform="translate(206,296)"><circle class="dg-bolt" r="16" fill="url(#dgorb)" style="--tx:${tx-206}px;--ty:${ty-296}px"/></g>`}
 
-  <!-- the score of the fight -->
+  <!-- the score of the challenge -->
   <g font-family="inherit" font-weight="800" letter-spacing="2" font-size="13">
-    <text x="602" y="34" fill="#ffb12e" text-anchor="middle">DRAGON</text>
+    <text x="602" y="34" fill="#ffb12e" text-anchor="middle">${esc(b.label)}</text>
     <text x="148" y="34" fill="#7fd7ff" text-anchor="middle">YOU</text></g>
-  ${Array.from({length:DRAGON_HP},(_,k)=>`<g transform="translate(${542+k*30},52)"><path class="dg-pip" id="dgHp${k}"
-      d="M0 -12 C8 -4 10 4 6 10 C4 13 -4 13 -6 10 C-10 4 -6 -2 0 -12Z" fill="#ff7a1f" stroke="#ffd27a" stroke-width="1.4"/></g>`).join("")}
-  ${Array.from({length:DRAGON_SHIELDS},(_,k)=>`<g transform="translate(${118+k*30},52)"><path class="dg-pip" id="dgSh${k}"
+  ${Array.from({length:BOSS_HP},(_,k)=>`<g transform="translate(${542+k*30},54)"><g class="dg-pip" id="dgHp${k}">${b.pip}</g></g>`).join("")}
+  ${Array.from({length:BOSS_TRIES},(_,k)=>`<g transform="translate(${118+k*30},52)"><path class="dg-pip" id="dgSh${k}"
       d="M0 -12 L10 -8 V0 C10 7 5 11 0 13 C-5 11 -10 7 -10 0 V-8Z" fill="#2d6a82" stroke="#7fd7ff" stroke-width="1.6"/></g>`).join("")}
   ${TH.fall()}
   <rect width="800" height="460" fill="url(#dgvig)"/>
@@ -3877,56 +4523,63 @@ function dragonProblem(){
   return makeProblem(lvl,g);
 }
 
+/* points: "drain" bars empty as you win (flames out), "fill" bars light up
+   (coins in); pieces of the art come and go with data-off / data-on */
 function paintDragonBars(){
-  const D=S.dragon;
-  for(let k=0;k<DRAGON_HP;k++){ const e=document.getElementById("dgHp"+k); if(e) e.classList.toggle("gone", k>=D.hp); }
-  for(let k=0;k<DRAGON_SHIELDS;k++){ const e=document.getElementById("dgSh"+k); if(e) e.classList.toggle("gone", k>=D.shields); }
+  const D=S.dragon, b=S.boss, hits=BOSS_HP-D.hp;
+  for(let k=0;k<BOSS_HP;k++){ const e=document.getElementById("dgHp"+k); if(!e) continue;
+    e.classList.toggle("gone", b.mode==="fill" ? k>=hits : k>=D.hp); }
+  for(let k=0;k<BOSS_TRIES;k++){ const e=document.getElementById("dgSh"+k); if(e) e.classList.toggle("gone", k>=D.shields); }
+  document.querySelectorAll("#scene [data-off]").forEach(e=>e.classList.toggle("bk-off", hits>=+e.dataset.off));
+  document.querySelectorAll("#scene [data-on]").forEach(e=>e.classList.toggle("bk-shown", hits>=+e.dataset.on));
 }
 
 function dragonScene(){
   S.sceneTok=(S.sceneTok||0)+1;
   S.rodeCoach=false;
-  $("#scene").innerHTML=dragonSVG();
-  $("#roomtag").textContent="The bridge";
+  S.boss = pickBoss(S.level);
+  S.dragon={hp:BOSS_HP, shields:BOSS_TRIES, used:new Set(), p:null};
+  const b=S.boss;
+  $("#scene").innerHTML=bossSVG();
+  paintDragonBars();
+  $("#roomtag").textContent=b.bg==="hall"?"The great hall":b.bg==="gate"?"The castle gate":"The bridge";
   $("#roomline").textContent="";
   $("#chest").classList.add("hidden"); $("#hatch").classList.add("hidden");
   document.body.classList.remove("dying");
   stopTimer(); $("#timerwrap").classList.add("hidden"); $("#readrow").classList.add("hidden");
-  $("#topic").innerHTML='<span style="color:#ffb12e">A special challenge</span> <i class="above hard">the dragon</i>';
-  $("#question").textContent=`A dragon is lying across the bridge — and it has seen you. On the road beyond it, something golden is waiting.`;
+  $("#topic").innerHTML=`<span style="color:#ffb12e">The final challenge</span> <i class="above hard">${b.icon} ${esc(b.name)}</i>`;
+  $("#question").textContent=`${b.intro} On the road beyond, something golden is waiting.`;
   $("#choices").innerHTML=""; $("#choices").onclick=null;
   $("#nextwrap").classList.add("hidden");
   const fb=$("#feedback"); fb.className="ok show";
-  fb.innerHTML=`<div class="ft">The only way across is through it.</div>
-    <div class="steps">Five problems, the hardest kinds ${esc(BANK[S.level].name)} has. Every one you get right is a burst of
-      lantern light that puts out one of its <b style="color:#ffb12e">five flames</b>. Every wrong one, it breathes fire and
-      burns one of your <b style="color:#7fd7ff">three shields</b> — you get a hint, and the same problem again.
-      Lose all three and it chases you off, but you can always come back.</div>
+  fb.innerHTML=`<div class="ft">The only way out is past ${esc(b.who)}.</div>
+    <div class="steps">Five problems, the hardest kinds ${esc(BANK[S.level].name)} has. ${esc(b.how)} — and you get a hint and
+      the same problem again. Lose all three and you have to come back, but you always can.</div>
     <div class="row" style="margin-top:14px;justify-content:flex-start">
-      <button class="btn" id="dgGo">🐉 Face the dragon</button>
+      <button class="btn" id="dgGo">${b.icon} Face ${esc(b.who)}</button>
       <button class="btn ghost" id="dgAway">Go home the long way</button></div>`;
   $("#dgGo").onclick=()=>{ SFX.click(); startDragon(); };
   $("#dgAway").onclick=()=>{ SFX.click(); familyScene(); };
   SFX.dragon();
-  if(kidMode) say("A dragon is lying across the bridge. Face the dragon, or go home the long way.",0.9);
+  if(kidMode) say(`${b.intro} Face ${b.who}, or go home the long way.`,0.9);
 }
 
 function startDragon(){
-  S.dragon={hp:DRAGON_HP, shields:DRAGON_SHIELDS, used:new Set(), p:null};
-  if(!$("#dgHp0")) $("#scene").innerHTML=dragonSVG();
+  S.dragon={hp:BOSS_HP, shields:BOSS_TRIES, used:new Set(), p:null};
+  $("#scene").innerHTML=bossSVG();
   paintDragonBars();
   dragonAsk();
 }
 
 function dragonAsk(){
-  const D=S.dragon, p=D.p=dragonProblem();
+  const D=S.dragon, b=S.boss, p=D.p=dragonProblem(), hits=BOSS_HP-D.hp;
   S.spoken=p; S.tries=0;
-  $("#topic").innerHTML=`The dragon · ${esc(p.topic)} <i class="above hard">${D.hp} flame${D.hp===1?"":"s"} left</i>`
+  $("#topic").innerHTML=`${esc(b.name)} · ${esc(p.topic)} <i class="above hard">${b.mode==="fill"?`${hits} of ${BOSS_HP}`:`${D.hp} to go`}</i>`
     + (p.multi?` <i class="above multi">more than one step</i>`:"");
   $("#question").textContent=p.question;
   $("#choices").innerHTML=p.choices.map((c,i)=>
     `<button class="ch" data-v="${esc(c)}"><b>${i+1}</b><span>${esc(c)}</span></button>`).join("");
-  $("#choices").onclick=e=>{ const b=e.target.closest(".ch"); if(!b||b.disabled) return; dragonAnswer(b); };
+  $("#choices").onclick=e=>{ const btn=e.target.closest(".ch"); if(!btn||btn.disabled) return; dragonAnswer(btn); };
   $("#feedback").className=""; $("#feedback").innerHTML="";
   $("#nextwrap").classList.add("hidden");
   $("#readrow").classList.toggle("hidden", !canRead());
@@ -3934,7 +4587,7 @@ function dragonAsk(){
 }
 
 function dragonAnswer(btn){
-  const D=S.dragon, p=D.p, right=btn.dataset.v===p.answer, fb=$("#feedback");
+  const D=S.dragon, b=S.boss, p=D.p, right=btn.dataset.v===p.answer, fb=$("#feedback");
   stopSpeech();
   if(right){
     btn.classList.add("right");
@@ -3942,13 +4595,12 @@ function dragonAnswer(btn){
     D.hp--; SFX.right(); tone(520,.35,"sine",.08,0,1400);
     replay(document.querySelector(".dg-bolt"),"on");
     setTimeout(()=>{ replay(document.querySelector(".dg-body"),"hit"); replay(document.querySelector(".dg-flash"),"on");
-      paintDragonBars(); }, 480);
-    if(kidMode) say("A hit!",0.95);
+      paintDragonBars(); }, b.bolt===false?60:480);
+    if(kidMode) say(b.hits[0],0.95);
     if(D.hp<=0){ setTimeout(dragonWon, 900); return; }
     fb.className="ok show";
-    fb.innerHTML=`<div class="ft">${P(["A hit — one flame goes out.","Straight to the nose. It flinches.",
-        "The light lands. The dragon blinks.","Another flame out — it backs up a step."])}
-      <span style="color:#ffb12e">${D.hp} left.</span></div>${fbSteps(p)}`;
+    fb.innerHTML=`<div class="ft">${esc(P(b.hits))}
+      <span style="color:#ffb12e">${b.mode==="fill"?`${BOSS_HP-D.hp} of ${BOSS_HP}.`:`${D.hp} to go.`}</span></div>${fbSteps(p)}`;
     $("#nextwrap").classList.remove("hidden");
     $("#nextBtn").textContent="Again!";
     $("#nextBtn").onclick=dragonAsk;
@@ -3957,49 +4609,55 @@ function dragonAnswer(btn){
   btn.classList.add("wrong"); btn.disabled=true;
   D.shields--; S.tries++;
   replay(document.querySelector(".dg-fire"),"on");
+  replay(document.querySelector(".dg-pop"),"on");
   noise(.8,.06,500); tone(150,.7,"sawtooth",.06,0,70);
-  setTimeout(()=>{ replay(document.querySelector(".dg-me"),"hurt"); paintDragonBars(); }, 380);
+  setTimeout(()=>{ replay(document.querySelector(".dg-me"),"hurt"); if(b.bolt===false) replay(document.querySelector(".dg-body"),"hit"); paintDragonBars(); }, 380);
   if(D.shields<=0){
     [...$("#choices").children].forEach(c=>c.disabled=true);
     setTimeout(dragonLost, 1000); return;
   }
   fb.className="no show";
-  fb.innerHTML=`<div class="ft">Fire! A shield is gone — ${D.shields} left. The problem is still there to beat.</div>
+  fb.innerHTML=`<div class="ft">${esc(b.miss)} — ${D.shields} ${D.shields===1?"chance":"chances"} left. The problem is still there to beat.</div>
     <div class="steps"><b>Hint:</b> ${esc(p.hint)}</div>`;
   if(kidMode) say("Not that one. "+p.hint,0.95);
 }
 
 function dragonWon(){
+  const b=S.boss;
   S.dragonWon=true;
-  save.dragons=(save.dragons||0)+1; store();
-  replay(document.querySelector(".dg-dragon"),"tamed");
+  if(!save.bossBeaten) save.bossBeaten={};
+  save.bossBeaten[b.id]=(save.bossBeaten[b.id]||0)+1;
+  if(b.id==="dragon") save.dragons=(save.dragons||0)+1;
+  store();
+  replay(document.querySelector(".dg-dragon"),"x-"+b.exit);
   replay(document.querySelector(".dg-ring"),"on");
   replay(document.querySelector(".dg-me"),"cheer");
   SFX.win();
   [1319,1568,2093].forEach((f,i)=>tone(f,.5,"sine",.05,1.2+i*0.14));
-  $("#topic").innerHTML='<span style="color:var(--gold)">The dragon is beaten</span>';
-  $("#question").textContent=`The last flame goes out. The dragon shrinks to the size of a cat, sneezes a smoke ring, and flies off over the castle.`;
+  $("#topic").innerHTML=`<span style="color:var(--gold)">${b.icon} ${esc(b.name)} — beaten</span>`;
+  $("#question").textContent=b.win[1];
   $("#choices").innerHTML=""; $("#readrow").classList.add("hidden");
   const fb=$("#feedback"); fb.className="ok show";
-  fb.innerHTML=`<div class="ft">The bridge is open. ${esc(S.name)} beat the dragon.</div>
-    <div class="steps" style="color:var(--gold)">On the road beyond it, a pumpkin coach has been waiting all this time.</div>`;
+  fb.innerHTML=`<div class="ft">${esc(b.win[0])} ${esc(S.name)} got past ${esc(b.who)}.</div>
+    <div class="steps" style="color:var(--gold)">On the road beyond, a pumpkin coach has been waiting all this time.</div>`;
   $("#nextwrap").classList.remove("hidden");
-  $("#nextBtn").textContent="Cross the bridge";
+  $("#nextBtn").textContent="Go to the coach";
   $("#nextBtn").onclick=carriageScene;
-  if(kidMode) say(`You beat the dragon! It shrinks to the size of a cat and flies away.`,0.92);
+  if(kidMode) say(`You did it! ${b.win[1]}`,0.92);
 }
 
 function dragonLost(){
-  replay(document.querySelector(".dg-dragon"),"roar");
+  const b=S.boss;
+  replay(document.querySelector(".dg-body"),"hit");
   SFX.dragon();
-  $("#topic").innerHTML='<span style="color:#ffb12e">The dragon holds the bridge</span>';
-  $("#question").textContent=`Your last shield is gone, and the dragon chases you back off the bridge. It does not follow you far.`;
+  $("#topic").innerHTML=`<span style="color:#ffb12e">${b.icon} ${esc(b.name)} is still there</span>`;
+  $("#question").textContent=b.lose;
   $("#choices").innerHTML=""; $("#readrow").classList.add("hidden");
   const fb=$("#feedback"); fb.className="no show";
-  fb.innerHTML=`<div class="ft">It is still sitting there. It will still be sitting there if you want another go.</div>
+  fb.innerHTML=`<div class="ft">It will still be there if you want another go.</div>
     ${fbSteps(S.dragon.p)}
     <div class="row" style="margin-top:14px;justify-content:flex-start">
-      <button class="btn" id="dgAgain">🐉 Try again</button>
+      <button class="btn" id="dgAgain">${b.icon} Try again</button>
       <button class="btn ghost" id="dgAway2">Go home the long way</button></div>`;
   $("#dgAgain").onclick=()=>{ SFX.click(); startDragon(); };
   $("#dgAway2").onclick=()=>{ SFX.click(); familyScene(); };
@@ -4165,8 +4823,8 @@ function carriageScene(){
   $("#question").textContent=`Out on the road, a pumpkin coach is waiting — two pale horses, and a princess at the window.`;
   $("#choices").innerHTML="";
   const fb=$("#feedback"); fb.className="ok show";
-  fb.innerHTML=`<div class="ft">${S.dragonWon
-      ? "“Our coachman ran off when the dragon landed,” she says. “And you sent it packing! Could you drive us home?”"
+  fb.innerHTML=`<div class="ft">${S.dragonWon && S.boss
+      ? `“Our coachman ran off when ${S.boss.who} turned up,” she says. “And you got past ${S.boss.who}! Could you drive us home?”`
       : "“Our coachman ran off when he saw the Pumpkin King,” she says. “Could you drive us home?”"}</div>
     <div class="steps" style="color:var(--gold)">${esc(S.name)} climbs up onto the box, takes the reins, and becomes the coachman.</div>
     <div class="steps">Behind you, the King waves from the castle gate. The horses know the way.</div>`;
@@ -4568,9 +5226,10 @@ function showReport(won){
       <tr><td>Where</td><td>${esc(W().name)}</td></tr>
       <tr><td>Level</td><td>${BANK[S.level].name} · ${TIERS[S.tier].name}</td></tr>
     </table>
-    ${S.dragonWon?`<div class="unlock" style="background:rgba(53,160,125,.16);border-color:#2f8a6c">
-       🐉 <b>${esc(S.name)} beat the dragon</b> and drove the princess home.
-       <div style="font-size:13.5px;color:var(--dim);margin-top:5px">Dragons beaten so far: ${save.dragons||1}.</div></div>`:""}
+    ${S.dragonWon&&S.boss?`<div class="unlock" style="background:rgba(53,160,125,.16);border-color:#2f8a6c">
+       ${S.boss.icon} <b>${esc(S.name)} got past ${esc(S.boss.who)}</b> and drove the princess home.
+       <div style="font-size:13.5px;color:var(--dim);margin-top:5px">Final challenges beaten so far:
+         ${Object.keys(save.bossBeaten||{}).length} of ${BOSSES.length}.</div></div>`:""}
     ${S.sawFamily?`<div class="unlock" style="background:rgba(255,138,31,.16);border-color:#b8722a">
        🏮 <b>${esc((AVATARS.find(v=>v.id===S.avatar)||AVATARS[0]).name)} got home.</b>
        <div style="font-size:13.5px;color:var(--dim);margin-top:5px">Every character has a family of its own waiting at the
