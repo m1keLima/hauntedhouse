@@ -109,6 +109,18 @@ input[type=text]::placeholder{color:#5c5070}
 .kidrow[aria-pressed="true"] .kidicon{filter:none;opacity:1}
 .kidrow[aria-pressed="true"] b{color:#7fd7ff}
 #version{text-align:center;margin:18px 0 0;font-size:12px;letter-spacing:2.5px;text-transform:uppercase;color:#5c5070}
+.score{text-align:center;margin:6px 0 0;line-height:1}
+.score b{font-size:clamp(54px,14vw,78px);color:var(--gold);font-weight:800}
+.score span{font-size:clamp(18px,4.5vw,24px);color:var(--dim);font-weight:700;margin-left:6px}
+.cats{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin:12px 0 4px}
+.cat{border:1px solid var(--line);border-radius:10px;padding:7px 3px;text-align:center;line-height:1.15;opacity:.55}
+.cat i{display:block;font-style:normal;font-weight:800;font-size:17px;color:var(--dim)}
+.cat b{display:block;font-size:10.5px;font-weight:700;margin:3px 0;color:var(--dim)}
+.cat span{display:block;font-size:10.5px;color:var(--dim)}
+.cat.past{opacity:.8}
+.cat.past i{color:var(--gold)}
+.cat.on{opacity:1;border-color:var(--gold);background:rgba(255,207,92,.12);box-shadow:0 0 14px rgba(255,207,92,.3)}
+.cat.on i,.cat.on b{color:var(--gold)}
 .ledger{margin:14px 0 4px}
 .ledger table{width:100%;border-collapse:collapse;font-size:15.5px}
 .ledger td{padding:8px 4px;border-bottom:1px solid var(--line);vertical-align:top}
@@ -344,15 +356,18 @@ table.rc td:last-child{text-align:right;font-weight:800;color:var(--gold)}
       A <b style="color:var(--gold)">chest</b> may appear once you are below full lanterns: the hardest kind of problem your grade has,
       worth <b style="color:var(--gold)">half a lantern</b> back. Wrong costs nothing. Later rooms can hold a
       <b style="color:#d9b6ff">grand chest</b> instead &mdash; a multi-step problem, and it pays
-      <b style="color:#d9b6ff">double, with a whole lantern</b>.<br>
+      <b style="color:#d9b6ff">double: a whole lantern</b>. Chests pay in light, and light is candy at the door.<br>
       A red-rimmed <b style="color:var(--blood)">shortcut hatch</b> in the floor &mdash; labelled, you cannot miss it &mdash;
       skips three rooms, but a wrong answer down there costs <b style="color:var(--blood)">a whole lantern</b>.
       Opening the chest or the hatch <b style="color:var(--good)">stops the room's clock</b>; it starts again from the same
       second when you come back.<br>
       Every problem runs a <b style="color:var(--good)">30-second candy clock</b>. It never costs you anything to be slow &mdash;
-      but answer while it is still running and you take <b style="color:var(--gold)">up to 5 extra sweets</b>, more the faster you are.<br>
+      but answer while it is still running and you take <b style="color:var(--gold)">up to 4 extra sweets</b>, more the faster you are.<br>
       What you carry out is decided by the lanterns you still have &mdash; <b style="color:var(--gold)">ten sweets for each one</b>,
       on top of whatever you picked up inside. Come out dark and you come out poor.<br>
+      A perfect run &mdash; every room right first time, fast, all three lanterns carried out &mdash; is exactly
+      <b style="color:var(--gold)">100 sweets</b>, so your bucket is a score out of 100. It puts you in one of
+      <b style="color:var(--gold)">five categories</b>: 0&ndash;19, 20&ndash;39, 40&ndash;59, 60&ndash;79 and 80&ndash;100.<br>
       Escape a place and the next one opens &mdash; the graveyard, the forest, the mountain, the cave, the dungeon, the castle &mdash;
       but only <b style="color:var(--gold)">for the grade you beat it at</b>. Open the graveyard at Grade 4 and Grade 5 still starts back at the house.
       The more you play a grade, the harder that grade gets &mdash; the hard types come out and the wrong answers
@@ -455,7 +470,9 @@ table.rc td:last-child{text-align:right;font-weight:800;color:var(--gold)}
               but taking your time never costs you anything.</li>
           <li>A <b style="color:var(--gold)">glowing chest</b> is free to try: get it right and you win back half a lantern.
               A purple <b style="color:#d9b6ff">grand chest</b> holds a problem that takes more than one step &mdash;
-              and pays twice as much.</li>
+              and gives back a whole lantern.</li>
+          <li>A perfect run is <b style="color:var(--gold)">100 sweets</b>. Your bucket is your score out of 100,
+              and it puts you in one of <b>five categories</b>.</li>
           <li>The <b style="color:var(--blood)">red hatch</b> skips three rooms &mdash; but get it wrong down there
               and it costs a whole lantern.</li>
           <li>It is <b>spooky, not scary</b>. Nothing jumps out at you, and nothing in here is real.</li>
@@ -469,6 +486,9 @@ table.rc td:last-child{text-align:right;font-weight:800;color:var(--gold)}
               time &mdash; the questions never run out and never repeat within a run.</li>
           <li><b>The level you pick is the level you get.</b> As a level is replayed it gets harder from the
               inside: harder types, and wrong answers that sit close to the right one.</li>
+          <li><b>The score is out of 100.</b> Ten rooms at up to 7 sweets (3 for right first time, up to 4 for
+              speed) plus 10 for each of three lanterns carried out. The report card shows where every sweet came
+              from and where the rest went, and places the run in one of five categories, twenty points each.</li>
           <li><b>Multi-step problems are guaranteed, not random.</b> Every grade has them &mdash; one room a
               run at the lower grades, two from Grade 5 up, plus a <b>grand chest</b> that holds another and
               pays double. They are the ones that ask for a plan rather than a fact.</li>
@@ -2888,7 +2908,7 @@ function applyTheme(){
    moment it goes out. Shown on the setup screen and at the foot of the
    report card, so a player can say which build they are playing.
    ===================================================================== */
-const BUILD = 11, RELEASED = "3 Oct 2026, 11:18";
+const BUILD = 12, RELEASED = "3 Oct 2026, 11:33";
 const COPYRIGHT = "© 2026 m1keLima. All rights reserved.";
 const VERSION_LINE = `v${BUILD} · released ${RELEASED} · ${COPYRIGHT}`;
 
@@ -2897,7 +2917,7 @@ const VERSION_LINE = `v${BUILD} · released ${RELEASED} · ${COPYRIGHT}`;
    ===================================================================== */
 const KEY="hauntedhouse.v2";
 const blank=()=>({name:"",avatar:"witch",level:0,world:0,unlock:{},sfx:true,music:true,kid:false,family:{},help:0,theme:"auto",schema:2,
-  best:{candy:0,rooms:0},prog:{},totals:{runs:0,rooms:0,correct:0,attempts:0,wins:0,shortcuts:0},topics:{}});
+  best:{candy:0,score:0,rooms:0},prog:{},totals:{runs:0,rooms:0,correct:0,attempts:0,wins:0,shortcuts:0},topics:{}});
 let save=blank();
 /* SCHEMA is the shape of the level list. Bump it whenever levels are added or
    removed in front of existing ones, and migrate here — `unlock` and `prog` are
@@ -3048,7 +3068,7 @@ function buildSetup(){
   $("#nameInput").oninput=e=>{ save.name=e.target.value.slice(0,16); store(); };
   const t=save.totals;
   $("#saveline").innerHTML = t.runs
-    ? `${t.runs} run${t.runs>1?"s":""} · ${t.wins} escape${t.wins===1?"":"s"} · best ${TH.treat} ${save.best.candy}
+    ? `${t.runs} run${t.runs>1?"s":""} · ${t.wins} escape${t.wins===1?"":"s"} · best ${save.best.score||0} / 100
        · lifetime accuracy ${t.attempts?Math.round(t.correct/t.attempts*100):0}%
        · ${t.shortcuts} shortcut${t.shortcuts===1?"":"s"} taken
        <br>${Object.keys(save.unlock||{}).filter(k=>save.unlock[k]>0)
@@ -3207,9 +3227,17 @@ function loadRoom(){
    The 30-second candy clock. Running out never costs you anything — it
    only stops the speed bonus, so a slow thinker is never punished.
    --------------------------------------------------------------- */
-const QSECS = 30, SPEED_MAX = 5;
+/* A perfect run is worth exactly 100 sweets, so the bucket reads as a score
+   out of 100: ten rooms × (3 first time + up to 4 for speed) = 70, plus
+   10 for each of the 3 lanterns carried out = 30. Nothing else may pay out
+   candy inside the house without breaking that — chests pay in light, which
+   becomes candy at the door. Change any of these and re-check the ceiling. */
+const QSECS = 30, SPEED_MAX = 4, FIRST_TRY = 3, LATER_TRY = 1, PER_LANTERN = 10;
+const ROOM_MAX = FIRST_TRY + SPEED_MAX, RUN_MAX = 10*ROOM_MAX + 3*PER_LANTERN;   /* = 100 */
 function remaining(){ return Math.max(0, QSECS - (Date.now()-S.qStart)/1000); }
-function speedBonus(){ return kidMode ? 0 : Math.round(remaining()/QSECS*SPEED_MAX); }
+/* read-aloud mode has no clock, so there is nothing to beat: the time candy is
+   always full. Otherwise a perfect read-aloud run could only ever reach 60. */
+function speedBonus(){ return kidMode ? SPEED_MAX : Math.round(remaining()/QSECS*SPEED_MAX); }
 
 /* The candy ledger. Every sweet that is won, and every sweet that slips away,
    is written down as it happens, so the report card can show exactly where the
@@ -3308,16 +3336,20 @@ function answer(btn,mode){
     SFX.right();
 
     if(mode==="bonus"){
-      /* a grand chest — a multi-step problem — is worth double, and a whole lantern */
-      const g=S.bonusGrand, gain=(g?4:2)+spd, lit=S.lanterns;
-      S.lanterns=Math.min(3,S.lanterns+(g?1:0.5)); S.candy+=gain; S.speedCandy+=spd;
-      if(g){ S.tally.grandN++; S.tally.grand+=4; } else { S.tally.chestN++; S.tally.chest+=2; }
-      S.tally.lanternWon+=S.lanterns-lit; tallySpeed(spd);
-      $("#candynum").textContent=S.candy; renderLanterns(); renderChase();
+      /* chests pay in light, not candy — a grand chest (multi-step) pays double,
+         a whole lantern. The light is worth 10 sweets a lantern at the door, and
+         keeping candy out of the chest is what holds a perfect run at 100. */
+      const g=S.bonusGrand, lit=S.lanterns;
+      S.lanterns=Math.min(3,S.lanterns+(g?1:0.5));
+      if(g) S.tally.grandN++; else S.tally.chestN++;
+      S.tally.lanternWon+=S.lanterns-lit;
+      renderLanterns(); renderChase();
       $("#chest").classList.add("hidden");
+      const back=S.lanterns-lit;
       fb.className="ok show";
-      fb.innerHTML=`<div class="ft">${g?"Every step of it, right. The grand chest opens: a whole lantern, and a double handful."
-        :"The lid gives. Half a lantern, and something sweet."} +${gain} ${TH.treat}${spd?` <span style="color:var(--gold)">(${spd} for speed)</span>`:""}</div>${fbSteps(p)}`;
+      fb.innerHTML=`<div class="ft">${g?"Every step of it, right. The grand chest opens.":"The lid gives."}
+        ${back===1?"A whole lantern":"Half a lantern"} back — worth
+        <span style="color:var(--gold)">${back*PER_LANTERN} ${TH.treat}</span> if you carry it out of the house.</div>${fbSteps(p)}`;
       $("#nextwrap").classList.remove("hidden");
       $("#nextBtn").textContent="Back to the room";
       $("#nextBtn").onclick=()=>askQuestion(S.current,"normal");
@@ -3350,16 +3382,16 @@ function answer(btn,mode){
       return;
     }
 
-    const base = S.tries===0?3:1, gain = base+spd;
+    const base = S.tries===0?FIRST_TRY:LATER_TRY, gain = base+spd;
     S.candy+=gain; S.speedCandy+=spd; $("#candynum").textContent=S.candy;
     if(S.tries===0) S.tally.first++; else S.tally.retry++;
     tallySpeed(spd);
     S.log.push({topic:p.topic,firstTry:S.tries===0,secs:secs,spd:spd});
     fb.className="ok show";
     const speedWord = kidMode ? "Take all the time you want — the door opens either way."
-      : spd>=5?"Before the wick even moved.":spd>=4?"Fast.":spd>=2?"Quick enough.":spd>=1?"Just in time.":"The clock beat you, but the door still opens.";
+      : spd>=4?"Before the wick even moved.":spd>=3?"Fast.":spd>=2?"Quick enough.":spd>=1?"Just in time.":"The clock beat you, but the door still opens.";
     fb.innerHTML=`<div class="ft">${S.tries===0?"The lock turns first time":"It gives, eventually"} — +${gain} ${TH.treat}${
-      kidMode?"":spd?` <span style="color:var(--gold)">(${spd} for speed, ${secs.toFixed(1)}s)</span>`:` <span style="color:var(--dim)">(${secs.toFixed(1)}s — no speed bonus)</span>`}</div>
+      kidMode?` <span style="color:var(--dim)">(${spd} of them for time — there is no clock in read-aloud)</span>`:spd?` <span style="color:var(--gold)">(${spd} for speed, ${secs.toFixed(1)}s)</span>`:` <span style="color:var(--dim)">(${secs.toFixed(1)}s — no speed bonus)</span>`}</div>
       <div class="steps" style="color:var(--gold)">${speedWord}</div>${fbSteps(p)}`;
     $("#nextwrap").classList.remove("hidden");
     $("#nextBtn").textContent = S.room===9 ? "Step into the cold air" : "Open the next door";
@@ -3494,7 +3526,7 @@ function wireProps(){
    ===================================================================== */
 function escapeScene(){
   /* what you carry out depends on the lanterns still burning — ten each */
-  S.escapeBonus = Math.round(10*S.lanterns);
+  S.escapeBonus = Math.round(PER_LANTERN*S.lanterns);
   S.candy += S.escapeBonus;
   const av=(AVATARS.find(a=>a.id===S.avatar)||AVATARS[0]).svg;
   let bats="";
@@ -3553,7 +3585,7 @@ function escapeScene(){
   stopTimer(); $("#timerwrap").classList.add("hidden");
   const fb=$("#feedback"); fb.className="ok show";
   fb.innerHTML=`<div class="ft">${S.lanterns} lantern${S.lanterns===1?"":"s"} still lit — the bucket fills.
-      <span style="color:var(--gold)">+${S.escapeBonus} ${TH.treat}</span>, for ${TH.treat} ${S.candy} in all.</div>
+      <span style="color:var(--gold)">+${S.escapeBonus} ${TH.treat}</span>, for ${TH.treat} ${S.candy} out of ${RUN_MAX}.</div>
     <div class="steps">Every lantern you still had is ten more sweets. He is behind you, watching. He is not angry.</div>`;
   $("#nextwrap").classList.remove("hidden");
   const home = S.world===WORLDS.length-1;      /* out of the castle: the last door there is */
@@ -3758,9 +3790,23 @@ function finishBonus(){
 /* =====================================================================
    END
    ===================================================================== */
-const RANKS=[[0,"Doorstep Dawdler"],[1,"Empty-Handed"],[25,"Trick-or-Treater"],[42,"Candle Bearer"],
-  [58,"Room Runner"],[72,"Lantern Keeper"],[84,"Master of the Dark"]];
-function rankFor(c){ let r=RANKS[0][1]; for(const[t,n]of RANKS) if(c>=t) r=n; return r; }
+/* Five categories, twenty points wide, on the score out of 100. */
+const RANKS=[
+  {n:1, min:0,  name:"Doorstep Dawdler"},
+  {n:2, min:20, name:"Trick-or-Treater"},
+  {n:3, min:40, name:"Candle Bearer"},
+  {n:4, min:60, name:"Lantern Keeper"},
+  {n:5, min:80, name:"Master of the Dark"}];
+function rankFor(score){ let r=RANKS[0]; for(const k of RANKS) if(score>=k.min) r=k; return r; }
+
+/* The bucket. The run can make at most 100; the bonus round wins back candy
+   that got away, but the bucket is full at 100. */
+function bucketFor(won){
+  const run = won ? S.candy : 0;
+  const br  = S.brDone ? S.br.candy : 0;
+  const brCounted = Math.max(0, Math.min(br, RUN_MAX-run));
+  return {run, br, brCounted, total: run+brCounted};
+}
 
 /* Counted once per run. The report card itself can be shown again — the
    bonus round goes back to it — so the run's bookkeeping lives here and
@@ -3776,62 +3822,96 @@ function endGame(won){
     if(S.room>save.best.rooms) save.best.rooms=S.room;
     if(!won) SFX.lose();
   }
-  const carried=(won?S.candy:0)+S.brCandy;
-  if(carried>save.best.candy) save.best.candy=carried;
+  /* best is kept on the 100 scale; the old best.candy was on a different one */
+  const carried=bucketFor(won).total;
+  if(carried>(save.best.score||0)) save.best.score=carried;
   store();
   showReport(won);
 }
 
+/* ---------- the score ----------
+   The bucket out of 100, the category it puts you in, and the five categories
+   laid out so a child can see the next one up. */
+function scoreBlock(won){
+  const b=bucketFor(won), r=rankFor(b.total), T=TH.treat;
+  return `
+    <div class="score"><b>${b.total}</b><span>/ ${RUN_MAX} ${T}</span></div>
+    <div class="rank">${esc(r.name)}</div>
+    <div class="cats">${RANKS.map(k=>{
+        const hi=(RANKS[k.n]?RANKS[k.n].min-1:RUN_MAX);
+        return `<div class="cat${k.n===r.n?" on":k.n<r.n?" past":""}">
+          <i>${k.n}</i><b>${esc(k.name)}</b><span>${k.min}–${hi}</span></div>`;}).join("")}</div>`;
+}
+
 /* ---------- the candy count ----------
-   Two lists. "How you got it" adds up to the bucket exactly, sweet for sweet —
-   including the one real loss, everything dropped when he catches you.
-   "What got away" is candy that was on offer and did not come home: it is not
-   taken off the total, it is there so a player can see what to do next time. */
+   Two lists that between them account for all 100.
+   "How you got your N" adds up to the bucket, sweet for sweet — including the
+   one real loss, everything dropped when he catches you.
+   "Where the other M went" adds up to exactly 100 − N: the candy that was on
+   offer and did not come home, so a player can see what to do next time.
+   Both are fed by S.tally, written as things happen — never reconstructed. */
 function candyLedger(won){
-  const t=S.tally||newTally(), T=TH.treat;
+  const t=S.tally||newTally(), T=TH.treat, b=bucketFor(won);
   const plural=(n,w)=>`${n} ${w}${n===1?"":"s"}`;
   const inside=S.candy-(S.escapeBonus||0);
   const got=[], gone=[];
   const add=(what,how,n)=>{ if(n) got.push({what,how,n}); };
-  const miss=(what,how,n)=>{ if(n>0) gone.push({what,how,n}); };
+  const miss=(what,how,n)=>{ if(n) gone.push({what,how,n}); };
+  const skipped = t.hatch ? 3 : 0;
+  const cleared = t.first + t.retry;
 
-  add("Right first time", `${plural(t.first,"room")} × 3`, t.first*3);
-  add("Right on a later try", `${plural(t.retry,"room")} × 1`, t.retry);
-  add("Speed", "the faster you answered, the more — up to 5 a question", t.speed);
-  add("Bonus chests", `${plural(t.chestN,"chest")} opened × 2`, t.chest);
-  add("Grand chests", `${plural(t.grandN,"grand chest")} opened × 4`, t.grand);
-  add("The hatch", "solved it — three rooms skipped", t.hatch);
+  /* -------- how you got it -------- */
+  add("Right first time", `${plural(t.first,"room")} × ${FIRST_TRY}`, t.first*FIRST_TRY);
+  add("Right on a later try", `${plural(t.retry,"room")} × ${LATER_TRY}`, t.retry*LATER_TRY);
+  add(kidMode?"Time candy":"Speed",
+      kidMode ? `read-aloud has no clock, so every answer gets the full ${SPEED_MAX}`
+              : `the faster you answered, the more — up to ${SPEED_MAX} a question`, t.speed);
+  add("The hatch", "solved it — paid 5, and skipped three rooms", t.hatch);
   if(!won && inside>0)
     got.push({what:"Dropped when he caught you", how:"everything picked up inside the house", n:-inside});
-  if(won) add("Getting out", `${S.lanterns} lantern${S.lanterns===1?"":"s"} still lit × 10`, S.escapeBonus||0);
-  if(S.brDone) add("Bonus round", `${S.br.right} of ${S.br.q.length} put right`, S.br.candy);
+  if(won){
+    const chests = t.chestN+t.grandN;
+    add("Getting out", `${S.lanterns} lantern${S.lanterns===1?"":"s"} still lit × ${PER_LANTERN}`
+      + (chests?` — ${plural(chests,"chest")} gave back ${t.lanternWon} of that light`:""), S.escapeBonus||0);
+  }
+  if(b.brCounted) add("Bonus round", `${S.br.right} of ${S.br.q.length} put right`
+      + (b.br>b.brCounted?` — won ${b.br}, but the bucket is full at ${RUN_MAX}`:""), b.brCounted);
 
-  miss("Not right first time", `${plural(t.retry,"room")} paid 1 instead of 3`, t.retry*2);
-  if(!kidMode) miss("Slow answers", "speed candy still on the clock when you answered", t.slow);
-  if(won) miss("Lanterns that went out",
-    `${t.wrongs?plural(t.wrongs,"wrong answer")+" (½ each)":""}${t.wrongs&&t.hatchFell?", ":""}${t.hatchFell?"the hatch (a whole one)":""}`
-    + `${t.lanternWon?` — chests won back ${t.lanternWon}`:""} · 10 a lantern`,
-    30-(S.escapeBonus||0));            /* exact: the escape bonus you did not get */
-  else miss("Never got out", "no escape bonus — that is 10 for every lantern you carry out", 30);
-  miss("Chests that stayed shut", `${plural(t.chestShutN,"chest")} answered wrong`, t.chestShut);
-  miss("The hatch", "fell through — it would have paid 5", t.hatchFell?5:0);
+  /* -------- where the rest went -------- */
+  miss("Not right first time", `${plural(t.retry,"room")} paid ${LATER_TRY} instead of ${FIRST_TRY}`, t.retry*(FIRST_TRY-LATER_TRY));
+  if(!kidMode) miss("Slow answers", "time candy still on the clock when you answered", t.slow);
+  if(skipped) miss("Rooms skipped by the hatch",
+      `3 rooms worth up to ${3*ROOM_MAX}; the hatch pays up to ${5+SPEED_MAX}`, 3*ROOM_MAX-(5+SPEED_MAX));
+  if(won){
+    const lost=3*PER_LANTERN - (S.escapeBonus||0);
+    miss("Lanterns that went out",
+      [t.wrongs?`${plural(t.wrongs,"wrong answer")} (½ each)`:"", t.hatchFell?"the hatch (a whole one)":""]
+        .filter(Boolean).join(", ") + (t.lanternWon?`, less ${t.lanternWon} won back by chests`:"")
+        + ` · ${PER_LANTERN} a lantern`, lost);
+  } else {
+    const unfinished = Math.max(0, 10-cleared-skipped);
+    miss("Rooms not finished", `${plural(unfinished,"room")} × up to ${ROOM_MAX}`, unfinished*ROOM_MAX);
+    miss("Never got out", `no lanterns left to carry out — up to ${3*PER_LANTERN}`, 3*PER_LANTERN);
+    miss("Dropped when he caught you", "what you had picked up inside", inside);
+  }
+  if(b.brCounted) miss("Won back in the bonus round", "", -b.brCounted);
 
   const total=got.reduce((a,r)=>a+r.n,0);
   const away=gone.reduce((a,r)=>a+r.n,0);
-  const row=(r,cls)=>`<tr><td><b>${esc(r.what)}</b><span class="how">${esc(r.how)}</span></td>
-     <td class="v ${cls}">${r.n<0?"−":cls==="minus"?"−":"+"}${Math.abs(r.n)}</td></tr>`;
+  const row=(r,minus)=>`<tr><td><b>${esc(r.what)}</b>${r.how?`<span class="how">${esc(r.how)}</span>`:""}</td>
+     <td class="v ${minus?(r.n<0?"plus":"minus"):(r.n<0?"minus":"plus")}">${minus?(r.n<0?"+":"−"):(r.n<0?"−":"+")}${Math.abs(r.n)}</td></tr>`;
   return `
     <div class="ledger">
-      <div class="ledhead">How you got your ${T}</div>
-      <table>${got.length?got.map(r=>row(r,r.n<0?"minus":"plus")).join("")
+      <div class="ledhead">How you got your ${total} ${T}</div>
+      <table>${got.length?got.map(r=>row(r,false)).join("")
               :`<tr><td colspan="2"><span class="how">Nothing yet.</span></td></tr>`}
-        <tr class="total"><td><b>In the bucket</b></td><td class="v plus">${T} ${total}</td></tr></table>
-      ${gone.length?`
-      <div class="ledhead miss">What got away</div>
-      <table>${gone.map(r=>row(r,"minus")).join("")}
-        <tr class="total miss"><td><b>Left in the house</b>
-          <span class="how">not taken off your total — this is what there was still to win</span></td>
-          <td class="v minus">${T} ${away}</td></tr></table>`:""}
+        <tr class="total"><td><b>In the bucket</b></td><td class="v plus">${total} / ${RUN_MAX}</td></tr></table>
+      ${away?`
+      <div class="ledhead miss">Where the other ${away} went</div>
+      <table>${gone.map(r=>row(r,true)).join("")}
+        <tr class="total miss"><td><b>Still in the house</b>
+          <span class="how">what there was still to win — ${total} + ${away} = ${RUN_MAX}</span></td>
+          <td class="v minus">${away}</td></tr></table>`:`<div class="ledhead" style="margin-top:12px">Every sweet in the house. Nothing got away.</div>`}
     </div>`;
 }
 
@@ -3870,7 +3950,7 @@ function showReport(won){
     <p class="center" style="color:var(--dim);margin-top:-4px;font-size:16px">
       ${won?`Ten rooms of ${W().name} behind you, at ${BANK[S.level].name}, ${TIERS[S.tier].name}.`
            :`You got as far as ${W().rooms[Math.min(9,S.room)]}.`}</p>
-    <div class="rank">${rankFor((won?S.candy:0)+S.brCandy)}</div>
+    ${scoreBlock(won)}
     ${candyLedger(won)}
     <table class="rc">
       <tr><td>Rooms cleared</td><td>${cleared} / 10</td></tr>
