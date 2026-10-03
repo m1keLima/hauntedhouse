@@ -2713,13 +2713,55 @@ const SAY = [
   [/\s{2,}/g," "]
 ];
 function speakable(s){ let t=String(s); for(const [re,to] of SAY) t=t.replace(re,to); return t.trim(); }
-function stopSpeech(){ try{ if(window.speechSynthesis) speechSynthesis.cancel(); }catch(e){} }
+/* Speech has to survive Safari (the iPad), which is fussier than Chrome:
+   - a speak() issued straight after cancel() is silently DROPPED — so after a
+     cancel we wait a moment before speaking, and only cancel if something is
+     actually playing. (Every read used to cancel-then-speak in one breath,
+     which is why read-aloud was silent on the iPad and fine in tests.)
+   - nothing is allowed to speak until the page has had a touch — so the first
+     touch anywhere speaks an empty line to unlock it;
+   - the engine can get stuck "paused" — so resume() before every speak;
+   - an utterance nobody holds on to can be dropped mid-sentence — so we keep it;
+   - if it still has not started after a moment, try once more.
+   An English voice is chosen when there is one, since the device may be set
+   to another language. */
+const SPEECH={u:null, cancelAt:0, voice:null, unlocked:false};
+function speechVoice(){
+  if(SPEECH.voice) return SPEECH.voice;
+  try{ const vs=speechSynthesis.getVoices()||[];
+    SPEECH.voice = vs.find(v=>/^en[-_](GB|US)/i.test(v.lang)&&v.localService) || vs.find(v=>/^en/i.test(v.lang)) || null;
+  }catch(e){}
+  return SPEECH.voice;
+}
+function unlockSpeech(){
+  if(SPEECH.unlocked||!window.speechSynthesis) return; SPEECH.unlocked=true;
+  try{ const u=new SpeechSynthesisUtterance(" "); u.volume=0; speechSynthesis.speak(u); }catch(e){}
+}
+["pointerdown","touchend","keydown"].forEach(ev=>document.addEventListener(ev,unlockSpeech,{once:true,capture:true}));
+try{ if(window.speechSynthesis) speechSynthesis.onvoiceschanged=()=>{ SPEECH.voice=null; speechVoice(); }; }catch(e){}
+
+function stopSpeech(){
+  try{ const ss=window.speechSynthesis; if(!ss) return;
+    if(ss.speaking||ss.pending){ ss.cancel(); SPEECH.cancelAt=Date.now(); }
+  }catch(e){}
+}
 function say(text,rate){
-  if(!window.speechSynthesis) return;
+  const ss=window.speechSynthesis; if(!ss) return;
   try{
-    const u=new SpeechSynthesisUtterance(speakable(text));
-    u.rate=rate||0.92; u.pitch=1; u.lang=document.documentElement.lang||"en";
-    speechSynthesis.speak(u);
+    const make=()=>{ const u=new SpeechSynthesisUtterance(speakable(text));
+      u.rate=rate||0.92; u.pitch=1; u.lang="en-GB"; const v=speechVoice(); if(v){ u.voice=v; u.lang=v.lang; } return u; };
+    const u=make(); SPEECH.u=u;
+    if(ss.speaking||ss.pending){ ss.cancel(); SPEECH.cancelAt=Date.now(); }
+    const go=(utt)=>{ if(SPEECH.u!==u) return;                 /* something newer has asked to speak */
+      try{ ss.resume(); }catch(e){} ss.speak(utt); };
+    const wait=Math.max(0, 250-(Date.now()-SPEECH.cancelAt));
+    wait ? setTimeout(()=>go(u),wait) : go(u);
+    /* still silent after a moment: one more try, carrying the same end handlers */
+    let started=false; u.addEventListener("start",()=>{ started=true; });
+    setTimeout(()=>{ if(started||SPEECH.u!==u) return;
+      const again=make(); again.onend=u.onend; again.onerror=u.onerror; again.addEventListener("start",()=>{ started=true; });
+      try{ ss.cancel(); }catch(e){} SPEECH.cancelAt=Date.now();
+      setTimeout(()=>go(again),250); }, wait+1500);
     return u;
   }catch(e){}
 }
@@ -2735,8 +2777,7 @@ function readAloud(p){
 const canRead = () => !!window.speechSynthesis && (kidMode || (S.level|0) <= 2);
 function speakQuestion(p){
   if(!p) return;
-  stopSpeech();
-  const u=say(p.question, 0.88), b=$("#readBtn");
+  const u=say(p.question, 0.88), b=$("#readBtn");          /* say() does its own cancelling, safely */
   if(u && b){ b.classList.add("talking");
     const done=()=>b.classList.remove("talking"); u.onend=done; u.onerror=done; setTimeout(done,20000); }
 }
@@ -3094,7 +3135,7 @@ function applyTheme(){
    moment it goes out. Shown on the setup screen and at the foot of the
    report card, so a player can say which build they are playing.
    ===================================================================== */
-const BUILD = 17, RELEASED = "3 Oct 2026, 12:50";
+const BUILD = 18, RELEASED = "3 Oct 2026, 14:11";
 const COPYRIGHT = "© 2026 m1keLima. All rights reserved.";
 const VERSION_LINE = `v${BUILD} · released ${RELEASED} · ${COPYRIGHT}`;
 
