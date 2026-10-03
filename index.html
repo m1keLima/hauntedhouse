@@ -173,8 +173,17 @@ kbd{background:#271a38;border:1px solid var(--line);border-radius:5px;padding:2p
 #roomline{position:absolute;left:14px;top:32px;max-width:62%;font-size:14px;font-style:italic;
   color:#c7b6dd;text-shadow:0 2px 12px #000, 0 0 20px #000;opacity:.92;line-height:1.35}
 @media(max-width:560px){#roomline{font-size:12.5px;max-width:80%}}
-#readrow{margin:-6px 0 14px}
-#readrow .btn{font-size:16px;padding:10px 18px;color:#7fd7ff;border-color:#2d5a6e}
+/* the question, with a speaker beside it for anyone who would rather listen */
+#qrow{display:flex;align-items:flex-start;gap:14px;margin:12px 0 18px}
+#qrow #question{margin:0;flex:1;min-width:0}
+#readrow{flex:none;padding-top:2px}
+.sayicon{width:54px;height:54px;border-radius:50%;font-size:25px;line-height:1;cursor:pointer;
+  display:grid;place-items:center;border:2px solid #2d6a82;background:#0e2532;color:#7fd7ff;
+  box-shadow:0 0 14px rgba(127,215,255,.25);-webkit-tap-highlight-color:transparent}
+.sayicon:active{transform:scale(.93)}
+.sayicon.talking{animation:saypulse 1s ease-in-out infinite;border-color:#7fd7ff}
+@keyframes saypulse{0%,100%{box-shadow:0 0 10px rgba(127,215,255,.3)}50%{box-shadow:0 0 26px rgba(127,215,255,.85)}}
+@media(max-width:560px){.sayicon{width:46px;height:46px;font-size:21px}}
 #chest,#hatch{position:absolute;bottom:5%;cursor:pointer;text-align:center;line-height:0}
 #chest{right:4%;filter:drop-shadow(0 0 16px rgba(255,207,92,.75));animation:bob 2.4s ease-in-out infinite}
 #hatch{left:30%;filter:drop-shadow(0 0 22px rgba(196,18,31,.8))}
@@ -492,8 +501,8 @@ table.rc td:last-child{text-align:right;font-weight:800;color:var(--gold)}
       <span id="timertext">30.0s</span>
       <span id="timerhint">candy clock</span>
     </div>
-    <div id="question"></div>
-    <div id="readrow" class="hidden"><button class="btn ghost" id="readBtn">🔊 Read it again</button></div>
+    <div id="qrow"><div id="question"></div><span id="readrow" class="hidden"><button class="sayicon" id="readBtn"
+      aria-label="Read the question out loud" title="Read it out loud">🔊</button></span></div>
     <div id="choices"></div>
     <div id="feedback"></div>
     <div id="nextwrap" class="hidden"><button class="btn" id="nextBtn">Continue</button></div>
@@ -549,6 +558,8 @@ table.rc td:last-child{text-align:right;font-weight:800;color:var(--gold)}
               right, or when the last lantern goes.</li>
           <li><b>The clock never punishes.</b> Running it down only forfeits the speed bonus &mdash; a slow
               thinker loses nothing.</li>
+          <li><b>A 🔊 button beside the question</b> reads it out loud on demand. It is always there for
+              Kindergarten to Grade 2, bonus round included, whether read-aloud is on or not.</li>
           <li><b>Read-aloud mode</b> (step 5 on the front page) reads each question out loud &mdash; not the
               four answers &mdash; and removes the clock entirely.</li>
           <li><b>A bonus round</b> at the end offers fresh problems of exactly the kinds they got wrong first
@@ -665,8 +676,8 @@ const BANK = [
     return{t:"Two-step story",m:true,q:`You have ${a} sweets. You are given ${b} more, then you hand out ${c}. How many are left?`,a:a+b-c,
       w:[a+b,a+b+c,a-b-c,a-c],s:`${a} + ${b} = ${a+b}. Then ${a+b} − ${c} = ${a+b-c}.`};},
   ()=>{const g=R(2,5),e=R(2,5),x=R(1,6);
-    return{t:"Groups and more",m:true,q:`${g} pumpkins have ${e} candles each, and ${x} spare candles sit on the step. How many candles altogether?`,a:g*e+x,
-      w:[g*e,g+e+x,g*(e+x),g*e-x],s:`${g} × ${e} = ${g*e} candles in the pumpkins, plus the ${x} spare ones → ${g*e+x}.`};}
+    return{t:"Groups and more",m:true,q:`${g} pumpkins have ${e} candles each, and ${x} spare candle${x===1?" sits":"s sit"} on the step. How many candles altogether?`,a:g*e+x,
+      w:[g*e,g+e+x,g*(e+x),g*e-x],s:`${g} × ${e} = ${g*e} candles in the pumpkins, plus the ${x===1?"1 spare one":x+" spare ones"} → ${g*e+x}.`};}
 ]},
 
 /* ---------------- 2. Grade 2 ---------------- */
@@ -2599,13 +2610,25 @@ function say(text,rate){
     const u=new SpeechSynthesisUtterance(speakable(text));
     u.rate=rate||0.92; u.pitch=1; u.lang=document.documentElement.lang||"en";
     speechSynthesis.speak(u);
+    return u;
   }catch(e){}
 }
 /* the question only — the four options are read by the player, not to them */
 function readAloud(p){
   if(!kidMode||!p) return;
+  speakQuestion(p);
+}
+/* The speaker icon beside the question. It is there on every question with
+   read-aloud on, and for Kindergarten to Grade 2 even with it off — a young
+   reader can always ask to hear the question, the bonus round included.
+   Only the question is read, never the four answers. */
+const canRead = () => !!window.speechSynthesis && (kidMode || (S.level|0) <= 2);
+function speakQuestion(p){
+  if(!p) return;
   stopSpeech();
-  say(p.question, 0.88);
+  const u=say(p.question, 0.88), b=$("#readBtn");
+  if(u && b){ b.classList.add("talking");
+    const done=()=>b.classList.remove("talking"); u.onend=done; u.onerror=done; setTimeout(done,20000); }
 }
 
 /* =====================================================================
@@ -2961,7 +2984,7 @@ function applyTheme(){
    moment it goes out. Shown on the setup screen and at the foot of the
    report card, so a player can say which build they are playing.
    ===================================================================== */
-const BUILD = 13, RELEASED = "3 Oct 2026, 11:46";
+const BUILD = 14, RELEASED = "3 Oct 2026, 11:52";
 const COPYRIGHT = "© 2026 m1keLima. All rights reserved.";
 const VERSION_LINE = `v${BUILD} · released ${RELEASED} · ${COPYRIGHT}`;
 
@@ -3359,7 +3382,7 @@ function askQuestion(p,mode){
   $("#nextwrap").classList.add("hidden");
   $("#choices").onclick=e=>{const b=e.target.closest(".ch"); if(!b||b.disabled)return; answer(b,mode);};
   $("#timerwrap").classList.toggle("hidden", kidMode);
-  $("#readrow").classList.toggle("hidden", !kidMode);
+  $("#readrow").classList.toggle("hidden", !canRead());
   if(mode==="normal") resumeRoomClock(); else startTimer(0);
   if(kidMode) readAloud(p);
 }
@@ -4238,7 +4261,7 @@ $("#help").onclick=e=>{ if(e.target===$("#help")) closeHelp(); };
 $("#kidBtn").onclick=()=>{ kidMode=!kidMode; save.kid=kidMode; store(); SFX.click(); paintKid();
   if(kidMode) say("Read aloud is on. I will read each question to you, and there is no clock.");
   else stopSpeech(); };
-$("#readBtn").onclick=()=>{ readAloud(S.spoken); };
+$("#readBtn").onclick=()=>{ speakQuestion(S.spoken); };
 $("#startBtn").onclick=()=>{ ac(); musicStart(); startGame(); };
 $("#quitBtn").onclick=()=>{
   /* walking out of the bonus round only ends the bonus round — the run is already over */
