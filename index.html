@@ -2943,6 +2943,13 @@ function lastWeekday(y,month,weekday){
   return new Date(y, month, last.getDate() - ((last.getDay()-weekday+7)%7));
 }
 const dayStart=(y,m,d)=>new Date(y,m,d,0,0,0);
+/* THE RULE for when a holiday shows: from `lead` days before its day, through the
+   day itself (+ `after` days). Halloween and Christmas get two weeks — children
+   count down to those; every other holiday gets one week; Christmas runs to the
+   26th so it hands straight over to New Year. Any other date is the season. */
+const around=(dayFn,lead,after)=>y=>{ const d=dayFn(y);
+  return {a:new Date(d.getFullYear(),d.getMonth(),d.getDate()-lead),
+          b:new Date(d.getFullYear(),d.getMonth(),d.getDate()+(after||0),23,59,59)}; };
 const dayEnd  =(y,m,d)=>new Date(y,m,d,23,59,59);
 const plusDays=(dt,n)=>new Date(dt.getFullYear(),dt.getMonth(),dt.getDate()+n);
 
@@ -3052,26 +3059,26 @@ const pumpkinAt=(x,y,s,c)=>`<g transform="translate(${x},${y}) scale(${s})">
   <path d="M-9 -9 q9 6 18 0Z" fill="#2a0f02"/></g>`;
 
 const THEMES = [
-  {id:"halloween", name:"Halloween", icon:"🎃", treat:"🍬", note:"18 Oct – 1 Nov",
+  {id:"halloween", name:"Halloween", icon:"🎃", treat:"🍬", note:"17 – 31 Oct",
    accent:"#ff8a1f", gold:"#ffcf5c", alt:"#c4121f", sky:"#1c1028",
-   win:y=>({a:dayStart(y,9,18), b:dayEnd(y,10,1)}),
+   day:y=>new Date(y,9,31), win:around(y=>new Date(y,9,31),14),
    deco:()=>pumpkinAt(64,428,1)+pumpkinAt(742,422,.82)+pumpkinAt(112,434,.6),
    fall:()=>[0,1,2].map(k=>`<g class="scuttle" style="animation-duration:${22+k*7}s;animation-delay:-${k*9}s">
      <g transform="translate(0,${40+k*38}) scale(${(0.7+k*0.2).toFixed(2)})" opacity=".75">
      <path d="M0 0 q-11 -9 -22 -2 q9 2 11 9 q7 -5 11 -7 q4 2 11 7 q2 -7 11 -9 q-11 -7 -22 2Z" fill="#0b0810"/></g></g>`).join("")},
 
-  {id:"thanksgiving", name:"Thanksgiving", icon:"🦃", treat:"🥧", note:"the week of the fourth Thursday in November",
+  {id:"thanksgiving", name:"Thanksgiving", icon:"🦃", treat:"🥧", note:"the week up to Thanksgiving (4th Thursday of November)",
    accent:"#d9762b", gold:"#f0c674", alt:"#8c3b1e", sky:"#2a1a12",
-   win:y=>{const t=nthWeekday(y,10,4,4); return {a:plusDays(t,-4), b:new Date(plusDays(t,3).setHours(23,59,59))};},
+   day:y=>nthWeekday(y,10,4,4), win:around(y=>nthWeekday(y,10,4,4),7),
    deco:()=>bunting(["#c2450b","#e0a02c","#8c3b1e","#a8531f"],24)
      +pumpkinAt(72,428,.9,"#d9762b")+pumpkinAt(736,424,.75,"#a8531f")
      +`<g transform="translate(118,432) scale(.7)"><ellipse cx="0" cy="-12" rx="16" ry="13" fill="#e0c46a"/>
         <path d="M0 -25 q2 -6 6 -7 l-1 4 q-3 1 -3 3Z" fill="#6b7a2a"/></g>`,
    fall:()=>falling(12,()=>leafShape(P(["#c2450b","#e0a02c","#8c3b1e","#d9762b"])))},
 
-  {id:"christmas", name:"Christmas", icon:"🎄", treat:"🎁", note:"1 – 26 Dec",
+  {id:"christmas", name:"Christmas", icon:"🎄", treat:"🎁", note:"11 – 26 Dec",
    accent:"#e5484d", gold:"#ffd76a", alt:"#3fae6a", sky:"#0f2233",
-   win:y=>({a:dayStart(y,11,1), b:dayEnd(y,11,26)}),
+   day:y=>new Date(y,11,25), win:around(y=>new Date(y,11,25),14,1),
    deco:()=>lights(["#e5484d","#3fae6a","#ffd76a","#5f96e0","#c47aff"])
      +`<g transform="translate(60,430)">
         <rect x="-7" y="-14" width="14" height="14" fill="#5c3a1c"/>
@@ -3085,26 +3092,26 @@ const THEMES = [
         <path d="M-9 24 q9 10 18 0 q-9 6 -18 0Z" fill="#e5484d"/></g>`,
    fall:()=>falling(22,flakeShape)},
 
-  {id:"newyear", name:"New Year", icon:"🎉", treat:"🍭", note:"27 Dec – 5 Jan",
+  {id:"newyear", name:"New Year", icon:"🎉", treat:"🍭", note:"27 Dec – 1 Jan",
    accent:"#ffd76a", gold:"#fff0b8", alt:"#8c7fff", sky:"#101a36",
-   win:y=>({a:dayStart(y,11,27), b:dayEnd(y+1,0,5)}),
+   day:y=>new Date(y,0,1), win:around(y=>new Date(y,0,1),5),
    deco:()=>bunting(["#ffd76a","#8c7fff","#5f96e0","#ff4d8a"],22)
      +[[120,120],[400,90],[680,130]].map(([x,y],k)=>`<g class="glowpulse" style="animation-delay:${k*0.7}s">
         <path d="M${x} ${y-16} l5 11 12 2 -9 9 2 12 -10 -6 -10 6 2 -12 -9 -9 12 -2Z" fill="#ffd76a" opacity=".8"/></g>`).join(""),
    fall:()=>falling(26,confettiShape)},
 
-  {id:"valentines", name:"Valentine's", icon:"💝", treat:"🍫", note:"7 – 15 Feb",
-   accent:"#ff5f8a", gold:"#ffc2d4", alt:"#c2185b", sky:"#2a1020", day:y=>new Date(y,1,14),
-   win:y=>({a:dayStart(y,1,7), b:dayEnd(y,1,15)}),
+  {id:"valentines", name:"Valentine's", icon:"💝", treat:"🍫", note:"7 – 14 Feb",
+   accent:"#ff5f8a", gold:"#ffc2d4", alt:"#c2185b", sky:"#2a1020",
+   day:y=>new Date(y,1,14), win:around(y=>new Date(y,1,14),7),
    deco:()=>[90,250,430,610,740].map((x,k)=>{const l=40+((k*37)%60);
      return `<g class="sway" style="transform-origin:${x}px 0px;animation-delay:${(k*0.6).toFixed(1)}s">
        <path d="M${x} 0 v${l}" stroke="#c2185b" stroke-width="1.6" opacity=".7"/>
        <g transform="translate(${x-8},${l}) scale(${(1+k%3*0.35).toFixed(2)})">${heartShape(k%2?"#ff5f8a":"#c2185b")}</g></g>`;}).join(""),
    fall:()=>falling(16,()=>P([heartShape("#ff8ab0"),petalShape("#ffc2d4")]))},
 
-  {id:"stpatricks", name:"St Patrick's", icon:"🍀", treat:"🍀", note:"12 – 18 Mar",
-   accent:"#3fae5a", gold:"#ffd76a", alt:"#1f7a3a", sky:"#0e2418", day:y=>new Date(y,2,17),
-   win:y=>({a:dayStart(y,2,12), b:dayEnd(y,2,18)}),
+  {id:"stpatricks", name:"St Patrick's", icon:"🍀", treat:"🍀", note:"10 – 17 Mar",
+   accent:"#3fae5a", gold:"#ffd76a", alt:"#1f7a3a", sky:"#0e2418",
+   day:y=>new Date(y,2,17), win:around(y=>new Date(y,2,17),7),
    deco:()=>bunting(["#3fae5a","#ffd76a","#1f7a3a","#6fd39a"],24)
      +`<g transform="translate(740,428)"><path d="M-26 0 q-4 -26 26 -26 q30 0 26 26Z" fill="#1a1a22"/>
         <ellipse cx="0" cy="-26" rx="27" ry="7" fill="#2a2a34"/>
@@ -3113,9 +3120,9 @@ const THEMES = [
         <circle cx="0" cy="-30" r="34" fill="#ffd76a" opacity=".14"/></g>`,
    fall:()=>falling(14,cloverShape)},
 
-  {id:"easter", name:"Easter", icon:"🐣", treat:"🥚", note:"the week before Easter Sunday",
-   accent:"#e894c8", gold:"#ffe08a", alt:"#7fc8e8", sky:"#241a2e", day:y=>easterDay(y),
-   win:y=>{const e=easterDay(y); return {a:plusDays(e,-7), b:new Date(plusDays(e,1).setHours(23,59,59))};},
+  {id:"easter", name:"Easter", icon:"🐣", treat:"🥚", note:"the week up to Easter Sunday",
+   accent:"#e894c8", gold:"#ffe08a", alt:"#7fc8e8", sky:"#241a2e",
+   day:y=>easterDay(y), win:around(y=>easterDay(y),7),
    deco:()=>[110,260,540,690].map((x,k)=>{const l=34+((k*29)%52), c=["#e894c8","#ffe08a","#7fc8e8","#9fe0a8"][k%4];
      return `<g class="sway" style="transform-origin:${x}px 0px;animation-delay:${(k*0.5).toFixed(1)}s">
        <path d="M${x} 0 v${l}" stroke="#7a6a8a" stroke-width="1.4" opacity=".6"/>
@@ -3127,24 +3134,23 @@ const THEMES = [
 
   {id:"mardigras", name:"Mardi Gras", icon:"🎭", treat:"🍩", note:"the week up to Fat Tuesday (47 days before Easter)",
    accent:"#a46be0", gold:"#ffd23a", alt:"#3fae5a", sky:"#1c1030",
-   day:y=>plusDays(easterDay(y),-47),
-   win:y=>{const t=plusDays(easterDay(y),-47); return {a:plusDays(t,-6), b:new Date(new Date(t).setHours(23,59,59))};},
+   day:y=>plusDays(easterDay(y),-47), win:around(y=>plusDays(easterDay(y),-47),7),
    deco:()=>beads(["#a46be0","#3fae5a","#ffd23a"])
      +maskAt(70,412,1.1,"#a46be0","#ffd23a")+maskAt(740,408,1,"#3fae5a","#ffd23a"),
    fall:()=>falling(22,k=>k%3?confettiShape(k).replace(/fill="[^"]*"/,`fill="${["#a46be0","#3fae5a","#ffd23a"][k%3]}"`):beadShape(["#a46be0","#3fae5a","#ffd23a"][k%3]))},
 
-  {id:"earthday", name:"Earth Day", icon:"🌍", treat:"🍎", note:"18 – 23 Apr",
+  {id:"earthday", name:"Earth Day", icon:"🌍", treat:"🍎", note:"15 – 22 Apr",
    accent:"#4fbf7a", gold:"#bff27a", alt:"#3f8fd8", sky:"#10222a",
-   day:y=>new Date(y,3,22), win:y=>({a:dayStart(y,3,18), b:dayEnd(y,3,23)}),
+   day:y=>new Date(y,3,22), win:around(y=>new Date(y,3,22),7),
    deco:()=>bunting(["#4fbf7a","#3f8fd8","#bff27a","#2e8a5a"],24)
      +sproutAt(60,430,1.2)+sproutAt(96,433,.9)+sproutAt(734,430,1.1)
      +`<g transform="translate(770,420)"><circle r="16" fill="#3f8fd8"/>
         <path d="M-8 -10 q8 2 6 10 q-6 4 -10 0 q-2 -6 4 -10Z M4 2 q8 -2 9 6 q-4 6 -10 2Z" fill="#4fbf7a"/></g>`,
    fall:()=>falling(14,k=>k%3?leafShape(P(["#4fbf7a","#6fd16a","#2e8a5a"])):petalShape("#bff27a"),true)},
 
-  {id:"cincodemayo", name:"Cinco de Mayo", icon:"🪅", treat:"🌮", note:"1 – 6 May",
+  {id:"cincodemayo", name:"Cinco de Mayo", icon:"🪅", treat:"🌮", note:"28 Apr – 5 May",
    accent:"#ff4d8a", gold:"#ffd23a", alt:"#1fae8a", sky:"#1e1430",
-   day:y=>new Date(y,4,5), win:y=>({a:dayStart(y,4,1), b:dayEnd(y,4,6)}),
+   day:y=>new Date(y,4,5), win:around(y=>new Date(y,4,5),7),
    deco:()=>papelPicado(["#ff4d8a","#ffd23a","#1fae8a","#ff8a1f","#7a5aff","#3fb8ff"])
      +pinataAt(120,70,0)+pinataAt(690,56,1)
      +[[62,432],[96,434],[740,430]].map(([x,y],k)=>`<g transform="translate(${x},${y})">
@@ -3152,26 +3158,25 @@ const THEMES = [
         <circle r="4" fill="#c2450b"/></g>`).join(""),
    fall:()=>falling(24,confettiShape)},
 
-  {id:"memorialday", name:"Memorial Day", icon:"🎖️", treat:"🍓", note:"the weekend of the last Monday in May",
+  {id:"memorialday", name:"Memorial Day", icon:"🎖️", treat:"🍓", note:"the week up to Memorial Day (last Monday of May)",
    accent:"#d8262e", gold:"#f4f4f8", alt:"#2a4aa8", sky:"#10182e",
-   day:y=>lastWeekday(y,4,1),
-   win:y=>{const m=lastWeekday(y,4,1); return {a:plusDays(m,-3), b:new Date(new Date(m).setHours(23,59,59))};},
+   day:y=>lastWeekday(y,4,1), win:around(y=>lastWeekday(y,4,1),7),
    deco:()=>bunting(["#d8262e","#f4f4f8","#2a4aa8"],24)
      +flagAt(54,432,1)+flagAt(744,430,.9)
      +poppyAt(100,432,1)+poppyAt(124,434,.8)+poppyAt(704,432,.9),
    fall:()=>falling(10,()=>petalShape("#d8262e"),true)},
 
-  {id:"july4", name:"4th of July", icon:"🎆", treat:"🍉", note:"28 Jun – 5 Jul",
+  {id:"july4", name:"4th of July", icon:"🎆", treat:"🍉", note:"27 Jun – 4 Jul",
    accent:"#e5484d", gold:"#ffd76a", alt:"#3f6fd8", sky:"#0f1838",
-   day:y=>new Date(y,6,4), win:y=>({a:dayStart(y,5,28), b:dayEnd(y,6,5)}),
+   day:y=>new Date(y,6,4), win:around(y=>new Date(y,6,4),7),
    deco:()=>bunting(["#e5484d","#f4f4f8","#3f6fd8"],22)
      +burstAt(150,110,34,"#e5484d",0)+burstAt(420,80,40,"#f4f4f8",.6)+burstAt(660,118,32,"#3f6fd8",1.1)
      +flagAt(52,432,1)+melonAt(742,430,1.1),
    fall:()=>falling(18,k=>starShape(["#e5484d","#f4f4f8","#3f6fd8"][k%3]))},
 
-  {id:"ferragosto", name:"Ferragosto", icon:"☀️", treat:"🍦", note:"10 – 16 Aug",
+  {id:"ferragosto", name:"Ferragosto", icon:"☀️", treat:"🍦", note:"8 – 15 Aug",
    accent:"#ff9a33", gold:"#ffe08a", alt:"#3fb8c8", sky:"#14203a",
-   day:y=>new Date(y,7,15), win:y=>({a:dayStart(y,7,10), b:dayEnd(y,7,16)}),
+   day:y=>new Date(y,7,15), win:around(y=>new Date(y,7,15),7),
    deco:()=>lights(["#ff9a33","#ffe08a","#4fbf7a","#e5484d","#3fb8c8"])
      +burstAt(200,96,30,"#ffe08a",.3)+burstAt(600,84,34,"#ff9a33",.9)
      +melonAt(64,430,1.1)
@@ -3223,7 +3228,7 @@ const THEMES = [
 function themeFor(d){
   let best=null, bestGap=Infinity;
   for(const t of THEMES){ if(t.season) continue;
-    for(const y of [d.getFullYear()-1, d.getFullYear()]){
+    for(const y of [d.getFullYear()-1, d.getFullYear(), d.getFullYear()+1]){
       const w=t.win(y); if(!(d>=w.a && d<=w.b)) continue;
       const day=t.day ? t.day(y) : new Date((+w.a + +w.b)/2);
       const gap=Math.abs(d - new Date(day.getFullYear(),day.getMonth(),day.getDate(),12));
@@ -3256,7 +3261,7 @@ function applyTheme(){
    moment it goes out. Shown on the setup screen and at the foot of the
    report card, so a player can say which build they are playing.
    ===================================================================== */
-const BUILD = 19, RELEASED = "4 Oct 2026, 09:34";
+const BUILD = 20, RELEASED = "4 Oct 2026, 09:43";
 const COPYRIGHT = "© 2026 m1keLima. All rights reserved.";
 const VERSION_LINE = `v${BUILD} · released ${RELEASED} · ${COPYRIGHT}`;
 
