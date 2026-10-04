@@ -315,6 +315,52 @@ kbd{background:#271a38;border:1px solid var(--line);border-radius:5px;padding:2p
 .dg-dragon.roar{animation:dgRoar .9s ease-out}
 @keyframes dgRoar{0%,100%{transform:scale(1)}30%{transform:scale(1.08) translateX(-10px)}60%{transform:scale(1.04)}}
 
+/* ---- the endings: arrive, board, leave (timeline: in 0–3 s, board 3.4–6.2 s,
+   prop 6.3 s, off at 7.2 s) ---- */
+.en-in-right{animation:enInR 3s cubic-bezier(.18,.7,.3,1) both}
+.en-in-top{animation:enInT 3s cubic-bezier(.18,.7,.3,1) both}
+.en-in-fade{animation:enInF 1.8s ease-out both}
+@keyframes enInR{from{transform:translateX(600px)}to{transform:translateX(0)}}
+@keyframes enInT{from{transform:translateY(-480px)}to{transform:translateY(0)}}
+@keyframes enInF{from{opacity:0}to{opacity:1}}
+.en-rider{animation:enClimb 2.8s 3.4s both}
+@keyframes enClimb{
+  0%{transform:translate(var(--sx),var(--sy));animation-timing-function:linear}
+  70%{transform:translate(var(--mx),var(--sy));animation-timing-function:ease-out}
+  86%{transform:translate(var(--hx),var(--hy));animation-timing-function:ease-in}
+  100%{transform:translate(0,0)}}
+.en-step{animation:hhStep .25s 3.4s 8 alternate ease-in-out}
+.en-walk{animation:hhStep .3s 7.2s infinite alternate ease-in-out}
+.en-gear{animation:hhFade .5s 6.3s both}
+.en-bob{animation:hhBob .5s 7.2s ease-in-out infinite alternate}
+.en-lift{animation:enLift 2.8s 7.2s ease-in-out both}
+@keyframes enLift{to{transform:translateY(var(--lift,-110px))}}
+.en-launch{animation:enLaunch 3.4s 7.4s ease-in both}
+@keyframes enLaunch{0%{transform:translateY(0)}12%{transform:translateY(6px)}100%{transform:translateY(-660px)}}
+.en-plume{transform:scaleY(.15);animation:enPlume 1.2s 7.2s ease-out both}
+@keyframes enPlume{to{transform:scaleY(1)}}
+.en-drop{animation:enDrop 3.2s 7.2s ease-in both}
+@keyframes enDrop{to{transform:translateY(300px)}}
+.en-cloud{animation:hhSlide 4.5s 7.2s linear infinite}
+.en-far{animation:hhSlide 7s 7.2s linear infinite}
+.en-mid{animation:hhSlideM 1.4s 7.2s linear infinite}
+.en-near{animation:hhSlideN .5s 7.2s linear infinite}
+.en-castle{animation:hhAway 9s 7.2s cubic-bezier(.5,0,.9,.6) both}
+.en-wheel{animation:enSpinIn 3s cubic-bezier(.18,.7,.3,1) both, hhSpin .8s 7.2s linear infinite}
+@keyframes enSpinIn{from{transform:rotate(1440deg)}to{transform:rotate(0)}}
+.en-leg{animation:hhTrot .2s 0s 15 alternate ease-in-out, hhTrot .2s 7.2s infinite alternate ease-in-out}
+.en-leg.b{animation-delay:-.2s, 7s}
+.en-leg.slow{animation-duration:.6s,.6s;animation-iteration-count:5,infinite}
+.en-hop{animation:enHop .45s ease-in-out infinite alternate}
+@keyframes enHop{from{transform:translateY(0)}to{transform:translateY(-16px)}}
+.en-vanish{transform-box:fill-box;transform-origin:50% 60%;animation:enVanish 1.4s 7.2s ease-in forwards}
+@keyframes enVanish{0%{opacity:1;transform:scale(1)}40%{opacity:1;transform:scale(1.1)}100%{opacity:0;transform:scale(.1)}}
+.en-burst{opacity:0;transform-box:fill-box;transform-origin:center;animation:enBurst 1.6s 7.4s ease-out both}
+@keyframes enBurst{0%{opacity:0;transform:scale(.3)}30%{opacity:1;transform:scale(1.2)}100%{opacity:0;transform:scale(1.6)}}
+.en-count{opacity:0;transform-box:fill-box;transform-origin:center;animation:enCount .6s both}
+@keyframes enCount{0%{opacity:0;transform:scale(.5)}35%{opacity:1;transform:scale(1.15)}80%{opacity:1}100%{opacity:0}}
+.en-name{opacity:0;animation:hhFade 1.2s 6.6s both}
+
 /* ---- the twenty final challenges: shared idles, pieces, exits ---- */
 .bk-bob{animation:bkBob 2.4s ease-in-out infinite alternate}
 @keyframes bkBob{from{transform:translateY(0)}to{transform:translateY(-10px)}}
@@ -3263,7 +3309,7 @@ function applyTheme(){
    moment it goes out. Shown on the setup screen and at the foot of the
    report card, so a player can say which build they are playing.
    ===================================================================== */
-const BUILD = 24, RELEASED = "4 Oct 2026, 10:11";
+const BUILD = 25, RELEASED = "4 Oct 2026, 16:40";
 const COPYRIGHT = "© 2026 m1keLima. All rights reserved.";
 const VERSION_LINE = `v${BUILD} · released ${RELEASED} · ${COPYRIGHT}`;
 
@@ -3498,6 +3544,9 @@ function paintFamilies(){
   const beat=BOSSES.filter(b=>save.bossBeaten&&save.bossBeaten[b.id]);
   if(beat.length) $("#famline").innerHTML += `<br><b>${beat.length} of ${BOSSES.length}</b> final challenges beaten:
     ${beat.map(b=>`<span title="${esc(b.name)}">${b.icon}</span>`).join(" ")}`;
+  const seenE=ENDINGS.filter(e=>save.endings&&save.endings[e.id]);
+  if(seenE.length) $("#famline").innerHTML += `<br><b>${seenE.length} of ${ENDINGS.length}</b> ways home found:
+    ${seenE.map(e=>`<span title="${esc(e.name)}">${e.icon}</span>`).join(" ")}`;
 }
 
 /* =====================================================================
@@ -3565,7 +3614,7 @@ function startGame(){
   S.tier=tierFor(S.level); S.usedTopics=new Set(); S.plan=buildPlan(S.level,S.usedTopics);
   S.room=0; S.lanterns=3; S.candy=0; S.escapeBonus=0; S.speedCandy=0; S.started=Date.now(); S.log=[]; S.jump=0;
   S.tally=newTally();
-  S.hatchUsed=false; S.sawFamily=false; S.dragonWon=false; S.rodeCoach=false; S.dragon=null; S.boss=null;
+  S.hatchUsed=false; S.sawFamily=false; S.dragonWon=false; S.rodeCoach=false; S.dragon=null; S.boss=null; S.ending=null;
   S.missed={}; S.br=null; S.brCandy=0; S.brDone=false; S.reported=false; S.won=false; S.unlocked=null;
   $("#chase").classList.remove("hidden"); $("#lanterns").parentNode.classList.remove("hidden");
   save.totals.runs++; save.prog[S.level]=(save.prog[S.level]||0)+1; store();
@@ -4581,12 +4630,11 @@ const BOSSES = [
   intro:"A thick fog has rolled over the far end of the bridge. Two pale eyes look out of it. Somewhere behind, you can just hear horses.",
   how:"Every right answer clears one bank of fog. Every wrong one, it breathes a cold mist on you and takes one of your three chances",
   hits:["A bank of fog lifts. You can see a little further.","Another clears. Something golden is waiting behind.","Three gone — that is a coach!","Nearly clear. The eyes are getting smaller."],
-  miss:"Whoooo — a cold mist", win:["The fog is gone.","The last of the fog drifts away like a sigh, and there is the pumpkin coach, waiting on the road just across the bridge."],
+  miss:"Whoooo — a cold mist", win:["The fog is gone.","The last of the fog drifts away like a sigh, and the way home is lit up and waiting, just across the bridge."],
   lose:"The fog rolls back in, thicker than ever. The eyes blink.",
   exit:"fade", target:[620,210], art:()=>`
-  <g transform="translate(700,300) scale(.32)">
-    <ellipse cx="0" cy="-10" rx="100" ry="76" fill="#e8741c"/><circle cx="-70" cy="70" r="40" fill="none" stroke="#ffcf5c" stroke-width="8"/>
-    <circle cx="70" cy="70" r="46" fill="none" stroke="#ffcf5c" stroke-width="8"/></g>
+  ${[680,760].map(x=>`<rect x="${x-3}" y="250" width="6" height="80" fill="#3a3040"/><rect x="${x-9}" y="236" width="18" height="18" rx="3" fill="#ffd27a" class="flick"/>
+    <circle cx="${x}" cy="245" r="30" fill="url(#halo2)"/>`).join("")}
   <g class="dg-dragon"><g class="dg-body">
     ${[0,1,2,3,4].map(k=>`<g data-off="${5-k}">${BK.at(0,0,"bk-drift",`<path d="M${380+k*8} ${130+k*44} q60 -30 120 0 t120 0 t120 0 t120 0 V${190+k*44} H${380+k*8}Z" fill="#b8b4c8" opacity="${0.42+k*0.05}"/>`,`animation-delay:${-k*0.9}s`)}</g>`).join("")}
     ${BK.at(620,210,"bk-bob",`<ellipse cx="-28" rx="12" ry="9" fill="#dff8ff"/><ellipse cx="28" rx="12" ry="9" fill="#dff8ff"/>
@@ -4721,7 +4769,7 @@ function paintDragonBars(){
 
 function dragonScene(){
   S.sceneTok=(S.sceneTok||0)+1;
-  S.rodeCoach=false;
+  S.rodeCoach=false; S.ending=null;
   S.boss = pickBoss(S.level);
   S.dragon={hp:BOSS_HP, shields:BOSS_TRIES, used:new Set(), p:null};
   const b=S.boss;
@@ -4733,7 +4781,7 @@ function dragonScene(){
   document.body.classList.remove("dying");
   stopTimer(); $("#timerwrap").classList.add("hidden"); $("#readrow").classList.add("hidden");
   $("#topic").innerHTML=`<span style="color:#ffb12e">The final challenge</span> <i class="above hard">${b.icon} ${esc(b.name)}</i>`;
-  $("#question").textContent=`${b.intro} On the road beyond, something golden is waiting.`;
+  $("#question").textContent=`${b.intro} Beyond it, something is waiting to take you home.`;
   $("#choices").innerHTML=""; $("#choices").onclick=null;
   $("#nextwrap").classList.add("hidden");
   const fb=$("#feedback"); fb.className="ok show";
@@ -4808,7 +4856,7 @@ function dragonAnswer(btn){
 }
 
 function dragonWon(){
-  const b=S.boss;
+  const b=S.boss, E=S.ending=pickEnding();          /* how they will get home */
   S.dragonWon=true;
   if(!save.bossBeaten) save.bossBeaten={};
   save.bossBeaten[b.id]=(save.bossBeaten[b.id]||0)+1;
@@ -4824,10 +4872,10 @@ function dragonWon(){
   $("#choices").innerHTML=""; $("#readrow").classList.add("hidden");
   const fb=$("#feedback"); fb.className="ok show";
   fb.innerHTML=`<div class="ft">${esc(b.win[0])} ${esc(S.name)} got past ${esc(b.who)}.</div>
-    <div class="steps" style="color:var(--gold)">On the road beyond, a pumpkin coach has been waiting all this time.</div>`;
+    <div class="steps" style="color:var(--gold)">${esc(E.tease)}</div>`;
   $("#nextwrap").classList.remove("hidden");
-  $("#nextBtn").textContent="Go to the coach";
-  $("#nextBtn").onclick=carriageScene;
+  $("#nextBtn").textContent=E.go;
+  $("#nextBtn").onclick= E.custom ? carriageScene : ()=>endingScene(E);
   if(kidMode) say(`You did it! ${b.win[1]}`,0.92);
 }
 
@@ -4847,6 +4895,533 @@ function dragonLost(){
   $("#dgAgain").onclick=()=>{ SFX.click(); startDragon(); };
   $("#dgAway2").onclick=()=>{ SFX.click(); familyScene(); };
   $("#nextwrap").classList.add("hidden");
+}
+
+/* =====================================================================
+   THE ENDINGS — how you get home after the final challenge. Twenty-three
+   of them (ENDINGS): the princess's coach and twenty-two more. Dealt from a
+   shuffled pile like the challenges (pickEnding), with a matching ending
+   first: beat the dragon and you ride it home, beat the ghost ship and the
+   pirates row you, and so on; the sleigh prefers Christmas, the fireworks
+   the 4th of July, New Year and Ferragosto.
+
+   One scene engine (endingSVG / endingScene): the vehicle or companion
+   arrives (from the right, from the sky, or fades in), the player walks
+   over and boards — the avatar is drawn BETWEEN the vehicle's back and its
+   front piece, so it reads as seated in a basket, a cab or behind a table —
+   picks up the prop of their new role, and at 7.2 s the scene moves off:
+     fly    — lifts off, the ground drops away, clouds stream past
+     launch — the rocket
+     ride   — the road / river / rails scroll by, the castle slides away
+     walk   — the same, with the player walking
+     stay   — a celebration where you are
+     poof   — stay, then the player vanishes in sparkles
+   Same rules as the carriage: animated elements carry no transform
+   attribute; base styles are the final frame (reduced motion shows it).
+   ===================================================================== */
+function enStrip(period,from,to,draw){ let o=""; for(let x=from;x<to;x+=period) o+=draw(x); return o; }
+
+function enBackdrop(kind, slow){
+  const k=slow||1, dur=b=>`style="animation-duration:${(b*k).toFixed(2)}s"`;
+  if(kind==="hall") return bossBackdrop("hall");
+  if(kind==="court") return bossBackdrop("gate");
+  const sky=`<rect width="800" height="460" fill="url(#ensky)"/>${stars(70,300)}${moon(110,78,32)}`;
+  if(kind==="sky"||kind==="night"){
+    const ground=`<g transform="translate(250,96) scale(.7)">${outsideKit("castle")}</g>
+      <rect x="0" y="318" width="800" height="142" fill="#2a2434"/>
+      ${Array.from({length:17},(_,i)=>`<rect x="${i*50}" y="302" width="30" height="16" fill="#2a2434"/>`).join("")}
+      <path d="M0 318 H800" stroke="#3a3346" stroke-width="3"/>`;
+    if(kind==="night") return sky+ground;
+    return sky+`<g class="en-cloud">${enStrip(400,-400,1200,x=>`<ellipse cx="${x+80}" cy="150" rx="90" ry="20" fill="#3a3466" opacity=".55"/>
+        <ellipse cx="${x+300}" cy="240" rx="110" ry="24" fill="#3a3466" opacity=".45"/>`)}</g>
+      <g class="en-drop">${ground}</g>`;
+  }
+  /* travelling: road, rails, river or snow */
+  const band = kind==="river" ? "#13324a" : kind==="snow" ? "#dfe8f2" : "#3b2c3a";
+  return sky+`
+    <g class="en-far" ${dur(7)}><path fill="#1c1430" d="${enStrip(400,-400,1200,x=>`M${x} 330 Q${x+100} 268 ${x+200} 312 Q${x+300} 284 ${x+400} 330Z `)}"/></g>
+    <g class="en-castle"><g transform="translate(262,104) scale(.7)">${outsideKit("castle")}</g></g>
+    ${kind==="river"?`<rect x="0" y="300" width="800" height="32" fill="#2a3a2a"/>`:""}
+    <rect x="0" y="${kind==="river"?332:326}" width="800" height="140" fill="${band}"/>
+    <g class="en-mid" ${dur(1.4)}>${enStrip(140,-140,940,x=> kind==="river"
+        ? `<path d="M${x} 330 q4 -24 8 0 M${x+12} 330 q3 -18 6 0" stroke="#3a5a3a" stroke-width="3" fill="none"/>`
+        : kind==="snow" ? `<path d="M${x} 330 l10 -28 l10 28Z" fill="#2a3a4a"/>`
+        : `<g fill="#2a1f2c"><rect x="${x}" y="338" width="6" height="30" rx="2"/><path d="M${x-30} 346 h140" stroke="#2a1f2c" stroke-width="3"/></g>`)}</g>
+    ${kind==="rail"?`<path d="M0 360 H800 M0 366 H800" stroke="#8a8a96" stroke-width="3"/>`:""}
+    <g class="en-near" ${dur(.5)}>${enStrip(80,-80,880,x=> kind==="river"
+        ? `<path d="M${x} ${400} q20 -6 40 0" stroke="#3a6a8a" stroke-width="2" fill="none"/><path d="M${x+30} 430 q16 -5 32 0" stroke="#2a5a7a" stroke-width="2" fill="none"/>`
+        : kind==="rail" ? `<rect x="${x}" y="356" width="10" height="14" fill="#4a3a2a"/><rect x="${x+40}" y="356" width="10" height="14" fill="#4a3a2a"/>`
+        : kind==="snow" ? `<ellipse cx="${x+10}" cy="414" rx="7" ry="2.2" fill="#b8c8dc"/>`
+        : `<ellipse cx="${x+10}" cy="414" rx="7" ry="2.2" fill="#5a4258" opacity=".7"/><path d="M${x+30} 404 h16" stroke="#4d3a4d" stroke-width="2" stroke-linecap="round"/>`)}</g>
+    ${kind==="snow"?falling(20,flakeShape):""}`;
+}
+
+/* small pieces the endings share */
+const EN = {
+  sash:`<path d="M15 47 L50 61 L48 66 L13 52Z" fill="#ffcf5c" opacity=".92"/>`,
+  scarf:c=>`<path d="M18 46 h28 v6 h-28Z" fill="${c}"/><path d="M44 48 q14 4 22 -6" stroke="${c}" stroke-width="5" fill="none" stroke-linecap="round"/>`,
+  ghost:(x,y,s)=>`<g transform="translate(${x},${y}) scale(${s||1})"><path d="M-14 0 C-14 -24 14 -24 14 0 v14 l-5 -4 -4 4 -5 -4 -5 4 -4 -4 -5 4Z" fill="#e6f0ff" opacity=".95"/>
+    ${BK.eye(-5,-6,3.6)}${BK.eye(5,-6,3.6)}</g>`,
+  bat:(x,y,s,d)=>BK.at(x,y,"bk-bob",`<g transform="scale(${s})"><g class="bk-flap"><path d="M-4 -2 q-20 -22 -44 -10 q12 6 12 18 q14 -8 26 -4Z M4 -2 q20 -22 44 -10 q-12 6 -12 18 q-14 -8 -26 -4Z" fill="#5a3a8a"/></g>
+    <ellipse cx="0" cy="2" rx="12" ry="14" fill="#6a4a9a"/>${BK.eye(-4,0,3.6)}${BK.eye(4,0,3.6)}</g>`,`animation-delay:${d||0}s`),
+  basket:(x,y,w,h)=>`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="6" fill="#8a5a2a" stroke="#5a3a1a" stroke-width="3"/>
+    ${Array.from({length:Math.floor(w/14)},(_,i)=>`<path d="M${x+8+i*14} ${y+4} v${h-8}" stroke="#6b4420" stroke-width="2"/>`).join("")}
+    <path d="M${x} ${y+h/2} h${w}" stroke="#6b4420" stroke-width="2"/>`,
+  wheel:(cx,cy,r,c)=>`<g transform="translate(${cx},${cy})"><g class="en-wheel"><circle r="${r}" fill="none" stroke="${c||"#ffcf5c"}" stroke-width="4"/>
+    ${[0,60,120].map(d=>`<path d="M${-(r-2)} 0 H${r-2}" transform="rotate(${d})" stroke="${c||"#ffcf5c"}" stroke-width="2.6"/>`).join("")}<circle r="${r*0.22}" fill="${c||"#ffcf5c"}"/></g></g>`,
+  leg:(x,y,len,c,cls)=>`<g transform="translate(${x},${y})"><g class="en-leg ${cls||""}"><rect x="-6" y="0" width="12" height="${len}" rx="5" fill="${c}"/></g></g>`
+};
+
+const ENDINGS = [
+ {id:"coach", name:"The Princess's Coach", icon:"👸", role:"the coachman", custom:true,
+  tease:"On the road beyond, a pumpkin coach has been waiting all this time.", go:"Go to the coach",
+  home:"drove the princess's coach home"},
+
+ {id:"balloon", lift:-60, name:"The Hot-Air Balloon", icon:"🎈", role:"the balloon pilot", bg:"sky", arrive:"top", mode:"fly",
+  after:["storm","fog"], seat:[404,216,1], from:[620,414],
+  tease:"Up on the castle wall, something round and orange is tugging at a rope.", go:"Climb into the balloon",
+  q:"A pumpkin balloon drifts down onto the castle wall, its basket swinging.",
+  ft:"There is nobody in it — only a note: “For whoever gets out.”",
+  become:"climbs into the basket, lights the burner, and becomes the balloon pilot.",
+  home:"flew home in the pumpkin balloon, over all seven places",
+  gear:EN.scarf("#e5484d"),
+  back:()=>`<g transform="translate(430,140)">
+      <ellipse rx="92" ry="104" fill="#ff8a1f"/><ellipse rx="58" ry="104" fill="none" stroke="#c2450b" stroke-width="4"/>
+      <ellipse rx="24" ry="104" fill="none" stroke="#c2450b" stroke-width="4"/><ellipse cx="-34" cy="-40" rx="18" ry="40" fill="#ffb066" opacity=".45"/>
+      <path d="M-6 -104 q4 -16 14 -18" stroke="#3f6b2a" stroke-width="6" fill="none"/>
+      <path d="M-56 82 q56 26 112 0" stroke="#ffcf5c" stroke-width="8" fill="none"/></g>
+    <path d="M366 226 L384 268 M494 226 L476 268 M410 236 L404 268 M450 236 L458 268" stroke="#6b4a2a" stroke-width="2.4"/>
+    <path d="M430 246 q-8 10 0 20 q8 -10 0 -20Z" fill="#ffd27a" class="flick"/>
+    <rect x="378" y="266" width="104" height="48" rx="6" fill="#5a3a1a"/>`,
+  front:()=>EN.basket(372,264,116,52)},
+
+ {id:"train", name:"The Ghost Train", icon:"🚂", role:"the train driver", bg:"rail", arrive:"right", mode:"ride",
+  after:["knight"], seat:[266,206,.95], from:[650,414],
+  tease:"Under the castle, a whistle blows — a train is pulling into a platform nobody knew was there.", go:"Run for the train",
+  q:"A little steam train puffs in under the castle, full of friendly ghosts in their Sunday best.",
+  ft:"“Our driver has gone home for tea,” says the guard. “Can anyone drive?”",
+  become:"climbs into the cab, pulls the whistle, and becomes the train driver.",
+  home:"drove the ghost train home",
+  gear:`<path d="M20 48 l12 12 l12 -12Z" fill="#e5484d"/>`,
+  back:()=>`
+    ${[0,1,2].map(i=>BK.at(186,214-i*4,"bk-rise",`<circle r="${10+i*4}" fill="#cfc8d8" opacity=".7"/>`,`animation-delay:${i*0.7}s`)).join("")}
+    <rect x="176" y="228" width="22" height="46" fill="#1a2030"/><rect x="170" y="222" width="34" height="10" rx="3" fill="#2a3040"/>
+    <rect x="150" y="270" width="130" height="58" rx="26" fill="#2a3a5a"/><path d="M160 282 h110" stroke="#ffcf5c" stroke-width="3"/>
+    <circle cx="152" cy="296" r="9" fill="#ffd27a" class="flick"/>
+    <path d="M140 330 l20 -20 v20Z" fill="#c4121f"/>
+    <rect x="250" y="216" width="90" height="112" fill="#7a2f3a"/><rect x="244" y="206" width="102" height="12" fill="#3a1a20"/>
+    <rect x="262" y="230" width="66" height="44" fill="#1a1028"/>
+    ${[[352,"#5a3a8a"],[524,"#3a6a5a"]].map(([x,c])=>`<rect x="${x}" y="236" width="160" height="92" rx="8" fill="${c}"/>
+      <rect x="${x-14}" y="300" width="14" height="6" fill="#1a1420"/>
+      ${[0,1,2].map(i=>`<rect x="${x+14+i*50}" y="252" width="36" height="32" rx="4" fill="#ffd27a"/>${EN.ghost(x+32+i*50,276,.8)}`).join("")}`).join("")}
+    ${[[182,334,22],[234,334,22],[300,330,26],[382,338,18],[482,338,18],[554,338,18],[654,338,18]].map(([x,y,r])=>EN.wheel(x,y,r,"#c9c4d4")).join("")}`,
+  front:()=>`<rect x="250" y="266" width="90" height="62" fill="#7a2f3a"/><path d="M250 280 h90" stroke="#ffcf5c" stroke-width="3"/>`},
+
+ {id:"dragonride", lift:-90, name:"Riding the Dragon", icon:"🐉", role:"the dragon rider", bg:"sky", arrive:"top", mode:"fly",
+  after:["dragon"], seat:[552,150,.85], from:[250,414],
+  tease:"A small dragon is waiting on the wall. It has been getting bigger.", go:"Say hello to the dragon",
+  q:"The little dragon flaps down onto the castle wall and grows, and grows, until it is big enough to carry someone.",
+  ft:"It lowers its head and blinks, very politely. It wants to make up for the fire.",
+  become:"climbs onto its back, holds on tight, and becomes a dragon rider.",
+  home:"rode home on the back of a dragon",
+  gear:EN.sash,
+  back:()=>dragonArt(),
+  front:()=>`<path d="M546 214 q32 -12 66 0 l-4 22 q-28 8 -58 0Z" fill="#7a4a2a" stroke="#ffcf5c" stroke-width="2"/>`},
+
+ {id:"boat", name:"The Pirate Rowing Boat", icon:"⛵", role:"the captain", bg:"river", arrive:"right", mode:"ride",
+  after:["ship","kraken"], seat:[468,252,.9], from:[650,330],
+  tease:"Down by the moat, somebody is singing a sea shanty — badly.", go:"Go down to the water",
+  q:"Two ghost pirates come rowing down the moat in a little boat with a pumpkin on the sail.",
+  ft:"“Every boat needs a captain,” they say. “Ours fell asleep in Room 4.”",
+  become:"steps aboard, takes the telescope, and becomes the captain.",
+  home:"sailed home down the river in a pirate rowing boat",
+  gear:`${EN.sash}<path d="M44 56 l18 -14" stroke="#c9952c" stroke-width="5" stroke-linecap="round"/>`,
+  back:()=>`<path d="M420 180 V320" stroke="#3a2416" stroke-width="7"/>
+    <path d="M424 188 q50 20 44 80 q-24 -12 -44 -6Z" fill="#cfd8e6" opacity=".9"/>
+    <circle cx="440" cy="232" r="11" fill="#ff8a1f"/><path d="M420 180 l26 7 l-26 7Z" fill="#1a1420"/>
+    <path d="M300 330 Q310 374 340 382 H540 Q566 374 576 330Z" fill="#5a3a24"/>
+    ${[[350,300],[400,300]].map(([x,y],i)=>`${EN.ghost(x,y,1)}<path d="M${x-14} ${y-14} h28" stroke="#c4121f" stroke-width="5"/>
+      ${BK.at(x+6,y+14,"bk-sway",`<path d="M0 0 L-46 50" stroke="#8a5a34" stroke-width="5" stroke-linecap="round"/>`,`animation-duration:1.2s;animation-delay:${i*0.2}s`)}`).join("")}`,
+  front:()=>`<path d="M296 318 H580 L572 348 H304Z" fill="#7a5434"/><path d="M300 330 H576" stroke="#5a3a24" stroke-width="3"/>`},
+
+ {id:"broom", name:"The Broomstick", icon:"🧹", role:"the broom flyer", bg:"sky", arrive:"right", mode:"fly",
+  after:["witch"], seat:[404,224,1], from:[640,414],
+  tease:"Something long and thin is leaning against the castle wall, humming to itself.", go:"Pick up the broom",
+  q:"A broomstick floats up to you, bristles twitching. The rival witch left her spare behind.",
+  ft:"It wobbles. It bucks. Then it settles, as if it has decided you will do.",
+  become:"climbs on, leans forward, and becomes a broom flyer.",
+  home:"flew home on a broomstick, past the moon",
+  gear:EN.scarf("#a46be0"),
+  back:()=>`${[0,1,2,3,4].map(k=>BK.at(560+k*26,288+(k%2)*8,"bk-pulse",`<path d="M0 -4 L1.2 -1.2 L4 0 L1.2 1.2 L0 4 L-1.2 1.2 L-4 0 L-1.2 -1.2Z" fill="#ffe7a0"/>`,`animation-delay:${k*0.3}s`)).join("")}`,
+  front:()=>`<path d="M300 292 H530" stroke="#8a5a2a" stroke-width="9" stroke-linecap="round"/>
+    <path d="M524 284 l62 -14 l4 26 l8 6 l-74 2Z" fill="#c9a24a"/><path d="M524 284 v18" stroke="#8a5a2a" stroke-width="6"/>`},
+
+ {id:"owl", lift:-50, name:"The Owl Post", icon:"🦉", role:"the owl's special delivery", bg:"sky", arrive:"top", mode:"fly",
+  after:["bats","wisps"], seat:[408,236,.9], from:[640,414],
+  tease:"A very large owl is perched on the gate, holding a very large basket.", go:"Read the label on the basket",
+  q:"A giant owl lands on the wall with a basket in its claws. The label says: SPECIAL DELIVERY.",
+  ft:"It hoots once. The address on the label is your house.",
+  become:"climbs into the basket, holds on to the letter, and becomes a special delivery.",
+  home:"was flown home by the owl post",
+  gear:`<rect x="40" y="50" width="18" height="12" fill="#f4eed2" stroke="#c9a87a"/><path d="M40 50 l9 7 l9 -7" stroke="#c9a87a" fill="none"/>`,
+  back:()=>`
+    <g transform="translate(386,130)"><g class="dg-wing"><path d="M0 0 q-60 -20 -110 20 q30 6 50 30 q20 -20 60 -10Z" fill="#6a4a2a"/></g></g>
+    <g transform="translate(474,130)"><g class="dg-wing b"><path d="M0 0 q60 -20 110 20 q-30 6 -50 30 q-20 -20 -60 -10Z" fill="#6a4a2a"/></g></g>
+    <ellipse cx="430" cy="140" rx="54" ry="64" fill="#8a6a4a"/><ellipse cx="430" cy="160" rx="36" ry="40" fill="#c9a87a"/>
+    ${[150,166,182].map(y=>`<path d="M412 ${y} l6 6 l6 -6 M430 ${y} l6 6 l6 -6" stroke="#8a6a4a" stroke-width="2" fill="none"/>`).join("")}
+    <path d="M396 86 l-6 -22 l18 12Z M464 86 l6 -22 l-18 12Z" fill="#8a6a4a"/>
+    <ellipse cx="430" cy="112" rx="40" ry="30" fill="#b89470"/>
+    ${BK.eye(414,110,13,"#3a2410")}${BK.eye(446,110,13,"#3a2410")}
+    <path d="M424 124 l6 12 l6 -12Z" fill="#ffb12e"/>
+    <path d="M412 200 L392 270 M448 200 L468 270" stroke="#6b4a2a" stroke-width="2.4"/>
+    <path d="M404 196 l8 8 M456 196 l-8 8" stroke="#ffb12e" stroke-width="4" stroke-linecap="round"/>
+    <rect x="388" y="270" width="88" height="40" rx="6" fill="#5a3a1a"/>`,
+  front:()=>EN.basket(384,268,96,46)},
+
+ {id:"parade", name:"The Pumpkin Parade", icon:"🎃", role:"the parade leader", bg:"road", arrive:"right", mode:"walk",
+  after:["golem"], seat:[110,318,1.2], from:[640,414],
+  tease:"Behind you, every pumpkin in the castle has started hopping down the stairs.", go:"Lead the parade",
+  q:"All the pumpkins from the castle hop out and line up in a row, candles lit, one of them with a drum.",
+  ft:"They look at you. A parade needs someone at the front.",
+  become:"takes the baton, steps out in front, and becomes the parade leader.",
+  home:"led the pumpkin parade all the way home",
+  gear:`<path d="M46 56 l14 -26" stroke="#f4f4f8" stroke-width="3"/><circle cx="60" cy="30" r="4" fill="#ffcf5c"/>`,
+  back:()=>[0,1,2,3,4,5].map(i=>BK.at(230+i*70,404,"en-hop",`
+    <ellipse cx="0" cy="-20" rx="${22-i%2*3}" ry="18" fill="#ff8a1f" stroke="#c2450b" stroke-width="2"/>
+    <path d="M0 -38 v-6" stroke="#3f6b2a" stroke-width="4"/>
+    <path d="M-10 -24 l5 -6 l5 6Z M2 -24 l5 -6 l5 6Z" fill="#ffd27a" class="flick"/>
+    <path d="M-10 -12 q10 8 20 0" stroke="#ffd27a" stroke-width="3" fill="none" class="flick"/>
+    ${i===2?`<rect x="14" y="-26" width="16" height="14" rx="3" fill="#c4121f" stroke="#ffcf5c" stroke-width="1.6"/>`:""}`,`animation-delay:${i*0.12}s`)).join("")},
+
+ {id:"coronation", name:"The Coronation", icon:"👑", role:"king or queen of the castle", bg:"hall", arrive:"fade", mode:"stay",
+  after:["sphinx","gargoyles","knight","phantom"], seat:[386,226,1.1], from:[660,414],
+  tease:"Trumpets are sounding in the great hall. They seem to be for you.", go:"Go into the great hall",
+  q:"The ghosts of the castle have laid out a red carpet, a throne, and a very small crown.",
+  ft:"“Anyone who gets all the way through,” says the oldest ghost, “rules the castle for one night.”",
+  become:"sits on the throne, is crowned, and becomes king or queen of the castle.",
+  home:"was crowned for a night, then walked home by the royal guard",
+  gear:`<path d="M18 4 l4 -14 l7 9 l3 -12 l3 12 l7 -9 l4 14Z" fill="#ffcf5c" stroke="#c9952c" stroke-width="1"/>
+    <circle cx="32" cy="-2" r="2" fill="#e5484d"/><path d="M14 50 q18 8 36 0 v6 q-18 8 -36 0Z" fill="#f4f4f8"/>`,
+  back:()=>`<path d="M346 330 V170 q54 -44 108 0 V330Z" fill="#7a1a2a" stroke="#ffcf5c" stroke-width="4"/>
+    <path d="M384 146 l16 -24 l16 24Z" fill="#ffcf5c"/>
+    ${[[220,290],[580,290],[640,306],[160,306]].map(([x,y],i)=>`${BK.at(x,y,"bk-bob",`${EN.ghost(0,0,1.4)}<path d="M14 -6 l26 -16" stroke="#ffcf5c" stroke-width="4" stroke-linecap="round"/><path d="M40 -22 l6 -6 l2 10Z" fill="#ffcf5c"/>`,`animation-delay:${i*0.4}s`)}`).join("")}`,
+  front:()=>`<rect x="352" y="294" width="96" height="36" rx="4" fill="#8a2a3a" stroke="#ffcf5c" stroke-width="3"/>`,
+  extra:()=>falling(18,confettiShape)},
+
+ {id:"unicorn", name:"The Moonlight Unicorn", icon:"🦄", role:"the unicorn rider", bg:"road", arrive:"right", mode:"ride",
+  after:["wisps","fog"], seat:[268,256,.9], from:[650,414],
+  tease:"Out of the forest, something white is walking, and where it steps, flowers glow.", go:"Go to the unicorn",
+  q:"A pale unicorn steps out of the trees. Every hoofprint it leaves lights up like a flower.",
+  ft:"It bows its head until its horn touches the ground in front of you.",
+  become:"climbs onto its back and becomes the unicorn's rider.",
+  home:"rode home on the moonlight unicorn",
+  gear:EN.sash,
+  back:()=>`<g transform="translate(300,352)">${horseSVG("#f4f0fa","#ff9ad8","#d8cfe6")}
+      <path d="M-56 -66 L-74 -102 L-50 -70Z" fill="#ffcf5c"/><path d="M-60 -78 l8 -3 M-64 -88 l8 -3" stroke="#c9952c" stroke-width="1.6"/></g>`,
+  front:()=>`<path d="M264 322 q36 -12 70 0 l-4 16 q-30 6 -62 0Z" fill="#a46be0" stroke="#ffcf5c" stroke-width="2"/>`,
+  extra:()=>`<g class="en-near" style="animation-duration:.9s">${enStrip(90,-90,890,x=>`<circle cx="${x+20}" cy="420" r="4" fill="#ff9ad8"/><circle cx="${x+20}" cy="420" r="12" fill="#ff9ad8" opacity=".25"/>`)}</g>`},
+
+ {id:"rocket", name:"The Rocket", icon:"🚀", role:"the astronaut", bg:"sky", arrive:"fade", mode:"launch",
+  after:["storm"], seat:[394,112,.85], from:[640,414],
+  tease:"The tallest tower of the castle has started to rumble and steam.", go:"Climb the tower",
+  q:"The castle's tallest tower opens like a flower. Inside it is a rocket.",
+  ft:"A voice crackles: “Ten minutes to launch. Is there an astronaut on board?”",
+  become:"climbs into the cockpit, closes the glass, and becomes the astronaut.",
+  home:"flew home by rocket, with one loop round the moon",
+  gear:"",
+  back:()=>`<g transform="translate(420,330)"><path class="en-plume" d="M-30 0 Q0 130 30 0Z" fill="url(#dgfire)"/></g>
+    <path d="M420 40 q46 50 46 150 v110 h-92 v-110 q0 -100 46 -150Z" fill="#eef2f8"/>
+    <path d="M420 40 q30 30 38 70 h-76 q8 -40 38 -70Z" fill="#e5484d"/>
+    <path d="M374 250 l-34 60 h34Z M466 250 l34 60 h-34Z" fill="#e5484d"/>
+    <path d="M380 300 h80 l-6 20 h-68Z" fill="#9aa4b8"/>
+    <path d="M420 322 q-8 10 0 18 q8 -8 0 -18Z" fill="#ffd27a" class="flick"/>`,
+  front:()=>`<rect x="376" y="168" width="88" height="22" fill="#eef2f8"/>
+    <ellipse cx="420" cy="146" rx="36" ry="40" fill="#bfe6ff" opacity=".3" stroke="#9ad0ff" stroke-width="3"/>`,
+  extra:()=>`<g font-size="64" font-weight="800" fill="#ffe08a" text-anchor="middle">
+    ${["3","2","1"].map((n,i)=>`<text x="620" y="170" class="en-count" style="animation-delay:${(5.9+i*0.55).toFixed(2)}s">${n}</text>`).join("")}</g>
+    <rect x="520" y="130" width="10" height="190" fill="#4a4258"/>${[0,1,2,3,4,5].map(i=>`<path d="M520 ${140+i*30} l10 20 M530 ${140+i*30} l-10 20" stroke="#4a4258" stroke-width="2"/>`).join("")}`},
+
+ {id:"bear", name:"The Big Friendly Bear", icon:"🐻", role:"the bear's passenger", bg:"snow", arrive:"right", mode:"ride",
+  after:["yeti"], seat:[330,206,.9], from:[650,414],
+  tease:"Something big, brown and very sleepy is sitting in the snow by the gate.", go:"Wake the bear, gently",
+  q:"A great brown bear has walked down from the mountain. It yawns, and the yawn is warm.",
+  ft:"It kneels down in the snow, the way bears do for cubs.",
+  become:"climbs onto its back, holds on to its fur, and becomes the bear's passenger.",
+  home:"rode home through the snow on a big friendly bear",
+  gear:EN.scarf("#e5484d"),
+  back:()=>`${EN.leg(298,368,36,"#5a3418")}${EN.leg(404,368,36,"#5a3418","b")}
+    <ellipse cx="360" cy="330" rx="112" ry="58" fill="#7a4a2a"/>
+    ${EN.leg(318,370,36,"#6a3e20","b")}${EN.leg(424,370,36,"#6a3e20")}
+    <circle cx="474" cy="314" r="12" fill="#6a3e20"/>
+    <circle cx="214" cy="262" r="14" fill="#7a4a2a"/><circle cx="262" cy="262" r="14" fill="#7a4a2a"/>
+    <circle cx="238" cy="298" r="46" fill="#7a4a2a"/>
+    <ellipse cx="212" cy="312" rx="22" ry="16" fill="#c9a07a"/><ellipse cx="198" cy="306" rx="7" ry="5" fill="#1a1010"/>
+    ${BK.eye(228,286,6,"#1a1010")}${BK.eye(252,288,6,"#1a1010")}
+    <path d="M204 322 q8 6 16 0" stroke="#3a2010" stroke-width="2" fill="none"/>`,
+  front:()=>`<path d="M316 280 q44 -18 92 0 q-8 20 -46 20 q-38 0 -46 -20Z" fill="#7a4a2a"/>`},
+
+ {id:"circus", name:"The Midnight Circus", icon:"🎪", role:"the ringmaster", bg:"road", arrive:"right", mode:"ride",
+  after:["troll","bats"], seat:[256,186,.85], from:[650,414],
+  tease:"Music is coming down the road — a drum, a trumpet, and somebody juggling.", go:"Follow the music",
+  q:"A red and gold circus wagon rolls up, with juggling bats on the roof and a skeleton playing the trumpet.",
+  ft:"“We're doing the show in your town tonight,” says the skeleton. “We just need a ringmaster.”",
+  become:"puts on the top hat, takes the cane, and becomes the ringmaster.",
+  home:"led the midnight circus into town and right up to the front door",
+  gear:`<rect x="20" y="-16" width="24" height="18" fill="#1a1420"/><rect x="14" y="0" width="36" height="4" fill="#1a1420"/>
+    <rect x="20" y="-4" width="24" height="3" fill="#e5484d"/><path d="M48 56 l8 24" stroke="#f4f4f8" stroke-width="3"/>`,
+  back:()=>`<g transform="translate(150,352)">${horseSVG("#3a2a2a","#e5484d","#2a1a1a")}</g>
+    <path d="M250 300 L170 336" stroke="#4a2a18" stroke-width="5"/>
+    <rect x="290" y="208" width="262" height="118" rx="10" fill="#c4121f"/>
+    ${[0,1,2,3,4,5].map(i=>`<rect x="${302+i*44}" y="214" width="18" height="106" fill="#ffcf5c" opacity=".85"/>`).join("")}
+    <path d="M284 210 ${Array.from({length:9},(_,i)=>`q15 -16 30 0`).join(" ")}" fill="#ffcf5c"/>
+    <rect x="360" y="170" width="120" height="26" rx="5" fill="#1a1420" stroke="#ffcf5c" stroke-width="2"/>
+    <text x="420" y="189" text-anchor="middle" font-size="16" font-weight="800" fill="#ffcf5c">CIRCUS</text>
+    ${[[400,140],[430,124],[460,140]].map(([x,y],i)=>BK.at(x,y,"bk-bob",`<circle r="7" fill="${["#ff4d8a","#5fe0ff","#ffd23a"][i]}"/>`,`animation-duration:.5s;animation-delay:${-i*0.17}s`)).join("")}
+    ${EN.bat(380,156,.5,0)}${EN.bat(480,156,.5,-.4)}
+    ${EN.wheel(330,340,26)}${EN.wheel(512,340,26)}
+    <rect x="232" y="234" width="80" height="12" fill="#5a3a24"/>`,
+  front:()=>`<rect x="236" y="244" width="74" height="28" rx="4" fill="#ffcf5c" stroke="#c4121f" stroke-width="3"/>`},
+
+ {id:"sleigh", name:"The Sleigh", icon:"🛷", role:"the sleigh driver", bg:"sky", arrive:"right", mode:"fly",
+  after:["yeti"], season:["christmas","winter","newyear"], seat:[400,212,.9], from:[650,414],
+  tease:"There is a jingle of bells somewhere above the castle.", go:"Look up",
+  q:"Two reindeer land in the courtyard, pulling a red sleigh heaped with presents.",
+  ft:"The front one has a very shiny nose. They are a driver short tonight.",
+  become:"climbs into the sleigh, takes the reins, and becomes the sleigh driver.",
+  home:"drove the sleigh home over the rooftops",
+  gear:EN.scarf("#3fae6a"),
+  back:()=>`${[[170,326],[250,316]].map(([x,y],i)=>`<g transform="translate(${x},${y}) scale(.9)">${horseSVG("#9a6a44","#5a3a24","#7a5034")}
+      <path d="M-46 -72 q-6 -22 -20 -26 M-52 -86 l-12 -2 M-40 -74 q4 -22 16 -28 M-32 -92 l10 -4" stroke="#d8c8a8" stroke-width="3" fill="none"/>
+      ${i===0?`<circle cx="-82" cy="-42" r="5" fill="#ff3a3a" class="flick"/>`:""}</g>`).join("")}
+    <path d="M300 290 L190 320 M300 290 L270 310" stroke="#c98a3a" stroke-width="2.4"/>
+    <path d="M330 330 h210 q26 0 26 -22" stroke="#ffcf5c" stroke-width="6" fill="none" stroke-linecap="round"/>
+    <path d="M356 236 h150 q30 0 30 40 v20 q0 26 -30 26 h-140 q-24 0 -24 -20Z" fill="#c4121f" stroke="#ffcf5c" stroke-width="3"/>
+    <rect x="452" y="210" width="34" height="30" fill="#3fae6a"/><rect x="480" y="200" width="28" height="40" fill="#5f96e0"/>
+    <path d="M452 224 h34 M469 210 v30 M494 200 v40" stroke="#ffcf5c" stroke-width="3"/>`,
+  front:()=>`<path d="M350 270 h124 v40 h-124Z" fill="#c4121f" stroke="#ffcf5c" stroke-width="3"/>`},
+
+ {id:"whale", lift:-70, name:"The Sky Whale", icon:"🐋", role:"the whale's friend", bg:"sky", arrive:"right", mode:"fly",
+  after:["kraken","storm"], seat:[380,126,.85], from:[650,414],
+  tease:"Something enormous and glowing is swimming slowly through the clouds.", go:"Wave to it",
+  q:"A whale made of night sky swims down through the clouds, its spots glowing like stars.",
+  ft:"It sings a long, low, friendly note, and comes to rest beside the castle wall.",
+  become:"climbs up onto its back and becomes the whale's friend.",
+  home:"rode home on the back of a whale through the stars",
+  gear:EN.sash,
+  back:()=>`<path d="M180 262 q20 -92 220 -92 q160 0 220 60 l60 -40 q-4 40 -30 60 q30 20 30 60 l-60 -40 q-70 70 -220 70 q-190 0 -220 -78Z" fill="#2a6a9a"/>
+    <path d="M200 282 q60 50 200 50 q120 0 190 -40" fill="#8ad0e8" opacity=".85"/>
+    ${[[300,210],[360,200],[480,212],[540,232],[420,226]].map(([x,y],i)=>`<circle cx="${x}" cy="${y}" r="5" fill="#bff4ff" class="bk-pulse" style="animation-delay:${i*0.3}s"/>`).join("")}
+    ${BK.eye(232,238,9,"#0a2a3a")}<path d="M206 268 q20 10 40 0" stroke="#0a2a3a" stroke-width="3" fill="none"/>
+    ${BK.at(430,168,"bk-rise",`<path d="M0 0 q-10 -20 0 -34 q10 14 0 34Z" fill="#bff4ff" opacity=".8"/>`)}`,
+  front:()=>`<path d="M358 188 q52 -22 104 0 q-10 14 -52 14 q-42 0 -52 -14Z" fill="#2a6a9a"/>`},
+
+ {id:"wizard", name:"The Wizard's Apprentice", icon:"🪄", role:"the wizard's apprentice", bg:"court", arrive:"fade", mode:"poof",
+  after:["sphinx","phantom"], seat:[430,316,1.1], from:[680,414],
+  tease:"An old man with a very long beard is waiting by the gate, tapping a staff.", go:"Go and see the wizard",
+  q:"An old wizard is waiting in the courtyard. “I have been watching you,” he says. “You are ready.”",
+  ft:"He hands you a hat, a wand, and one spell — just one — for getting home.",
+  become:"puts on the hat, raises the wand, says the spell, and becomes the wizard's apprentice.",
+  home:"said the one spell they knew, and was home in a puff of sparkles",
+  gear:`<path d="M14 6 l18 -40 l18 40Z" fill="#3a4ab8"/><path d="M14 6 h36" stroke="#ffcf5c" stroke-width="4"/><circle cx="32" cy="-14" r="2.4" fill="#ffcf5c"/>
+    <path d="M46 56 l16 -20" stroke="#5a3a1a" stroke-width="3"/><path d="M62 32 l1.4 3 3.2 .5 -2.3 2.2 .5 3.2 -2.8 -1.5 -2.8 1.5 .5 -3.2 -2.3 -2.2 3.2 -.5Z" fill="#ffcf5c"/>`,
+  back:()=>`<path d="M250 330 q10 -150 50 -170 q40 20 50 170Z" fill="#3a4ab8"/>
+    ${[[280,220],[316,260],[290,300],[322,200]].map(([x,y])=>`<path d="M${x} ${y-5} l1.4 3.6 3.6 .4 -2.7 2.4 .8 3.6 -3.1 -1.9 -3.1 1.9 .8 -3.6 -2.7 -2.4 3.6 -.4Z" fill="#ffcf5c"/>`).join("")}
+    <circle cx="300" cy="150" r="22" fill="#f0d0b0"/>${BK.eye(292,148,4.4)}${BK.eye(308,148,4.4)}
+    <path d="M280 156 q20 80 40 0 q-4 30 -20 50 q-16 -20 -20 -50Z" fill="#f4f4f8"/>
+    <path d="M266 136 l34 -84 l34 84Z" fill="#3a4ab8"/><path d="M266 136 h68" stroke="#ffcf5c" stroke-width="5"/>
+    <path d="M356 132 V330" stroke="#6a4a2a" stroke-width="6"/><circle cx="356" cy="126" r="11" fill="#9affd8" class="bk-pulse"/><circle cx="356" cy="126" r="30" fill="url(#halo3)"/>`,
+  extra:()=>`<g transform="translate(466,350)"><g class="en-burst">${Array.from({length:10},(_,k)=>{const a=k*36*Math.PI/180;
+    return `<path d="M${(Math.cos(a)*20).toFixed(0)} ${(Math.sin(a)*20).toFixed(0)} l1.6 4 4 .4 -3 2.6 .9 4 -3.5 -2.1 -3.5 2.1 .9 -4 -3 -2.6 4 -.4Z" fill="#ffe7a0"/>`;}).join("")}
+    <circle r="40" fill="url(#halo3)"/></g></g>`},
+
+ {id:"batcloud", name:"The Bat Cloud", icon:"🦇", role:"the bat-carpet rider", bg:"sky", arrive:"top", mode:"fly",
+  after:["bats"], seat:[400,226,.9], from:[650,414],
+  tease:"The sky over the castle has gone very dark, and very squeaky.", go:"Look up at the bats",
+  q:"Hundreds of little bats swoop down and link wings, making a flat, squeaking, flapping carpet.",
+  ft:"It hovers at knee height. The bats look at you hopefully.",
+  become:"steps on, sits down very carefully, and becomes the bat-carpet rider.",
+  home:"flew home on a carpet made of bats",
+  gear:EN.sash,
+  back:()=>Array.from({length:7},(_,i)=>EN.bat(330+i*33,298,.55,-i*0.13)).join(""),
+  front:()=>Array.from({length:6},(_,i)=>EN.bat(346+i*33,314,.55,-i*0.2)).join("")},
+
+ {id:"feast", name:"The Castle Feast", icon:"🍰", role:"the guest of honour", bg:"hall", arrive:"fade", mode:"stay",
+  after:["troll","giant","mummy","cat"], seat:[400,212,1], from:[680,414],
+  tease:"There is a smell of pie coming from the great hall.", go:"Follow the smell of pie",
+  q:"The great hall is set for a feast, and everybody you met tonight has come — even the Pumpkin King.",
+  ft:"There is one empty chair in the middle, with your name on a card.",
+  become:"sits down in the middle of the table and becomes the guest of honour.",
+  home:"ate far too much pie at the castle feast, then was walked home by everyone",
+  gear:`<path d="M22 50 h20 l-10 14Z" fill="#f4f4f8"/>`,
+  back:()=>{ const g=[S.boss?S.boss.icon:"🐉","🧌","🕷️","👻","🐸","🎃"];
+    return `${g.map((e,i)=>BK.at([200,262,324,500,562,624][i],298,"bk-bob",`<text font-size="44" text-anchor="middle">${e}</text>`,`animation-delay:${i*0.3}s`)).join("")}
+    <g transform="translate(700,330) scale(.95) translate(-32,-76)">${KING_BODY}</g>`; },
+  front:()=>`<rect x="140" y="292" width="540" height="40" fill="#6b4a2a"/>
+    <path d="M140 292 h540 v20 ${Array.from({length:18},()=>"q-15 10 -30 0").join(" ")}Z" fill="#efe2d0"/>
+    <ellipse cx="230" cy="290" rx="28" ry="9" fill="#e0a02c"/><ellipse cx="560" cy="290" rx="28" ry="9" fill="#c2450b"/>
+    <rect x="300" y="262" width="40" height="28" rx="4" fill="#ff9ab0"/><rect x="306" y="248" width="28" height="16" rx="3" fill="#ffd0e0"/>
+    ${[270,470,630].map(x=>`<rect x="${x-3}" y="266" width="6" height="24" fill="#f4eed2"/><path d="M${x} 256 q-5 6 0 11 q5 -5 0 -11Z" fill="#ffb12e" class="flick"/>`).join("")}`,
+  extra:()=>falling(16,confettiShape)},
+
+ {id:"fireworks", name:"The Fireworks Finale", icon:"🎆", role:"the firework master", bg:"night", arrive:"fade", mode:"stay",
+  season:["july4","newyear","ferragosto"], seat:[150,238,1], from:[320,318],
+  tease:"On the battlements, somebody has left a box of fireworks and a long match.", go:"Climb onto the battlements",
+  q:"Up on the castle wall is the biggest box of fireworks you have ever seen, and a long, lit match.",
+  ft:"A note on the box says: “For the one who got out. Light it.”",
+  become:"lights the fuse, steps back, and becomes the firework master — and the sky spells out a name.",
+  home:"lit the castle fireworks, then walked home under them",
+  gear:`<path d="M46 58 l10 -18" stroke="#8a5a2a" stroke-width="4"/><path d="M56 40 q-6 -8 0 -16 q6 8 0 16Z" fill="#ff8a1f" class="flick"/>`,
+  back:()=>`<rect x="222" y="270" width="60" height="48" rx="4" fill="#7a2f3a" stroke="#ffcf5c" stroke-width="3"/>
+    ${[232,250,268].map(x=>`<rect x="${x}" y="250" width="10" height="22" fill="#e5484d"/>`).join("")}`,
+  extra:()=>`<g class="en-name">${burstAt(360,120,50,"#ff4d8a",0)}${burstAt(520,86,62,"#ffd76a",.5)}${burstAt(680,140,46,"#5fe0ff",1)}
+      ${burstAt(450,200,36,"#7ad17a",.3)}${burstAt(620,236,40,"#c47aff",.8)}
+      <text x="520" y="300" text-anchor="middle" font-size="56" font-weight="800" fill="#ffe08a" stroke="#ff8a1f" stroke-width="2" class="glowpulse">${esc(S.name)}</text></g>`},
+
+ {id:"tortoise", name:"The Giant Tortoise", icon:"🐢", role:"the tortoise's lookout", bg:"road", slow:3, arrive:"right", mode:"ride",
+  after:["toad"], seat:[374,134,.85], from:[650,414],
+  tease:"A tortoise the size of a house is waiting by the road. There is a house on it.", go:"Knock on the tortoise",
+  q:"A giant tortoise is waiting by the road, with a little cottage built on top of its shell.",
+  ft:"“I am slow,” it says, “but I have never once been late.”",
+  become:"climbs up onto the porch of the little cottage and becomes the tortoise's lookout.",
+  home:"rode home on a giant tortoise — slowly, but never late",
+  gear:`<path d="M44 56 l18 -14" stroke="#c9952c" stroke-width="5" stroke-linecap="round"/>`,
+  back:()=>`${EN.leg(290,326,44,"#6a8a4a","slow")}${EN.leg(500,326,44,"#6a8a4a","slow b")}
+    <path d="M240 342 q0 -150 170 -150 q170 0 170 150Z" fill="#4a7a3a"/>
+    <path d="M300 250 l40 -24 l40 24 l-40 24Z M420 250 l40 -24 l40 24 l-40 24Z M360 300 l40 -24 l40 24 l-40 24Z" fill="none" stroke="#3a5a2a" stroke-width="3"/>
+    ${EN.leg(330,330,42,"#7a9a5a","slow b")}${EN.leg(470,330,42,"#7a9a5a","slow")}
+    <circle cx="212" cy="326" r="30" fill="#8aa86a"/>${BK.eye(204,318,6,"#1a2a10")}<path d="M192 336 q10 6 20 0" stroke="#2a3a1a" stroke-width="2" fill="none"/>
+    <rect x="360" y="148" width="92" height="50" fill="#c9a07a"/><path d="M350 150 l56 -42 l56 42Z" fill="#a33b1e"/>
+    <rect x="430" y="164" width="16" height="16" fill="#ffd27a" class="flick"/>`,
+  front:()=>`<path d="M356 190 h100 v14 h-100Z" fill="#8a5a34"/><path d="M362 190 v14 M384 190 v14 M406 190 v14 M428 190 v14 M450 190 v14" stroke="#5a3a1a" stroke-width="3"/>`},
+
+ {id:"fireflies", name:"The Fireflies' Lantern", icon:"🏮", role:"the lantern carrier", bg:"road", arrive:"fade", mode:"walk",
+  after:["toad","wisps"], seat:[250,318,1.2], from:[650,414],
+  tease:"Thousands of tiny lights are gathering on the road home.", go:"Follow the lights",
+  q:"The fireflies from the bridge have come back, with all their cousins, and lined up in a glowing path.",
+  ft:"The one at the front settles inside an old lantern and waits for you to pick it up.",
+  become:"lifts the lantern, follows the path, and becomes the lantern carrier.",
+  home:"followed the fireflies home, carrying their lantern",
+  gear:`<path d="M48 50 v8" stroke="#3a2a18" stroke-width="2"/><rect x="42" y="58" width="12" height="14" rx="3" fill="#ffd27a" class="flick"/><circle cx="48" cy="65" r="14" fill="#ffd27a" opacity=".3"/>`,
+  back:()=>Array.from({length:30},(_,i)=>{ const t=i/29, x=20+t*400, y=330-Math.sin(t*Math.PI)*120;
+    return `<g><circle cx="${x.toFixed(0)}" cy="${y.toFixed(0)}" r="3.4" fill="#f2ff9a" class="bk-pulse" style="animation-delay:${(i*0.08).toFixed(2)}s"/>
+      <circle cx="${x.toFixed(0)}" cy="${y.toFixed(0)}" r="10" fill="#e8ff7a" opacity=".2"/></g>`; }).join("")},
+
+ {id:"carousel", name:"The Haunted Carousel", icon:"🎠", role:"the carousel rider", bg:"court", arrive:"fade", mode:"stay",
+  after:["cat"], seat:[402,238,.8], from:[680,414],
+  tease:"In the courtyard, a carousel has started playing music all by itself.", go:"Go into the courtyard",
+  q:"A carousel stands in the courtyard, lit up and turning slowly, its painted horses rising and falling.",
+  ft:"One horse has stopped right in front of you, as if it has been saving you a seat.",
+  become:"climbs onto the horse and becomes the carousel rider — and when it stops, you are home.",
+  home:"rode the haunted carousel, and when it stopped they were on their own front step",
+  gear:`<path d="M46 56 V10" stroke="#fff" stroke-width="1"/><ellipse cx="46" cy="4" rx="9" ry="11" fill="#ff4d8a"/>`,
+  back:()=>`<ellipse cx="420" cy="360" rx="210" ry="28" fill="#8a2a3a" stroke="#ffcf5c" stroke-width="4"/>
+    <path d="M420 66 V350" stroke="#ffcf5c" stroke-width="8"/>
+    ${[260,580].map((x,i)=>`<path d="M${x} 140 V350" stroke="#ffcf5c" stroke-width="5"/>
+      ${BK.at(x,300,"bk-bob",`<g transform="scale(.55)">${horseSVG(i?"#c8e0ff":"#ffd0e8","#a46be0","#b8a8d8")}</g>`,`animation-duration:1.4s;animation-delay:${-i*0.7}s`)}`).join("")}
+    <path d="M200 142 L420 50 L640 142Z" fill="#e5484d"/>
+    ${[0,1,2,3,4].map(i=>`<path d="M420 50 L${244+i*88} 142 L${288+i*88} 142Z" fill="#f4f4f8"/>`).join("")}
+    <path d="M200 142 ${Array.from({length:11},()=>"q20 16 40 0").join(" ")}" fill="#ffcf5c"/>
+    ${Array.from({length:11},(_,i)=>`<circle cx="${220+i*40}" cy="152" r="4" fill="#ffe08a" class="bk-pulse" style="animation-delay:${i*0.15}s"/>`).join("")}
+    <g transform="translate(432,318) scale(.62)">${horseSVG("#f4f0fa","#ff9ad8","#d8cfe6")}</g>`,
+  front:()=>`<path d="M398 300 q30 -10 58 0 l-4 14 q-26 6 -50 0Z" fill="#a46be0" stroke="#ffcf5c" stroke-width="2"/>`,
+  extra:()=>[0,1,2].map(i=>BK.at(300+i*120,120,"bk-rise",`<text font-size="24" fill="#ffe08a">♪</text>`,`animation-delay:${i*0.8}s`)).join("")},
+
+ {id:"king", name:"The Pumpkin King's Thank-You", icon:"🤝", role:"the King's honoured friend", bg:"road", arrive:"right", mode:"walk",
+  seat:[290,318,1.2], from:[650,414],
+  tease:"Footsteps behind you. Big ones. Somebody has been following you all night.", go:"Turn round",
+  q:"The Pumpkin King, who has been one step behind you all night, finally catches up.",
+  ft:"He takes off his crown, bows, and holds out his hand. “I was never chasing you,” he says. “I was keeping up.”",
+  become:"shakes his hand and becomes the Pumpkin King's honoured friend.",
+  home:"walked home side by side with the Pumpkin King",
+  gear:"",
+  back:()=>`<g transform="translate(430,414)"><g class="en-walk"><g transform="scale(1.6) translate(-32,-76)">${KING_BODY}</g></g></g>`,
+  extra:()=>`<g class="en-gear"><circle cx="370" cy="350" r="7" fill="#f0d0b0"/><circle cx="382" cy="350" r="7" fill="#ff8a1f"/></g>
+    <g class="en-name">${BK.bubble(470,190,"Thank you.","#5a2a0a").replace('class="dg-pop"','')}</g>`}
+];
+
+/* deal the next ending: a shuffled pile, a matching one first */
+function pickEnding(){
+  let seen=new Set(save.endSeen||[]);
+  let pool=ENDINGS.filter(e=>!seen.has(e.id));
+  if(!pool.length){ save.endSeen=[]; seen=new Set(); pool=ENDINGS.filter(e=>e.id!==save.endLast); }
+  const boss=S.boss&&S.boss.id, th=TH&&TH.id;
+  const fit=e=>((e.after||[]).includes(boss)?2:0)+((e.season||[]).includes(th)?1:0);
+  const best=Math.max(...pool.map(fit));
+  const e=P(pool.filter(x=>fit(x)===best));
+  save.endSeen=[...(save.endSeen||[]), e.id]; save.endLast=e.id; store();
+  return e;
+}
+function noteEnding(e){ if(!save.endings) save.endings={}; save.endings[e.id]=(save.endings[e.id]||0)+1; store(); }
+
+function endingSVG(E){
+  const a=AVATARS.find(v=>v.id===S.avatar)||AVATARS[0];
+  const [sx,sy,sc]=E.seat, [fx,fy]=E.from||[600,414];
+  const x0=fx-32*sc, y0=fy-80*sc, dx=x0-sx, dy=y0-sy;
+  const mx = dx>0 ? Math.min(dx,70) : Math.max(dx,-70);
+  const vars=`--sx:${dx.toFixed(0)}px;--sy:${dy.toFixed(0)}px;--mx:${mx.toFixed(0)}px;--hx:${(mx*0.45).toFixed(0)}px;--hy:${(dy*0.25).toFixed(0)}px`;
+  const arrive = E.arrive==="top"?"en-in-top":E.arrive==="fade"?"en-in-fade":"en-in-right";
+  const lift = E.mode==="fly"?"en-lift":E.mode==="launch"?"en-launch":"";
+  const bob = (E.mode==="fly"||E.mode==="ride")?"en-bob":"";
+  const liftStyle = E.lift ? ` style="--lift:${E.lift}px"` : "";
+  return `
+  <defs>
+    <linearGradient id="ensky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#14123a"/><stop offset="65%" stop-color="#2a1844"/><stop offset="1" stop-color="#3a1f3a"/></linearGradient>
+    <linearGradient id="dgsky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#160f30"/><stop offset="70%" stop-color="#2c1530"/><stop offset="1" stop-color="#3a1a22"/></linearGradient>
+    <linearGradient id="dgfire" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#fff2a8"/><stop offset=".35" stop-color="#ffb12e"/><stop offset=".8" stop-color="#ff5a1f"/>
+      <stop offset="1" stop-color="#c4121f" stop-opacity="0"/></linearGradient>
+    <radialGradient id="dgeye"><stop offset="0" stop-color="#fff3a0"/><stop offset="1" stop-color="#ff9a1f"/></radialGradient>
+    <radialGradient id="moong2"><stop offset="0" stop-color="#fff7d8" stop-opacity=".45"/><stop offset="1" stop-color="#fff7d8" stop-opacity="0"/></radialGradient>
+    <radialGradient id="halo2"><stop offset="0" stop-color="#ffb347" stop-opacity=".5"/><stop offset="1" stop-color="#ffb347" stop-opacity="0"/></radialGradient>
+    <radialGradient id="halo3"><stop offset="0" stop-color="#9affd8" stop-opacity=".55"/><stop offset="1" stop-color="#9affd8" stop-opacity="0"/></radialGradient>
+    <radialGradient id="dgvig" cx="50%" cy="55%" r="80%">
+      <stop offset="55%" stop-color="#000" stop-opacity="0"/><stop offset="100%" stop-color="#000" stop-opacity=".7"/></radialGradient>
+  </defs>
+  <g class="hh-anim">
+  ${enBackdrop(E.bg, E.slow)}
+  <g class="${lift}"${liftStyle}><g class="${bob}">
+    <g class="${arrive}">${E.back()}</g>
+    <g class="en-rider" style="${vars}"><g class="${E.mode==="walk"?"en-walk":""}"><g class="en-step"><g class="${E.mode==="poof"?"en-vanish":""}">
+      <g transform="translate(${sx},${sy}) scale(${sc})">${a.svg}<g class="en-gear">${E.gear||""}</g></g></g></g></g></g>
+    <g class="${arrive}">${E.front?E.front():""}</g>
+  </g></g>
+  ${E.extra?E.extra():""}
+  ${TH.fall()}
+  <rect width="800" height="460" fill="url(#dgvig)"/>
+  </g>`;
+}
+
+function endingScene(E){
+  const tok = S.sceneTok = (S.sceneTok||0)+1;
+  S.ending=E; noteEnding(E);
+  const a=AVATARS.find(v=>v.id===S.avatar)||AVATARS[0];
+  $("#scene").innerHTML=endingSVG(E);
+  $("#roomtag").textContent=E.name;
+  $("#roomline").textContent="";
+  $("#chest").classList.add("hidden"); $("#hatch").classList.add("hidden");
+  document.body.classList.remove("dying");
+  stopTimer(); $("#timerwrap").classList.add("hidden"); $("#readrow").classList.add("hidden");
+  $("#topic").innerHTML=`<span style="color:var(--gold)">${E.icon} ${esc(E.name)}</span> <i class="above">${esc(a.name)}</i>`;
+  $("#question").textContent=E.q;
+  $("#choices").innerHTML=""; $("#choices").onclick=null;
+  const fb=$("#feedback"); fb.className="ok show";
+  fb.innerHTML=`<div class="ft">${esc(E.ft)}</div>
+    <div class="steps" style="color:var(--gold)">${esc(S.name)} ${esc(E.become)}</div>`;
+  $("#nextwrap").classList.add("hidden");
+  $("#nextBtn").textContent="Go home";
+  $("#nextBtn").onclick=familyScene;
+  const still = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+  setTimeout(()=>{ if(S.sceneTok===tok) $("#nextwrap").classList.remove("hidden"); }, still?0:7200);
+  /* sound: footsteps while boarding, then the leaving */
+  for(let t=3.4;t<6;t+=0.3) tone(t%0.6<0.3?420:360,.04,"triangle",.035,t);
+  if(E.mode==="fly"||E.mode==="launch") tone(180,2.2,"sine",.05,7.2,760);
+  else if(E.mode==="ride") for(let t=7.2;t<9.8;t+=0.21) tone(t%0.42<0.2?760:560,.045,"triangle",.04,t);
+  else if(E.mode==="walk") for(let t=7.2;t<9.8;t+=0.4) tone(160,.12,"square",.03,t);
+  if(E.mode==="poof") [1568,2093,2637].forEach((f,i)=>tone(f,.4,"sine",.05,7.2+i*0.1));
+  [784,988,1175,1568].forEach((f,i)=>tone(f,.4,"triangle",.05,6.4+i*0.12));
+  if(kidMode) say(`${E.q} ${E.ft} ${S.name} ${E.become}`, 0.9);
 }
 
 /* =====================================================================
@@ -4879,7 +5454,7 @@ function horseSVG(coat, mane, shade){
 }
 
 function carriageScene(){
-  S.rodeCoach=true;
+  S.rodeCoach=true; S.ending=ENDINGS[0]; noteEnding(ENDINGS[0]);
   const a=AVATARS.find(v=>v.id===S.avatar)||AVATARS[0];
   const tok = S.sceneTok = (S.sceneTok||0)+1;          /* a later scene cancels our timers */
   const wheel=(cx,cy,r)=>`<g transform="translate(${cx},${cy})"><g class="hh-wheel">
@@ -5103,7 +5678,7 @@ function familyScene(){
   document.body.classList.remove("dying");
   stopTimer(); $("#timerwrap").classList.add("hidden"); $("#readrow").classList.add("hidden");
   $("#topic").innerHTML='<span style="color:var(--gold)">The door at the end</span> <i class="above">'+esc(a.name)+'</i>';
-  $("#question").textContent=`${S.name} came all the way through the castle, and ${S.rodeCoach?"drove the princess's coach":"walked the long way round"} until the road was one they knew.`;
+  $("#question").textContent=`${S.name} came all the way through the castle and ${S.ending?S.ending.home:"walked home the long way round"}.`;
   $("#choices").innerHTML="";
   const fb=$("#feedback"); fb.className="ok show";
   fb.innerHTML=`<div class="ft">Waiting up: ${esc(f.them)} — and ${esc(f.pet)}.</div>
@@ -5433,7 +6008,7 @@ function showReport(won){
       <tr><td>Level</td><td>${BANK[S.level].name} · ${TIERS[S.tier].name}</td></tr>
     </table>
     ${S.dragonWon&&S.boss?`<div class="unlock" style="background:rgba(53,160,125,.16);border-color:#2f8a6c">
-       ${S.boss.icon} <b>${esc(S.name)} got past ${esc(S.boss.who)}</b> and drove the princess home.
+       ${S.boss.icon} <b>${esc(S.name)} got past ${esc(S.boss.who)}</b>${S.ending?` and ${esc(S.ending.home)}`:""}.
        <div style="font-size:13.5px;color:var(--dim);margin-top:5px">Final challenges beaten so far:
          ${Object.keys(save.bossBeaten||{}).length} of ${BOSSES.length}.</div></div>`:""}
     ${S.sawFamily?`<div class="unlock" style="background:rgba(255,138,31,.16);border-color:#b8722a">
