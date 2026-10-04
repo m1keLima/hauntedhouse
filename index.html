@@ -155,6 +155,10 @@ input[type=text]::placeholder{color:#5c5070}
 kbd{background:#271a38;border:1px solid var(--line);border-radius:5px;padding:2px 7px;font-size:13px}
 
 #hud{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+/* where you are in the game: which of the seven places */
+.placebox{display:flex;align-items:center;gap:7px;border-color:var(--gold)}
+.placebox b{color:var(--gold);font-weight:800}
+.placebox small{color:var(--dim);font-size:12px;letter-spacing:1px}
 .hudbox{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:9px 14px;
   font-size:16px;display:flex;align-items:center;gap:9px}
 .lanterns{display:flex;gap:4px;align-items:center}
@@ -528,7 +532,8 @@ table.rc td:last-child{text-align:right;font-weight:800;color:var(--gold)}
       <b style="color:#d9b6ff">grand chest</b> instead &mdash; a multi-step problem, and it pays
       <b style="color:#d9b6ff">double: a whole lantern</b>. Chests pay in light, and light is candy at the door.<br>
       A red-rimmed <b style="color:var(--blood)">shortcut hatch</b> in the floor &mdash; labelled, you cannot miss it &mdash;
-      skips three rooms, but a wrong answer down there costs <b style="color:var(--blood)">a whole lantern</b>.
+      skips three rooms and pays for all three, as if you had got each right first time &mdash; but a wrong answer
+      down there costs <b style="color:var(--blood)">a whole lantern</b>.
       Opening the chest or the hatch <b style="color:var(--good)">stops the room's clock</b>; it starts again from the same
       second when you come back.<br>
       Every problem runs a <b style="color:var(--good)">candy clock</b> &mdash; 30 seconds in Grade 1, growing a little each
@@ -559,6 +564,8 @@ table.rc td:last-child{text-align:right;font-weight:800;color:var(--gold)}
 
 <section id="game" class="hidden">
   <div id="hud">
+    <div class="hudbox placebox" id="placebox" title="Where you are"><span id="placeIcon">🏚️</span>
+      <b id="placeName">The House</b> <small id="placeStep">1 of 7</small></div>
     <div class="hudbox"><span id="roomnum">Room 1 / 10</span></div>
     <div class="hudbox"><span class="lanterns" id="lanterns"></span></div>
     <div class="hudbox"><span id="treatIcon">🍬</span> <span class="candy" id="candynum">0</span></div>
@@ -644,8 +651,8 @@ table.rc td:last-child{text-align:right;font-weight:800;color:var(--gold)}
               and gives back a whole lantern.</li>
           <li>A perfect run is <b style="color:var(--gold)">100 sweets</b>. Your bucket is your score out of 100,
               and it puts you in one of <b>five categories</b>.</li>
-          <li>The <b style="color:var(--blood)">red hatch</b> skips three rooms &mdash; but get it wrong down there
-              and it costs a whole lantern.</li>
+          <li>The <b style="color:var(--blood)">red hatch</b> skips three rooms, and you still get the sweets for all
+              three &mdash; but get it wrong down there and it costs a whole lantern.</li>
           <li>It is <b>spooky, not scary</b>. Nothing jumps out at you, and nothing in here is real.</li>
         </ul>
       </div>
@@ -3261,7 +3268,7 @@ function applyTheme(){
    moment it goes out. Shown on the setup screen and at the foot of the
    report card, so a player can say which build they are playing.
    ===================================================================== */
-const BUILD = 20, RELEASED = "4 Oct 2026, 09:43";
+const BUILD = 21, RELEASED = "4 Oct 2026, 09:51";
 const COPYRIGHT = "© 2026 m1keLima. All rights reserved.";
 const VERSION_LINE = `v${BUILD} · released ${RELEASED} · ${COPYRIGHT}`;
 
@@ -3552,6 +3559,12 @@ function tighten(p){
   return p;
 }
 
+/* the place box at the top: which of the seven places you are in */
+function paintPlace(){
+  const w=W(), i=Math.max(0,WORLDS.indexOf(w));
+  $("#placeIcon").textContent=w.icon; $("#placeName").textContent=w.name;
+  $("#placeStep").textContent=`${i+1} of ${WORLDS.length}`;
+}
 function startGame(){
   S.level=save.level; S.world=Math.min(save.world||0, unlockFor(save.level)); S.avatar=save.avatar; S.name=(save.name||"").trim()||"the visitor";
   S.tier=tierFor(S.level); S.usedTopics=new Set(); S.plan=buildPlan(S.level,S.usedTopics);
@@ -3582,6 +3595,7 @@ function loadRoom(){
   $("#roomtag").textContent=`${S.room+1}. ${W().rooms[S.room]}`;
   $("#roomline").textContent=P(SCARELINES);
   $("#roomnum").textContent=`Room ${S.room+1} / 10`;
+  paintPlace();
   renderLanterns(); renderChase(); renderKing();
   $("#candynum").textContent=S.candy;
 
@@ -3635,7 +3649,13 @@ function newTally(){
           hatch:0, hatchFell:false, hatchLantern:0, lanternWon:0, lanternLost:0};
 }
 /* speed is offered on every question you answer; what you did not take is "slow" */
-function tallySpeed(spd){ const t=S.tally; if(!t) return; t.speed+=spd; if(!kidMode) t.slow+=SPEED_MAX-spd; }
+function tallySpeed(spd,times){ const t=S.tally; if(!t) return; times=times||1;
+  t.speed+=spd*times; if(!kidMode) t.slow+=(SPEED_MAX-spd)*times; }
+/* The hatch skips three rooms, and pays for all three in full: right first time
+   for each (it is one shot, no second try) plus their speed candy. Taking it
+   costs nothing you would have earned by walking — it saves the walk, and risks
+   a whole lantern. Paying more than three rooms would break the 100 ceiling. */
+const HATCH_ROOMS = 3;
 function paintTimer(){
   const r=remaining(), w=$("#timerwrap");
   $("#timerfill").style.width=(r/qsecs()*100).toFixed(1)+"%";
@@ -3755,12 +3775,14 @@ function answer(btn,mode){
     }
 
     if(mode==="shortcut"){
-      S.jump=3; S.candy+=5+spd; S.speedCandy+=spd; $("#candynum").textContent=S.candy;
-      S.tally.hatch+=5; tallySpeed(spd);
+      const base=HATCH_ROOMS*FIRST_TRY, gain=base+HATCH_ROOMS*spd;
+      S.jump=HATCH_ROOMS; S.candy+=gain; S.speedCandy+=HATCH_ROOMS*spd; $("#candynum").textContent=S.candy;
+      S.tally.hatch+=base; tallySpeed(spd,HATCH_ROOMS);
       save.totals.shortcuts++; store();
       $("#hatch").classList.add("hidden");
       fb.className="ok show";
-      fb.innerHTML=`<div class="ft">The hatch swallows you and spits you out three rooms deeper. +${5+spd} ${TH.treat}${spd?` <span style="color:var(--gold)">(${spd} for speed)</span>`:""}</div>${fbSteps(p)}`;
+      fb.innerHTML=`<div class="ft">The hatch swallows you and spits you out three rooms deeper — and all three rooms count.
+        +${gain} ${TH.treat} <span style="color:var(--gold)">(${base} for the rooms${spd?`, ${HATCH_ROOMS*spd} for speed`:""})</span></div>${fbSteps(p)}`;
       $("#nextwrap").classList.remove("hidden");
       $("#nextBtn").textContent="Crawl through";
       $("#nextBtn").onclick=()=>advance(3);
@@ -3890,7 +3912,8 @@ function wireProps(){
         It drops into somewhere three rooms ahead. Something has been using it.<br><br>
         One problem: the hardest kind ${BANK[S.level].name} has, and the wrong answers
         sit right next to the right one.
-        Solve it and you skip three rooms and take <b style="color:var(--gold)">5 ${TH.treat}</b>.
+        Solve it and you skip three rooms <b style="color:var(--gold)">and still get the candy for all three</b>
+        (up to ${HATCH_ROOMS*ROOM_MAX} ${TH.treat}, as if you had got each one right first time).
         Fail and it costs you <b style="color:var(--blood)">a whole lantern</b>.</p>
       <div class="row" style="margin-top:18px">
         <button class="btn" id="hatchYes">Go down</button>
@@ -5287,7 +5310,7 @@ function candyLedger(won){
   add(kidMode?"Time candy":"Speed",
       kidMode ? `read-aloud has no clock, so every answer gets the full ${SPEED_MAX}`
               : `the faster you answered, the more — up to ${SPEED_MAX} a question`, t.speed);
-  add("The hatch", "solved it — paid 5, and skipped three rooms", t.hatch);
+  add("The hatch", `3 rooms skipped, paid in full: 3 × ${FIRST_TRY} (their speed is in Speed)`, t.hatch);
   if(!won && inside>0)
     got.push({what:"Dropped when he caught you", how:"everything picked up inside the house", n:-inside});
   if(won){
@@ -5312,8 +5335,6 @@ function candyLedger(won){
     miss("Wrong answers", `${plural(t.retry,"room")} paid ${LATER_TRY} instead of ${FIRST_TRY}`, lostRoom);
   }
   if(!kidMode) miss("Slow answers", "time candy still on the clock when you answered", t.slow);
-  if(skipped) miss("Rooms skipped by the hatch",
-      `3 rooms worth up to ${3*ROOM_MAX}; the hatch pays up to ${5+SPEED_MAX}`, 3*ROOM_MAX-(5+SPEED_MAX));
   if(won){
     if(t.hatchFell) miss("Fell through the hatch", "a whole lantern gone", Math.round(PER_LANTERN*t.hatchLantern));
     const chests=t.chestN+t.grandN;
@@ -5385,7 +5406,7 @@ function showReport(won){
     ${scoreBlock(won)}
     ${candyLedger(won)}
     <table class="rc">
-      <tr><td>Rooms cleared</td><td>${cleared} / 10</td></tr>
+      <tr><td>Rooms cleared</td><td>${Math.min(10,cleared+(S.tally&&S.tally.hatch?HATCH_ROOMS:0))} / 10${S.tally&&S.tally.hatch?` <span style="color:var(--dim);font-weight:400">(3 by the hatch)</span>`:""}</td></tr>
       <tr><td>First-try accuracy</td><td>${acc}%</td></tr>
       <tr><td>Average time a room</td><td>${avgSecs}</td></tr>
       <tr><td>Lanterns left</td><td>${S.lanterns} of 3</td></tr>
