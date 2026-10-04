@@ -545,7 +545,7 @@ table.rc td:last-child{text-align:right;font-weight:800;color:var(--gold)}
       A perfect run &mdash; every room right first time, fast, all three lanterns carried out &mdash; is exactly
       <b style="color:var(--gold)">100 sweets</b>, so your bucket is a score out of 100. It puts you in one of
       <b style="color:var(--gold)">five categories</b>: 0&ndash;19, 20&ndash;39, 40&ndash;59, 60&ndash;79 and 80&ndash;100.<br>
-      Escape a place and the next one opens &mdash; the graveyard, the forest, the mountain, the cave, the dungeon, the castle &mdash;
+      Get out of a place with <b style="color:var(--gold)">60 or more</b> and the next one opens &mdash; the graveyard, the forest, the mountain, the cave, the dungeon, the castle &mdash;
       but only <b style="color:var(--gold)">for the grade you beat it at</b>. Open the graveyard at Grade 4 and Grade 5 still starts back at the house.
       The more you play a grade, the harder that grade gets &mdash; the hard types come out and the wrong answers
       start sitting right next to the right one. It <b style="color:var(--gold)">never leaves the grade you picked</b>:
@@ -3263,7 +3263,7 @@ function applyTheme(){
    moment it goes out. Shown on the setup screen and at the foot of the
    report card, so a player can say which build they are playing.
    ===================================================================== */
-const BUILD = 23, RELEASED = "4 Oct 2026, 10:06";
+const BUILD = 24, RELEASED = "4 Oct 2026, 10:11";
 const COPYRIGHT = "© 2026 m1keLima. All rights reserved.";
 const VERSION_LINE = `v${BUILD} · released ${RELEASED} · ${COPYRIGHT}`;
 
@@ -3400,7 +3400,7 @@ function renderWorlds(){
     return `<button class="wld${locked?" locked":""}" data-i="${i}" ${locked?"disabled":""}
       aria-pressed="${i===(save.world||0)&&!locked}">
       <span class="wicon">${locked?"🔒":w.icon}</span>${esc(w.name)}
-      <small>${locked?"beat "+esc(WORLDS[i-1].name.replace(/^The /,""))+" at "+esc(BANK[save.level].name):"10 rooms"}</small>
+      <small>${locked?"60+ in "+esc(WORLDS[i-1].name.replace(/^The /,""))+" at "+esc(BANK[save.level].name):"10 rooms"}</small>
       </button>`;}).join("");
   const nm=WORLDS[save.world||0].name.replace(/^The /,"");
   $("#startBtn").textContent = (save.world||0)===0 ? "Approach the house" : "Go into the "+nm.toLowerCase();
@@ -5253,9 +5253,6 @@ function endGame(won){
   if(!S.reported){
     S.reported=true; S.won=won;
     save.totals.rooms += S.room; if(won) save.totals.wins++;
-    if(won && S.world===earnedFor(S.level) && S.world<WORLDS.length-1){
-      save.unlock[S.level]=S.world+1; save.world=S.world+1; S.unlocked=WORLDS[S.world+1];
-    }
     if(S.room>save.best.rooms) save.best.rooms=S.room;
     if(!won) SFX.lose();
   }
@@ -5363,17 +5360,33 @@ function candyLedger(won){
     </div>`;
 }
 
-/* the place after this one, and whether this grade has opened it yet;
+/* You go on to the next place only by getting out of this one with 60 or more
+   (category 4 and up). That opens it for this grade — the same rule decides
+   the Next button and what the front page lets you pick. Checked every time the
+   card is drawn, so a bonus round that lifts the score to 60 opens it too.
+   Code 1235 (save.allOpen) overrides it, as it does every lock. */
+const NEXT_SCORE = 60;
+function tryUnlock(won){
+  if(!won || S.world!==earnedFor(S.level) || S.world>=WORLDS.length-1) return;
+  if(bucketFor(won).total < NEXT_SCORE) return;
+  save.unlock[S.level]=S.world+1; save.world=S.world+1; S.unlocked=WORLDS[S.world+1]; store();
+}
+/* the place after this one, and whether you may go there from this card;
    after the castle, the next place is the house again */
-function nextPlace(){
+function nextPlace(won){
   const last=WORLDS.length-1;
   if(S.world>=last) return {i:0, open:true, label:"Start over at the House"};
-  const i=S.world+1, w=WORLDS[i];
-  return {i, open: i<=unlockFor(S.level), label:"Next: "+w.name.replace(/^The /,"the "),
-          why:`${w.icon} ${w.name} opens when you get out of ${W().name} at ${BANK[S.level].name}.`};
+  const i=S.world+1, w=WORLDS[i], score=bucketFor(won).total;
+  const open = save.allOpen || (won && score>=NEXT_SCORE && i<=unlockFor(S.level));
+  const bonusLeft = missedList().length && !S.brDone;
+  return {i, open, label:"Next: "+w.name.replace(/^The /,"the "),
+    why: !won ? `${w.icon} Get out of ${W().name} with ${NEXT_SCORE} or more to go on to ${w.name}.`
+         : `${w.icon} ${w.name} needs ${NEXT_SCORE} or more — you have ${score}.`
+           + (bonusLeft ? " The bonus round can still get you there." : ` Repeat ${W().name} to try again.`)};
 }
 
 function showReport(won){
+  tryUnlock(won);
   const unlocked=S.unlocked;
   const secs=Math.round((Date.now()-S.started)/1000), mins=Math.floor(secs/60), rem=secs%60;
   const first=S.log.filter(l=>l.firstTry).length, cleared=S.log.length;
@@ -5431,7 +5444,7 @@ function showReport(won){
        <b style="color:var(--gold)">at ${esc(BANK[S.level].name)}</b>.
        <div style="font-size:13.5px;color:var(--dim);margin-top:5px">Other grades still have to open it themselves.</div></div>`:""}
     ${missBlock}${nextTier}
-    ${(()=>{ const nx=nextPlace();
+    ${(()=>{ const nx=nextPlace(won);
       return `<div class="row endrow" style="margin-top:20px">
       <button class="btn ghost" id="againBtn">↻ Repeat ${esc(W().name.replace(/^The /,"the "))}</button>
       <button class="btn" id="nextPlaceBtn" ${nx.open?"":"disabled"}>${nx.label} →</button>
@@ -5442,7 +5455,7 @@ function showReport(won){
   const bb=$("#bonusBtn"); if(bb) bb.onclick=()=>{ SFX.click(); startBonus(); };
   /* Repeat really repeats: a win has already moved save.world on to the next place */
   $("#againBtn").onclick=()=>{ save.world=S.world; store(); $("#overlay").classList.add("hidden"); startGame(); };
-  $("#nextPlaceBtn").onclick=()=>{ const nx=nextPlace(); if(!nx.open) return;
+  $("#nextPlaceBtn").onclick=()=>{ const nx=nextPlace(won); if(!nx.open) return;
     save.world=nx.i; store(); $("#overlay").classList.add("hidden"); startGame(); };
   $("#menuBtn").onclick=()=>{ $("#overlay").classList.add("hidden");
     $("#game").classList.add("hidden"); $("#setup").classList.remove("hidden");
