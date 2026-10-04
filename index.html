@@ -139,6 +139,7 @@ input[type=text]::placeholder{color:#5c5070}
   border:1.5px solid var(--line);background:rgba(0,0,0,.35);color:var(--ink,#f2ecd4)}
 #codeBox .btn{padding:8px 14px;font-size:15px}
 #codeMsg{font-size:14px;color:var(--gold)}
+.endrow .btn[disabled]{opacity:.38;cursor:not-allowed;box-shadow:none}
 .rcfoot{text-align:center;margin-top:16px;font-size:11.5px;letter-spacing:2px;text-transform:uppercase;color:#5c5070}
 .misslist{margin:14px 0 0;padding:14px 16px;border-radius:12px;background:rgba(196,18,31,.09);
   border:1px solid rgba(196,18,31,.34);font-size:16px;line-height:1.7}
@@ -3262,7 +3263,7 @@ function applyTheme(){
    moment it goes out. Shown on the setup screen and at the foot of the
    report card, so a player can say which build they are playing.
    ===================================================================== */
-const BUILD = 22, RELEASED = "4 Oct 2026, 10:01";
+const BUILD = 23, RELEASED = "4 Oct 2026, 10:06";
 const COPYRIGHT = "© 2026 m1keLima. All rights reserved.";
 const VERSION_LINE = `v${BUILD} · released ${RELEASED} · ${COPYRIGHT}`;
 
@@ -5362,6 +5363,16 @@ function candyLedger(won){
     </div>`;
 }
 
+/* the place after this one, and whether this grade has opened it yet;
+   after the castle, the next place is the house again */
+function nextPlace(){
+  const last=WORLDS.length-1;
+  if(S.world>=last) return {i:0, open:true, label:"Start over at the House"};
+  const i=S.world+1, w=WORLDS[i];
+  return {i, open: i<=unlockFor(S.level), label:"Next: "+w.name.replace(/^The /,"the "),
+          why:`${w.icon} ${w.name} opens when you get out of ${W().name} at ${BANK[S.level].name}.`};
+}
+
 function showReport(won){
   const unlocked=S.unlocked;
   const secs=Math.round((Date.now()-S.started)/1000), mins=Math.floor(secs/60), rem=secs%60;
@@ -5420,13 +5431,19 @@ function showReport(won){
        <b style="color:var(--gold)">at ${esc(BANK[S.level].name)}</b>.
        <div style="font-size:13.5px;color:var(--dim);margin-top:5px">Other grades still have to open it themselves.</div></div>`:""}
     ${missBlock}${nextTier}
-    <div class="row" style="margin-top:20px">
-      <button class="btn" id="againBtn">Go back in</button>
-      <button class="btn ghost" id="menuBtn">Change level or character</button></div>
+    ${(()=>{ const nx=nextPlace();
+      return `<div class="row endrow" style="margin-top:20px">
+      <button class="btn ghost" id="againBtn">↻ Repeat ${esc(W().name.replace(/^The /,"the "))}</button>
+      <button class="btn" id="nextPlaceBtn" ${nx.open?"":"disabled"}>${nx.label} →</button>
+      <button class="btn ghost" id="menuBtn">Exit</button></div>
+      ${nx.open?"":`<div class="missed" style="margin-top:8px;text-align:center">${esc(nx.why)}</div>`}`; })()}
     <div class="rcfoot">${VERSION_LINE}</div>`;
   $("#overlay").classList.remove("hidden");
   const bb=$("#bonusBtn"); if(bb) bb.onclick=()=>{ SFX.click(); startBonus(); };
-  $("#againBtn").onclick=()=>{ $("#overlay").classList.add("hidden"); startGame(); };
+  /* Repeat really repeats: a win has already moved save.world on to the next place */
+  $("#againBtn").onclick=()=>{ save.world=S.world; store(); $("#overlay").classList.add("hidden"); startGame(); };
+  $("#nextPlaceBtn").onclick=()=>{ const nx=nextPlace(); if(!nx.open) return;
+    save.world=nx.i; store(); $("#overlay").classList.add("hidden"); startGame(); };
   $("#menuBtn").onclick=()=>{ $("#overlay").classList.add("hidden");
     $("#game").classList.add("hidden"); $("#setup").classList.remove("hidden");
     document.body.classList.remove("dying"); buildSetup(); };
