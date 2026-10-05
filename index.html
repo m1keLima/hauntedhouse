@@ -2991,10 +2991,10 @@ function lastWeekday(y,month,weekday){
   return new Date(y, month, last.getDate() - ((last.getDay()-weekday+7)%7));
 }
 const dayStart=(y,m,d)=>new Date(y,m,d,0,0,0);
-/* THE RULE for when a holiday shows: from `lead` days before its day, through the
-   day itself (+ `after` days). Halloween and Christmas get two weeks — children
-   count down to those; every other holiday gets one week; Christmas runs to the
-   26th so it hands straight over to New Year. Any other date is the season. */
+/* THE RULE for when a holiday shows: from `lead` days before its day through
+   `after` days past it — the same calendar as Dog Day. Halloween opens 10 Oct,
+   Christmas 26 Nov, and most others a week or ten days ahead with a few days'
+   tail. Where two overlap, the nearer day wins. Any other date is the season. */
 const around=(dayFn,lead,after)=>y=>{ const d=dayFn(y);
   return {a:new Date(d.getFullYear(),d.getMonth(),d.getDate()-lead),
           b:new Date(d.getFullYear(),d.getMonth(),d.getDate()+(after||0),23,59,59)}; };
@@ -3109,7 +3109,7 @@ const pumpkinAt=(x,y,s,c)=>`<g transform="translate(${x},${y}) scale(${s})">
 const THEMES = [
   {id:"halloween", name:"Halloween", icon:"🎃", treat:"🍬", note:"17 – 31 Oct",
    accent:"#ff8a1f", gold:"#ffcf5c", alt:"#c4121f", sky:"#1c1028",
-   day:y=>new Date(y,9,31), win:around(y=>new Date(y,9,31),14),
+   day:y=>new Date(y,9,31), win:around(y=>new Date(y,9,31),21,2),
    deco:()=>pumpkinAt(64,428,1)+pumpkinAt(742,422,.82)+pumpkinAt(112,434,.6),
    fall:()=>[0,1,2].map(k=>`<g class="scuttle" style="animation-duration:${22+k*7}s;animation-delay:-${k*9}s">
      <g transform="translate(0,${40+k*38}) scale(${(0.7+k*0.2).toFixed(2)})" opacity=".75">
@@ -3117,7 +3117,7 @@ const THEMES = [
 
   {id:"thanksgiving", name:"Thanksgiving", icon:"🦃", treat:"🥧", note:"the week up to Thanksgiving (4th Thursday of November)",
    accent:"#d9762b", gold:"#f0c674", alt:"#8c3b1e", sky:"#2a1a12",
-   day:y=>nthWeekday(y,10,4,4), win:around(y=>nthWeekday(y,10,4,4),7),
+   day:y=>nthWeekday(y,10,4,4), win:around(y=>nthWeekday(y,10,4,4),10,3),
    deco:()=>bunting(["#c2450b","#e0a02c","#8c3b1e","#a8531f"],24)
      +pumpkinAt(72,428,.9,"#d9762b")+pumpkinAt(736,424,.75,"#a8531f")
      +`<g transform="translate(118,432) scale(.7)"><ellipse cx="0" cy="-12" rx="16" ry="13" fill="#e0c46a"/>
@@ -3126,7 +3126,7 @@ const THEMES = [
 
   {id:"christmas", name:"Christmas", icon:"🎄", treat:"🎁", note:"11 – 26 Dec",
    accent:"#e5484d", gold:"#ffd76a", alt:"#3fae6a", sky:"#0f2233",
-   day:y=>new Date(y,11,25), win:around(y=>new Date(y,11,25),14,1),
+   day:y=>new Date(y,11,25), win:around(y=>new Date(y,11,25),29,1),
    deco:()=>lights(["#e5484d","#3fae6a","#ffd76a","#5f96e0","#c47aff"])
      +`<g transform="translate(60,430)">
         <rect x="-7" y="-14" width="14" height="14" fill="#5c3a1c"/>
@@ -3142,7 +3142,7 @@ const THEMES = [
 
   {id:"newyear", name:"New Year", icon:"🎉", treat:"🍭", note:"27 Dec – 1 Jan",
    accent:"#ffd76a", gold:"#fff0b8", alt:"#8c7fff", sky:"#101a36",
-   day:y=>new Date(y,0,1), win:around(y=>new Date(y,0,1),5),
+   day:y=>new Date(y,0,1), win:around(y=>new Date(y,0,1),5,6),
    deco:()=>bunting(["#ffd76a","#8c7fff","#5f96e0","#ff4d8a"],22)
      +[[120,120],[400,90],[680,130]].map(([x,y],k)=>`<g class="glowpulse" style="animation-delay:${k*0.7}s">
         <path d="M${x} ${y-16} l5 11 12 2 -9 9 2 12 -10 -6 -10 6 2 -12 -9 -9 12 -2Z" fill="#ffd76a" opacity=".8"/></g>`).join(""),
@@ -3150,7 +3150,7 @@ const THEMES = [
 
   {id:"valentines", name:"Valentine's", icon:"💝", treat:"🍫", note:"7 – 14 Feb",
    accent:"#ff5f8a", gold:"#ffc2d4", alt:"#c2185b", sky:"#2a1020",
-   day:y=>new Date(y,1,14), win:around(y=>new Date(y,1,14),7),
+   day:y=>new Date(y,1,14), win:around(y=>new Date(y,1,14),13,1),
    deco:()=>[90,250,430,610,740].map((x,k)=>{const l=40+((k*37)%60);
      return `<g class="sway" style="transform-origin:${x}px 0px;animation-delay:${(k*0.6).toFixed(1)}s">
        <path d="M${x} 0 v${l}" stroke="#c2185b" stroke-width="1.6" opacity=".7"/>
@@ -3159,7 +3159,7 @@ const THEMES = [
 
   {id:"stpatricks", name:"St Patrick's", icon:"🍀", treat:"🍀", note:"10 – 17 Mar",
    accent:"#3fae5a", gold:"#ffd76a", alt:"#1f7a3a", sky:"#0e2418",
-   day:y=>new Date(y,2,17), win:around(y=>new Date(y,2,17),7),
+   day:y=>new Date(y,2,17), win:around(y=>new Date(y,2,17),10,1),
    deco:()=>bunting(["#3fae5a","#ffd76a","#1f7a3a","#6fd39a"],24)
      +`<g transform="translate(740,428)"><path d="M-26 0 q-4 -26 26 -26 q30 0 26 26Z" fill="#1a1a22"/>
         <ellipse cx="0" cy="-26" rx="27" ry="7" fill="#2a2a34"/>
@@ -3170,7 +3170,7 @@ const THEMES = [
 
   {id:"easter", name:"Easter", icon:"🐣", treat:"🥚", note:"the week up to Easter Sunday",
    accent:"#e894c8", gold:"#ffe08a", alt:"#7fc8e8", sky:"#241a2e",
-   day:y=>easterDay(y), win:around(y=>easterDay(y),7),
+   day:y=>easterDay(y), win:around(y=>easterDay(y),14,1),
    deco:()=>[110,260,540,690].map((x,k)=>{const l=34+((k*29)%52), c=["#e894c8","#ffe08a","#7fc8e8","#9fe0a8"][k%4];
      return `<g class="sway" style="transform-origin:${x}px 0px;animation-delay:${(k*0.5).toFixed(1)}s">
        <path d="M${x} 0 v${l}" stroke="#7a6a8a" stroke-width="1.4" opacity=".6"/>
@@ -3182,14 +3182,14 @@ const THEMES = [
 
   {id:"mardigras", name:"Mardi Gras", icon:"🎭", treat:"🍩", note:"the week up to Fat Tuesday (47 days before Easter)",
    accent:"#a46be0", gold:"#ffd23a", alt:"#3fae5a", sky:"#1c1030",
-   day:y=>plusDays(easterDay(y),-47), win:around(y=>plusDays(easterDay(y),-47),7),
+   day:y=>plusDays(easterDay(y),-47), win:around(y=>plusDays(easterDay(y),-47),13),
    deco:()=>beads(["#a46be0","#3fae5a","#ffd23a"])
      +maskAt(70,412,1.1,"#a46be0","#ffd23a")+maskAt(740,408,1,"#3fae5a","#ffd23a"),
    fall:()=>falling(22,k=>k%3?confettiShape(k).replace(/fill="[^"]*"/,`fill="${["#a46be0","#3fae5a","#ffd23a"][k%3]}"`):beadShape(["#a46be0","#3fae5a","#ffd23a"][k%3]))},
 
   {id:"earthday", name:"Earth Day", icon:"🌍", treat:"🍎", note:"15 – 22 Apr",
    accent:"#4fbf7a", gold:"#bff27a", alt:"#3f8fd8", sky:"#10222a",
-   day:y=>new Date(y,3,22), win:around(y=>new Date(y,3,22),7),
+   day:y=>new Date(y,3,22), win:around(y=>new Date(y,3,22),7,3),
    deco:()=>bunting(["#4fbf7a","#3f8fd8","#bff27a","#2e8a5a"],24)
      +sproutAt(60,430,1.2)+sproutAt(96,433,.9)+sproutAt(734,430,1.1)
      +`<g transform="translate(770,420)"><circle r="16" fill="#3f8fd8"/>
@@ -3198,7 +3198,7 @@ const THEMES = [
 
   {id:"cincodemayo", name:"Cinco de Mayo", icon:"🪅", treat:"🌮", note:"28 Apr – 5 May",
    accent:"#ff4d8a", gold:"#ffd23a", alt:"#1fae8a", sky:"#1e1430",
-   day:y=>new Date(y,4,5), win:around(y=>new Date(y,4,5),7),
+   day:y=>new Date(y,4,5), win:around(y=>new Date(y,4,5),7,2),
    deco:()=>papelPicado(["#ff4d8a","#ffd23a","#1fae8a","#ff8a1f","#7a5aff","#3fb8ff"])
      +pinataAt(120,70,0)+pinataAt(690,56,1)
      +[[62,432],[96,434],[740,430]].map(([x,y],k)=>`<g transform="translate(${x},${y})">
@@ -3216,7 +3216,7 @@ const THEMES = [
 
   {id:"july4", name:"4th of July", icon:"🎆", treat:"🍉", note:"27 Jun – 4 Jul",
    accent:"#e5484d", gold:"#ffd76a", alt:"#3f6fd8", sky:"#0f1838",
-   day:y=>new Date(y,6,4), win:around(y=>new Date(y,6,4),7),
+   day:y=>new Date(y,6,4), win:around(y=>new Date(y,6,4),10,3),
    deco:()=>bunting(["#e5484d","#f4f4f8","#3f6fd8"],22)
      +burstAt(150,110,34,"#e5484d",0)+burstAt(420,80,40,"#f4f4f8",.6)+burstAt(660,118,32,"#3f6fd8",1.1)
      +flagAt(52,432,1)+melonAt(742,430,1.1),
@@ -3224,7 +3224,7 @@ const THEMES = [
 
   {id:"ferragosto", name:"Ferragosto", icon:"☀️", treat:"🍦", note:"8 – 15 Aug",
    accent:"#ff9a33", gold:"#ffe08a", alt:"#3fb8c8", sky:"#14203a",
-   day:y=>new Date(y,7,15), win:around(y=>new Date(y,7,15),7),
+   day:y=>new Date(y,7,15), win:around(y=>new Date(y,7,15),10,5),
    deco:()=>lights(["#ff9a33","#ffe08a","#4fbf7a","#e5484d","#3fb8c8"])
      +burstAt(200,96,30,"#ffe08a",.3)+burstAt(600,84,34,"#ff9a33",.9)
      +melonAt(64,430,1.1)
@@ -3309,7 +3309,7 @@ function applyTheme(){
    moment it goes out. Shown on the setup screen and at the foot of the
    report card, so a player can say which build they are playing.
    ===================================================================== */
-const BUILD = 25, RELEASED = "4 Oct 2026, 16:40";
+const BUILD = 26, RELEASED = "4 Oct 2026, 20:03";
 const COPYRIGHT = "© 2026 m1keLima. All rights reserved.";
 const VERSION_LINE = `v${BUILD} · released ${RELEASED} · ${COPYRIGHT}`;
 
