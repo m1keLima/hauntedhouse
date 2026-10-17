@@ -497,6 +497,45 @@ kbd{background:#271a38;border:1px solid var(--line);border-radius:5px;padding:2p
   padding:20px;z-index:60;backdrop-filter:blur(7px)}
 #overlay .card{max-width:660px;width:100%;max-height:92vh;overflow:auto}
 
+/* the topic picker: a grown-up switches off what has not been taught yet */
+#topics{position:fixed;inset:0;background:rgba(3,2,6,.95);display:flex;align-items:center;justify-content:center;
+  padding:20px;z-index:72;backdrop-filter:blur(8px)}
+#topics.hidden{display:none !important}
+#topicsCard{position:relative;max-width:860px;width:100%;max-height:94vh;display:flex;flex-direction:column;padding:0;overflow:hidden}
+.tp-head{padding:22px 24px 14px;border-bottom:1px solid var(--line)}
+.tp-head h2{margin:0 0 4px;font-size:24px}
+.tp-head p{margin:0;color:var(--dim);font-size:15px;line-height:1.5}
+.tp-count{color:var(--gold);font-weight:800;font-variant-numeric:tabular-nums}
+.tp-tools{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.tp-tools button{font:inherit;font-size:14px;padding:7px 12px;border-radius:10px;cursor:pointer;
+  background:#150e20;border:1px solid var(--line);color:var(--dim)}
+.tp-tools button:hover{color:var(--ink);border-color:#cfe0ff}
+.tp-body{overflow:auto;padding:8px 16px 8px;flex:1;min-height:0}
+.tp-area{border-bottom:1px solid var(--line)}
+.tp-area>summary{list-style:none;display:grid;grid-template-columns:auto 1fr auto auto;gap:12px;align-items:center;
+  padding:12px 8px;cursor:pointer}
+.tp-area>summary::-webkit-details-marker{display:none}
+.tp-area>summary:hover{background:rgba(255,255,255,.03)}
+.tp-area>summary .nm{font-weight:800;font-size:17px}
+.tp-area>summary .n{color:var(--dim);font-size:14px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.tp-area>summary .chev{color:var(--dim);transition:transform .15s}
+.tp-area[open]>summary .chev{transform:rotate(90deg)}
+.tp-row{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:start;padding:9px 8px 9px 40px;
+  border-top:1px dashed rgba(255,255,255,.06);cursor:pointer}
+.tp-row:hover{background:rgba(255,255,255,.03)}
+.tp-row .t{font-weight:700;font-size:15.5px}
+.tp-row .ex{display:block;color:var(--dim);font-size:13.5px;margin-top:2px;line-height:1.4;overflow-wrap:anywhere}
+.tp-row.off .t,.tp-row.off .ex{opacity:.45;text-decoration:line-through}
+.tp-dots{color:var(--gold);font-size:12px;letter-spacing:1px;white-space:nowrap;padding-top:3px}
+.tp-dots i{font-style:normal;color:#3a2d4c}
+#topics input[type=checkbox]{width:20px;height:20px;accent-color:var(--pumpkin);margin:0;cursor:pointer}
+.tp-foot{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;
+  padding:14px 24px;border-top:1px solid var(--line)}
+.tp-foot label{display:flex;gap:8px;align-items:center;color:var(--dim);font-size:14px;cursor:pointer}
+.tp-warn{color:var(--bad);font-size:14px;width:100%}
+#topicsBtn{margin-top:10px;font-size:14px;padding:9px 14px}
+@media(max-width:560px){.tp-row{padding-left:12px}.tp-head{padding:18px 16px 12px}.tp-foot{padding:12px 16px}}
+
 /* the welcome card: one side for the player, one for whoever is standing behind them */
 #help{position:fixed;inset:0;background:rgba(3,2,6,.95);display:flex;align-items:center;justify-content:center;
   padding:20px;z-index:70;backdrop-filter:blur(8px)}
@@ -540,6 +579,7 @@ table.rc td:last-child{text-align:right;font-weight:800;color:var(--gold)}
     <div class="seclabel">3 &mdash; Choose your level</div>
     <div class="grid-levels" id="levelGrid"></div>
     <div id="tierNote"></div>
+    <button class="btn ghost" id="topicsBtn">Choose topics</button>
 
     <div class="seclabel">4 &mdash; Choose your character</div>
     <div class="grid-av" id="avGrid"></div>
@@ -674,6 +714,22 @@ table.rc td:last-child{text-align:right;font-weight:800;color:var(--gold)}
 </section>
 
 <div id="overlay" class="hidden"><div class="card" id="overlayCard"></div></div>
+<div id="topics" class="hidden" role="dialog" aria-modal="true" aria-labelledby="tpTitle">
+  <div class="card" id="topicsCard">
+    <button id="topicsX" aria-label="Close" style="position:absolute;top:10px;right:12px;width:40px;height:40px;border-radius:12px;cursor:pointer;background:#150e20;border:1px solid var(--line);color:var(--dim);font-size:24px;font-family:inherit">×</button>
+    <div class="tp-head">
+      <h2 id="tpTitle">Topics</h2>
+      <p>Untick anything not taught yet, and the game will never ask it. <span class="tp-count" id="tpCount"></span></p>
+      <div class="tp-tools"><button id="tpAll">Tick everything</button><button id="tpEasy">Only the easier ones (●●)</button><button id="tpOpen">Show every topic</button></div>
+    </div>
+    <div class="tp-body" id="tpBody"></div>
+    <div class="tp-foot">
+      <label><input type="checkbox" id="tpAsk"> Show this whenever a grade is picked</label>
+      <button class="btn" id="tpDone" style="padding:11px 26px;font-size:17px">Done</button>
+      <div class="tp-warn hidden" id="tpWarn"></div>
+    </div>
+  </div>
+</div>
 
 <div id="help" class="hidden">
   <div class="card helpcard">
@@ -710,7 +766,9 @@ table.rc td:last-child{text-align:right;font-weight:800;color:var(--gold)}
         <ul class="helplist">
           <li><b>Thirteen levels</b>, Kindergarten through Grade 12, with 100 kinds of problem per grade (1,300 in all), the numbers made fresh
               every time. Every kind is used once before any comes back, even across many runs, and each room
-              is a little harder than the one before.</li>
+              is a little harder than the one before — the first room is always one of the easiest.</li>
+          <li><b>Choose topics</b> (under the grades) lists every topic of the grade with an example, grouped
+              by area. Untick whatever has not been taught yet and it is never asked.</li>
           <li><b>The level you pick is the level you get.</b> As a level is replayed it gets harder from the
               inside: harder types, and wrong answers that sit close to the right one.</li>
           <li><b>The score is out of 100.</b> Ten rooms at up to 7 sweets (3 for right first time, up to 4 for
@@ -1592,12 +1650,15 @@ function markUsed(level, g){
   const c = save.cycle || (save.cycle={});
   const a = c[level] || (c[level]=[]);
   if(a.indexOf(g)<0) a.push(g);
-  /* multi-step and ordinary types run separate cycles: a run needs some of
-     each, so they run out at different speeds. When every type of one kind has
-     been used, that kind starts over and the other carries on. */
-  const isM = x => (MULTI[level]||[]).indexOf(x)>=0, kind = isM(g);
-  const all = BANK[level].gens.map((_,i)=>i).filter(x=>isM(x)===kind);
-  if(all.every(x=>a.indexOf(x)>=0)) c[level]=a.filter(x=>isM(x)!==kind).concat([g]);
+  /* Each kind (multi-step or ordinary) and each difficulty runs its own cycle:
+     a run needs easy types at the start, hard ones at the end and a multi-step
+     one or two, so they run out at different speeds. When every switched-on
+     type of one kind and difficulty has been used, just that group starts over. */
+  const isM = x => (MULTI[level]||[]).indexOf(x)>=0;
+  const grp = x => (isM(x)?"m":"o") + (typeof TYPE_META!=="undefined" ? typeD(level,x) : "");
+  const mine = grp(g);
+  const all = BANK[level].gens.map((_,i)=>i).filter(x=>grp(x)===mine && isOn(level,x));
+  if(all.every(x=>a.indexOf(x)>=0)) c[level]=a.filter(x=>grp(x)!==mine).concat([g]);
 }
 /* unused types first (shuffled), then the used ones (shuffled) */
 function unusedFirst(level, arr){
@@ -11007,6 +11068,8 @@ GEN_HINT_SNAP();
 Object.keys(ADD).forEach(L=>BANK[L].gens.push(...ADD[L]));
 Object.keys(ADD_HINTS).forEach(t=>{ if(!(t in HINTS)) HINTS[t]=ADD_HINTS[t]; });
 /* ===== MORE PROBLEM TYPES — END ===== */
+/* difficulty (1–5 within the grade) and area of every type, keyed by topic — v29 */
+const TYPE_META = {"0":{"Counting":["Counting & number sense",1],"Adding to five":["Addition",1],"Taking away":["Subtraction",1],"One more":["Counting & number sense",1],"One less":["Counting & number sense",2],"Which is biggest":["Comparing & ordering",2],"Which is smallest":["Comparing & ordering",2],"Missing number":["Patterns & sequences",2],"Counting down":["Patterns & sequences",3],"Shape names":["Shapes & geometry",2],"Corners":["Shapes & geometry",3],"Patterns":["Patterns & sequences",2],"Making five":["Addition",2],"Two steps":["Mixed operations",4],"Follow the path":["Mixed operations",4],"Compare groups":["Comparing & ordering",3],"Ordinal numbers":["Counting & number sense",2],"Ten frame":["Subtraction",3],"Story sums":["Addition",1],"Story take-away":["Subtraction",2],"Double trouble":["Addition",2],"Penny coins":["Money",3],"Longest or shortest":["Measurement",1],"Ten and more":["Place value",3],"Two take-aways":["Subtraction",4],"Number neighbours":["Counting & number sense",1],"Counting from a number":["Counting & number sense",2],"Teen number split":["Place value",3],"Number words":["Counting & number sense",2],"Writing number words":["Counting & number sense",3],"Most and fewest":["Comparing & ordering",1],"Pairs that make a number":["Addition",3],"Two bags":["Subtraction",3],"Zero facts":["Subtraction",2],"Missing part":["Expressions & equations",3],"How many went":["Subtraction",3],"Position words":["Shapes & geometry",2],"Solid shapes":["Shapes & geometry",1],"Flat or solid":["Shapes & geometry",3],"Shapes around us":["Shapes & geometry",2],"Which take-away":["Subtraction",4],"Counting in twos":["Patterns & sequences",3],"Teen countdown":["Counting & number sense",3],"Odd one out sums":["Addition",4],"Adding pictures":["Addition",1],"Taking away pictures":["Subtraction",1],"Fix the mistake":["Mixed operations",4],"Mystery number":["Number puzzles & reasoning",4],"Fair shares":["Division",3],"Counting one kind":["Counting & number sense",2],"Spending pennies":["Money",3],"Different shape":["Shapes & geometry",3],"Putting in order":["Comparing & ordering",3],"Number between":["Counting & number sense",1],"More or less than":["Comparing & ordering",1],"Fewer than":["Subtraction",3],"Five and some":["Addition",3],"Number line hops":["Addition",1],"Which number sentence":["Mixed operations",3],"Dice dots":["Addition",2],"Adding three":["Addition",3],"Ghost bus":["Mixed operations",4],"More than and together":["Mixed operations",4],"Empty spaces":["Subtraction",3],"Balance the scales":["Expressions & equations",5],"Heaviest thing":["Measurement",1],"Holds the most":["Measurement",1],"Balance with cubes":["Multiplication",4],"Does not belong":["Number puzzles & reasoning",3],"Sorting rule":["Number puzzles & reasoning",3],"Left and right in a line":["Shapes & geometry",2],"Between two things":["Shapes & geometry",3],"Tricky patterns":["Patterns & sequences",4],"Pattern gap":["Patterns & sequences",4],"Counting pairs":["Multiplication",3],"Find the group":["Counting & number sense",1],"Solid riddles":["Shapes & geometry",4],"Share to make equal":["Number puzzles & reasoning",5],"Count on from the bag":["Addition",2],"Who is in that place":["Counting & number sense",3],"Coin swap":["Money",4],"Story for a sum":["Mixed operations",3],"Hiding under the hat":["Subtraction",3],"Sides and corners in all":["Shapes & geometry",4],"Places in the queue":["Counting & number sense",4],"Putting shapes together":["Shapes & geometry",4],"Tracing faces":["Shapes & geometry",4],"Counting slip":["Counting & number sense",3],"Still the same number":["Counting & number sense",3],"Who has more now":["Mixed operations",4],"Who is tallest":["Measurement",4],"Birthday ages":["Subtraction",3],"Together still the same":["Mixed operations",5],"Legs altogether":["Addition",4],"Count by sides":["Shapes & geometry",4],"How far apart":["Subtraction",3],"Pick the coins":["Money",4],"Best two cards":["Addition",5],"Number riddle":["Number puzzles & reasoning",5],"Most sides":["Shapes & geometry",3]},"1":{"Addition":["Addition",2],"Subtraction":["Subtraction",2],"Counting on":["Addition",1],"Making ten":["Addition",1],"Three numbers":["Addition",2],"Tens and ones":["Place value",1],"Doubles":["Addition",1],"Number bonds":["Addition",2],"Comparing":["Comparing & ordering",1],"Shapes":["Shapes & geometry",1],"Taking away":["Subtraction",2],"How many more":["Subtraction",3],"Counting back":["Subtraction",2],"Equal groups":["Addition",2],"Two-step story":["Mixed operations",3],"Groups and more":["Mixed operations",4],"Fact families":["Subtraction",2],"Missing start":["Expressions & equations",3],"Compare sums":["Comparing & ordering",3],"Clock hands":["Time",3],"Coin totals":["Money",2],"Building numbers":["Place value",1],"Counting in steps":["Patterns & sequences",2],"Odd and even":["Counting & number sense",2],"Picture graph":["Data & statistics",2],"Hidden in the house":["Addition",3],"Near doubles":["Addition",3],"Bridging ten":["Addition",3],"Undoing doubles":["Division",3],"Mystery take away":["Subtraction",3],"Number words":["Counting & number sense",1],"Balancing equations":["Expressions & equations",4],"True number sentence":["Expressions & equations",3],"Solid shapes":["Shapes & geometry",2],"Ten more or less":["Place value",1],"Hundred square":["Counting & number sense",2],"Taking ones away":["Subtraction",2],"Half past in digits":["Time",1],"Hours later":["Time",2],"Half an hour later":["Time",3],"Long and short hands":["Time",3],"Swapping coins":["Money",2],"Paying exactly":["Money",3],"Fewest coins":["Money",3],"Shop change":["Money",3],"Spending pennies":["Money",2],"Ruler reading":["Measurement",3],"Longest and shortest":["Measurement",1],"Which is shorter":["Measurement",2],"Tally marks":["Data & statistics",2],"Days of the week":["Time",2],"Most popular":["Data & statistics",1],"Fewer than":["Addition",3],"Hidden part":["Subtraction",2],"Think of a number":["Number puzzles & reasoning",5],"Spot the mistake":["Number puzzles & reasoning",2],"Odd one out":["Number puzzles & reasoning",3],"Adding tens":["Addition",1],"Adding ones on":["Addition",1],"Taking tens away":["Subtraction",2],"Shopping trip":["Money",3],"Time trail":["Time",4],"Compare the totals":["Mixed operations",4],"Longer together":["Mixed operations",4],"Double and add":["Mixed operations",3],"Middle number":["Comparing & ordering",2],"Greater or less":["Comparing & ordering",1],"Months of the year":["Time",1],"Back through ten":["Subtraction",4],"Adding nothing":["Addition",1],"Spot the ten":["Addition",3],"Equal parts":["Fractions",1],"Bigger pieces":["Fractions",2],"Joining shapes":["Shapes & geometry",4],"Measuring units":["Measurement",4],"Vote totals":["Data & statistics",2],"Sides altogether":["Shapes & geometry",4],"Counting to 120":["Counting & number sense",1],"Number in between":["Counting & number sense",1],"How many tens":["Place value",2],"Jumping on tens":["Addition",2],"Splitting numbers":["Place value",2],"Ten ones make a ten":["Place value",4],"Missing middle":["Expressions & equations",3],"How many joined":["Addition",2],"How many at first":["Subtraction",3],"Hours earlier":["Time",2],"How many hours":["Time",2],"Making the biggest":["Comparing & ordering",3],"Pick the number sentence":["Addition",1],"Think addition":["Subtraction",2],"Richest bag":["Money",4],"Bus stops":["Mixed operations",4],"Spend from your coins":["Money",4],"Up to twenty":["Subtraction",3],"Make it fair":["Number puzzles & reasoning",5],"Chain of clues":["Mixed operations",4],"Second hop":["Subtraction",4],"Tally totals":["Data & statistics",3],"Number trail":["Place value",4]},"2":{"2-digit addition":["Addition",2],"2-digit subtraction":["Subtraction",2],"Skip counting":["Multiplication",1],"Missing addend":["Addition",3],"Doubling":["Addition",1],"Even or odd":["Counting & number sense",1],"Place value":["Place value",2],"Arrays":["Multiplication",3],"Telling time":["Time",2],"Money":["Money",2],"Comparing numbers":["Comparing & ordering",1],"Trick-or-treat totals":["Addition",2],"Measuring length":["Measurement",3],"Repeated addition":["Multiplication",1],"Multi-step totals":["Mixed operations",3],"Groups then take away":["Mixed operations",3],"Nearest ten or hundred":["Place value",2],"Hundreds, tens, ones":["Place value",1],"Change from a pound":["Money",2],"Halves and quarters":["Fractions",2],"Five-minute times":["Time",3],"Number line jumps":["Counting & number sense",1],"Sharing into groups":["Division",2],"Metres and cm":["Measurement",2],"Mixed groups":["Mixed operations",3],"Two buys and change":["Money",3],"Fix the carry":["Addition",3],"Fix the borrow":["Subtraction",3],"Three-digit sums":["Addition",3],"Three-digit take away":["Subtraction",3],"Ten or hundred more":["Place value",1],"Expanded form":["Place value",1],"Numbers from words":["Place value",2],"Jumping sequences":["Patterns & sequences",2],"True comparisons":["Comparing & ordering",2],"Spot the array":["Multiplication",1],"Arrays as addition":["Multiplication",1],"Coins that make it":["Money",3],"Where the minute hand points":["Time",1],"Time going back":["Time",3],"Quarter past and to":["Time",1],"Potion timer":["Time",3],"Counting coins":["Money",2],"Pounds and pence":["Money",3],"Fewest coins":["Money",4],"Pairs and leftovers":["Division",2],"Ruler not at zero":["Measurement",3],"Whole from a half":["Fractions",3],"Related facts":["Mixed operations",2],"Picture graph key":["Data & statistics",1],"Vote count":["Data & statistics",2],"Think of a number":["Number puzzles & reasoning",3],"Missing part taken":["Subtraction",3],"Adding four numbers":["Addition",3],"Making 100":["Addition",2],"Estimate by tens":["Place value",3],"Odd one out":["Number puzzles & reasoning",4],"Digit cards":["Place value",3],"Unusual partitions":["Place value",4],"Halfway between":["Counting & number sense",3],"Coins then spend":["Money",4],"Potion steps":["Time",4],"Silk left over":["Subtraction",4],"Picture graph compare":["Data & statistics",3],"More than, then total":["Mixed operations",3],"Chart two steps":["Data & statistics",4],"Doubles plus one":["Addition",1],"Nearly tens":["Addition",3],"Choosing units":["Measurement",1],"Sensible estimates":["Measurement",2],"Line plot reading":["Data & statistics",4],"Reading a bar scale":["Data & statistics",4],"Faces of solids":["Shapes & geometry",2],"Naming equal parts":["Fractions",1],"Shape riddles":["Shapes & geometry",4],"Which costs more":["Money",5],"Crossing noon":["Time",5],"How many hours":["Time",3],"Minutes and hours":["Time",3],"Day of the week later":["Time",4],"Hundred square moves":["Counting & number sense",4],"Biggest answer":["Mixed operations",4],"Balancing sums":["Expressions & equations",3],"Fewer than puzzles":["Subtraction",3],"What changed":["Place value",3],"Number in words":["Place value",3],"Equal addends":["Number puzzles & reasoning",3],"Joining lengths":["Addition",2],"Make them equal":["Number puzzles & reasoning",4],"Can I afford it":["Money",5],"Same difference":["Subtraction",4],"Taking from hundreds":["Subtraction",4],"Counting sides":["Mixed operations",4],"Two step machine":["Number puzzles & reasoning",3],"How many tens":["Place value",3],"Which coins make it":["Money",2],"Weeks into days":["Time",3],"Saving up":["Patterns & sequences",4],"Fiver for two":["Money",5],"All the way round":["Area, perimeter & volume",3]},"3":{"Times tables":["Multiplication",2],"Division":["Division",2],"Fraction of a set":["Fractions",2],"Perimeter":["Area, perimeter & volume",2],"Multiply then add":["Mixed operations",3],"Rounding":["Place value",1],"Missing factor":["Multiplication",2],"Comparing fractions":["Fractions",2],"Multiplication problems":["Multiplication",2],"Sharing equally":["Division",2],"Area of a square":["Area, perimeter & volume",2],"Change from a note":["Money",2],"Reading a chart":["Data & statistics",2],"Elapsed time":["Time",3],"Three-step problem":["Mixed operations",4],"Multiply and share":["Mixed operations",4],"Area by rows":["Multiplication",2],"Nearest hundred":["Place value",2],"Leftovers":["Division",3],"Matching fractions":["Fractions",3],"Fractions on a line":["Fractions",2],"Measures":["Measurement",3],"Column sums":["Subtraction",2],"Shopping trip":["Money",5],"Pictogram":["Data & statistics",3],"Potion measures":["Measurement",5],"Same-top fractions":["Fractions",4],"Missing part":["Subtraction",2],"Clever adding":["Addition",2],"Times tens":["Multiplication",3],"Best estimate":["Measurement",1],"Same-size pieces":["Fractions",1],"Fractions as wholes":["Fractions",4],"Regular shape perimeter":["Area, perimeter & volume",3],"Splitting a times fact":["Multiplication",4],"Fact families":["Division",1],"Missing divisor":["Division",2],"Minutes between":["Time",4],"L-shape area":["Area, perimeter & volume",5],"Missing side":["Area, perimeter & volume",4],"Square from perimeter":["Area, perimeter & volume",4],"Clock hands":["Time",3],"Finding the start time":["Time",4],"Balancing weights":["Measurement",1],"Filling the cauldron":["Mixed operations",4],"Fraction left":["Fractions",2],"Line plot counts":["Data & statistics",2],"Step patterns":["Patterns & sequences",1],"Odd products":["Number puzzles & reasoning",2],"Estimating sums":["Addition",3],"Spot the times slip":["Multiplication",1],"Mystery number":["Number puzzles & reasoning",5],"Take away then share":["Mixed operations",3],"Biggest product":["Multiplication",2],"Three factors":["Multiplication",2],"Quadrilateral clues":["Shapes & geometry",3],"Times before take-away":["Mixed operations",3],"Brackets first":["Mixed operations",3],"Weeks and days":["Time",3],"Minutes to hours":["Time",3],"Times as many":["Multiplication",2],"Rounding up groups":["Division",4],"Fair swap":["Percent, ratio & rates",4],"Fraction of a group":["Fractions",2],"Not in the table":["Multiplication",1],"Compare groupings":["Mixed operations",3],"Swap the factors":["Multiplication",1],"Double and halve":["Multiplication",4],"What is left over":["Division",3],"Jumps on a line":["Multiplication",2],"Missing dividend":["Division",2],"Checking with inverse":["Mixed operations",3],"Missing digits":["Number puzzles & reasoning",4],"Jumbled place value":["Place value",2],"Rounds to":["Place value",3],"Ten and hundred more":["Place value",1],"Fraction twins":["Fractions",4],"Shaded fraction":["Fractions",1],"Whole from a fraction":["Fractions",5],"Side from area":["Area, perimeter & volume",3],"Area and perimeter":["Area, perimeter & volume",5],"Area difference":["Area, perimeter & volume",4],"Tally charts":["Data & statistics",1],"Time in words":["Time",1],"Reading a scale":["Measurement",2],"Odd shape out":["Shapes & geometry",2],"Zero and one facts":["Division",1],"Carrying slip":["Addition",2],"Grouping factors":["Multiplication",4],"Coins and change":["Money",3],"Pence to pounds":["Money",1],"Unit price":["Money",2],"Scaling up":["Percent, ratio & rates",3],"Calendar dates":["Time",4],"Parts and totals":["Number puzzles & reasoning",5],"Perimeter of polygons":["Area, perimeter & volume",1],"Number machine":["Functions & graphs",2],"Find the rule":["Functions & graphs",4],"Biggest and smallest":["Place value",4],"Numbers in words":["Place value",1]},"4":{"Multi-digit ×":["Multiplication",2],"Remainders":["Division",2],"Equivalent fractions":["Fractions",2],"Area":["Area, perimeter & volume",1],"Factors":["Multiplication",2],"Order of operations":["Mixed operations",2],"Long division":["Division",3],"Mixed numbers":["Fractions",2],"Decimal place value":["Decimals",2],"Multiples":["Multiplication",3],"Angles":["Angles",1],"Two-step problems":["Mixed operations",2],"Rounding big numbers":["Place value",1],"Fraction word problems":["Fractions",2],"Three-step problem":["Mixed operations",4],"Working backwards":["Mixed operations",3],"Prime numbers":["Number puzzles & reasoning",3],"Long multiplication":["Multiplication",3],"Fraction sums":["Fractions",2],"Improper fractions":["Fractions",3],"Ordering fractions":["Comparing & ordering",2],"Tenths and hundredths":["Decimals",2],"Angles on a line":["Angles",2],"Roman numerals":["Counting & number sense",3],"Compound area":["Area, perimeter & volume",4],"Unit problems":["Measurement",4],"Expanded form":["Place value",1],"Ten times the value":["Place value",2],"Rounding to thousands":["Place value",2],"Column subtraction":["Subtraction",2],"Spot the mistake":["Number puzzles & reasoning",3],"Multiplying tens and hundreds":["Multiplication",1],"Estimating products":["Multiplication",3],"Times as many":["Multiplication",1],"How many times as many":["Division",2],"Quotient and remainder":["Division",3],"Boats needed":["Division",2],"Factor pairs":["Multiplication",2],"Not a multiple":["Multiplication",2],"Pattern rules":["Patterns & sequences",2],"Mystery number":["Number puzzles & reasoning",4],"Compared with a half":["Comparing & ordering",1],"Splitting fractions":["Fractions",1],"Adding mixed numbers":["Fractions",3],"Mixed number subtraction":["Fractions",4],"Fraction times whole":["Fractions",4],"Biggest decimal":["Comparing & ordering",2],"Decimal steps":["Decimals",1],"Metric units":["Measurement",2],"Missing side":["Area, perimeter & volume",3],"Acute or obtuse":["Angles",1],"Joining angles":["Angles",2],"Naming triangles":["Shapes & geometry",1],"Shape properties":["Shapes & geometry",3],"Duration":["Time",3],"Splitting to multiply":["Multiplication",2],"Groups and leftovers":["Mixed operations",3],"Side from perimeter":["Area, perimeter & volume",4],"Shopping sums":["Money",3],"Comparison totals":["Multiplication",3],"Cauldron measures":["Measurement",4],"Pool and share":["Mixed operations",4],"Square: area to perimeter":["Area, perimeter & volume",4],"Fraction then multiply":["Fractions",4],"Which gives more":["Mixed operations",4],"Days and weeks":["Mixed operations",5],"Between two numbers":["Comparing & ordering",1],"Biggest from digits":["Place value",2],"Column addition":["Addition",1],"Turning angles":["Angles",4],"Compass turns":["Angles",5],"Time conversions":["Time",3],"Kilograms and grams":["Measurement",4],"Line plot data":["Data & statistics",4],"Tenths plus hundredths":["Decimals",3],"Giving change":["Money",3],"Fraction number lines":["Fractions",1],"Fraction differences":["Fractions",1],"Odd fraction out":["Fractions",3],"Counting multiples":["Multiplication",3],"Square numbers":["Multiplication",2],"Two-part rules":["Patterns & sequences",5],"Dividing by 10s":["Division",1],"Splitting to divide":["Division",3],"Regular shape perimeters":["Area, perimeter & volume",2],"Rectangle puzzles":["Area, perimeter & volume",5],"Protractor readings":["Angles",2],"Equal angle parts":["Angles",1],"End times":["Time",2],"Decimal midpoints":["Decimals",2],"Estimating totals":["Addition",3],"Inverse checks":["Mixed operations",2],"Numbers in words":["Place value",1],"Regrouping place value":["Place value",3],"Saving up":["Money",5],"Letter for a number":["Expressions & equations",2],"Shared factors":["Multiplication",3],"L-shape perimeter":["Area, perimeter & volume",5],"Clever multiplying":["Multiplication",3],"Reading a table":["Data & statistics",3]},"5":{"Decimal addition":["Addition",1],"Decimal ×":["Multiplication",2],"Adding fractions":["Fractions",2],"Order of operations":["Mixed operations",2],"Volume":["Area, perimeter & volume",2],"Fraction to decimal":["Decimals",3],"Multiplying fractions":["Fractions",2],"Dividing decimals":["Decimals",2],"Percent":["Percent, ratio & rates",2],"Simplifying fractions":["Fractions",2],"Coordinates":["Coordinates & transformations",1],"Fraction of an amount":["Fractions",2],"Rounding decimals":["Decimals",2],"Subtracting fractions":["Fractions",1],"Multi-step decimals":["Money",3],"Multi-step fractions":["Fractions",3],"Multi-step word problems":["Number puzzles & reasoning",3],"Powers of ten":["Place value",2],"Unit fraction division":["Fractions",5],"Finding the mean":["Data & statistics",2],"Number rules":["Patterns & sequences",4],"Percent to fraction":["Percent, ratio & rates",3],"Metric conversions":["Measurement",2],"Coordinate moves":["Coordinates & transformations",1],"Missing dimension":["Area, perimeter & volume",3],"Measure problems":["Measurement",4],"Missing mean value":["Data & statistics",4],"Ten to the power":["Exponents, roots & scientific notation",3],"Comparing decimals":["Comparing & ordering",1],"Decimal expanded form":["Place value",2],"Decimal subtraction":["Subtraction",1],"Decimals in words":["Place value",1],"Halfway decimals":["Decimals",3],"Spot the decimal slip":["Decimals",1],"Dividing by decimals":["Decimals",3],"Multiplying by 2 digits":["Multiplication",3],"Two-digit divisors":["Division",3],"Remainder sense":["Division",4],"Mixed number sums":["Fractions",4],"Mixed number differences":["Fractions",5],"Missing fraction":["Fractions",1],"Lowest common denominator":["Fractions",2],"Fraction estimates":["Fractions",2],"Fractions as division":["Fractions",3],"Scaling by fractions":["Fractions",4],"Whole from a part":["Fractions",5],"Fractional area":["Area, perimeter & volume",3],"Decimal to fraction":["Decimals",3],"Hours and minutes":["Time",1],"Reading expressions":["Expressions & equations",3],"Two-box volume":["Area, perimeter & volume",4],"Two-rule patterns":["Patterns & sequences",2],"Words to expressions":["Expressions & equations",2],"Nested brackets":["Mixed operations",3],"Shape families":["Shapes & geometry",1],"Line plots":["Data & statistics",4],"Potion shop bill":["Money",4],"Tank in litres":["Area, perimeter & volume",4],"Cauldron recipe":["Fractions",5],"Cutting into pieces":["Measurement",4],"Fraction of what's left":["Fractions",4],"Decimal sequences":["Patterns & sequences",2],"Estimating with decimals":["Decimals",2],"Mixed number ×":["Fractions",4],"Biggest fraction":["Comparing & ordering",3],"Digit value ratio":["Place value",3],"Price of many":["Money",3],"Decimal times decimal":["Decimals",4],"Sharing a bill":["Money",4],"Cube volume":["Area, perimeter & volume",1],"Mixed times fraction":["Fractions",5],"Ordering decimals":["Comparing & ordering",2],"Rule ordered pairs":["Functions & graphs",3],"Grid distances":["Coordinates & transformations",1],"Missing corner":["Coordinates & transformations",2],"Customary units":["Measurement",2],"Decimal number line":["Decimals",1],"Reading decimals aloud":["Place value",1],"Multiplying by 0.1":["Decimals",2],"Unit pricing":["Money",3],"Fractions of units":["Time",2],"Equal groups test":["Division",2],"Estimating quotients":["Division",3],"Checking division":["Division",3],"Missing operation":["Mixed operations",4],"Placing brackets":["Mixed operations",5],"Decimal complements":["Subtraction",1],"Decimal story sums":["Decimals",3],"Fraction or decimal":["Comparing & ordering",4],"Part of a part":["Fractions",5],"Zeros in products":["Multiplication",1],"Division to decimals":["Division",3],"Balance puzzles":["Expressions & equations",3],"Decimal perimeter":["Area, perimeter & volume",2],"Packing cubes":["Area, perimeter & volume",4],"Taking from wholes":["Fractions",2],"Fractions making one":["Fractions",1],"Odd fraction out":["Fractions",3],"Decimal number puzzle":["Number puzzles & reasoning",5],"Grid rectangle area":["Area, perimeter & volume",4]},"6":{"Percent":["Percent, ratio & rates",2],"Simplifying ratios":["Percent, ratio & rates",1],"Adding integers":["Addition",2],"Multiplying integers":["Multiplication",2],"Mean":["Data & statistics",2],"Evaluating expressions":["Expressions & equations",1],"Unit rate":["Percent, ratio & rates",2],"Greatest common factor":["Counting & number sense",2],"Exponents":["Exponents, roots & scientific notation",2],"Area of a triangle":["Area, perimeter & volume",2],"One-step equations":["Expressions & equations",1],"Dividing fractions":["Fractions",3],"Temperature change":["Addition",2],"Volume of a box":["Area, perimeter & volume",2],"Multi-step percent":["Percent, ratio & rates",3],"Multi-step ratio":["Percent, ratio & rates",4],"Working backwards":["Expressions & equations",3],"Bells together":["Counting & number sense",4],"Ratio tables":["Percent, ratio & rates",2],"Number line distance":["Subtraction",2],"Writing expressions":["Expressions & equations",3],"Finding the whole":["Percent, ratio & rates",4],"Fraction by fraction":["Fractions",3],"Best buy":["Percent, ratio & rates",4],"Missing mean value":["Data & statistics",4],"Wrapping a box":["Area, perimeter & volume",4],"Rectangle on a grid":["Coordinates & transformations",4],"Part-to-whole ratios":["Percent, ratio & rates",3],"Finding the percent":["Percent, ratio & rates",2],"Dividing two fractions":["Fractions",3],"Distance from zero":["Comparing & ordering",1],"Ordering integers":["Comparing & ordering",2],"Reflecting points":["Coordinates & transformations",3],"Quadrants":["Coordinates & transformations",1],"Collecting like terms":["Expressions & equations",2],"Factoring with the GCF":["Expressions & equations",3],"Not equivalent":["Expressions & equations",4],"Solutions of inequalities":["Inequalities",3],"Solving with decimals":["Expressions & equations",2],"Input–output rules":["Functions & graphs",4],"Parallelogram area":["Area, perimeter & volume",3],"Trapezoid area":["Area, perimeter & volume",3],"Composite areas":["Area, perimeter & volume",4],"Packing small cubes":["Area, perimeter & volume",5],"Finding the MAD":["Data & statistics",5],"Quartiles and IQR":["Data & statistics",5],"Speed and distance":["Percent, ratio & rates",3],"Converting units":["Measurement",2],"Dividing by 2-digit numbers":["Division",3],"Powers and brackets":["Exponents, roots & scientific notation",3],"Prime factorisation":["Counting & number sense",4],"Percents as fractions":["Percent, ratio & rates",1],"Reciprocals":["Fractions",1],"Spot Bea's mistake":["Percent, ratio & rates",1],"Ratio differences":["Percent, ratio & rates",5],"Fractions, decimals, percents":["Fractions",4],"Two-variable expressions":["Expressions & equations",2],"Equation stories":["Expressions & equations",1],"Powers of fractions":["Exponents, roots & scientific notation",3],"Opposite numbers":["Addition",1],"Comparing negatives":["Comparing & ordering",1],"Lining up decimals":["Decimals",1],"Volume with fractions":["Area, perimeter & volume",4],"New mean":["Data & statistics",5],"Equivalent ratios":["Percent, ratio & rates",2],"Ratios as percents":["Percent, ratio & rates",4],"Identical groups":["Counting & number sense",4],"Finding the median":["Data & statistics",2],"Outlier effect":["Data & statistics",5],"Statistical questions":["Data & statistics",1],"Frequency table mean":["Data & statistics",4],"Histogram bins":["Data & statistics",2],"Reading a box plot":["Data & statistics",3],"Multiplying decimals":["Decimals",3],"Decimal quotients":["Decimals",3],"Open or closed circle":["Inequalities",1],"Dependent variables":["Functions & graphs",3],"Naming properties":["Expressions & equations",2],"Cubes and edges":["Exponents, roots & scientific notation",3],"Parts of an expression":["Expressions & equations",1],"Nets of solids":["Shapes & geometry",2],"Pyramid nets":["Area, perimeter & volume",4],"Taking away negatives":["Subtraction",3],"Between negatives":["Comparing & ordering",2],"Fraction coefficients":["Expressions & equations",3],"Which value works":["Expressions & equations",1],"Divisibility tests":["Counting & number sense",2],"Counting factors":["Counting & number sense",3],"Height of the crate":["Area, perimeter & volume",3],"Triangle on a grid":["Coordinates & transformations",5],"How many can you buy":["Money",3],"Three-part ratios":["Percent, ratio & rates",4],"Reflection distance":["Coordinates & transformations",3],"Estimating percents":["Percent, ratio & rates",2],"Converting rates":["Percent, ratio & rates",3],"Comparing powers":["Exponents, roots & scientific notation",3],"Expand and simplify":["Expressions & equations",3],"Counting solutions":["Inequalities",2],"Base from area":["Area, perimeter & volume",3],"Changing ratios":["Percent, ratio & rates",5]},"7":{"Two-step equations":["Expressions & equations",2],"Percent increase":["Percent, ratio & rates",2],"Circle area":["Area, perimeter & volume",2],"Circumference":["Area, perimeter & volume",1],"Proportion":["Percent, ratio & rates",2],"Distributing":["Expressions & equations",2],"Probability":["Probability",1],"Surface area":["Area, perimeter & volume",3],"Scale drawings":["Measurement",2],"Simple interest":["Money",2],"Angle relationships":["Angles",1],"Ratio sharing":["Percent, ratio & rates",2],"Range and mode":["Data & statistics",1],"Multi-step equations":["Expressions & equations",3],"Multi-step percent":["Percent, ratio & rates",4],"Multi-step geometry":["Area, perimeter & volume",3],"Constant of proportionality":["Percent, ratio & rates",2],"Percent change":["Percent, ratio & rates",3],"Discount then VAT":["Money",4],"Negative fractions":["Fractions",4],"Two-step inequalities":["Inequalities",4],"Circumference to area":["Area, perimeter & volume",4],"Vertical angles":["Angles",4],"Compound probability":["Probability",4],"Prism volume":["Area, perimeter & volume",3],"Expected frequency":["Probability",1],"Percent decrease":["Percent, ratio & rates",1],"Percent error":["Percent, ratio & rates",4],"Proportional equations":["Expressions & equations",2],"Complex fraction rates":["Percent, ratio & rates",5],"Subtracting integers":["Subtraction",1],"Dividing integers":["Division",1],"Integer order of operations":["Mixed operations",3],"Repeating decimals":["Decimals",4],"Combining like terms":["Expressions & equations",2],"Factoring expressions":["Expressions & equations",3],"Negative brackets":["Expressions & equations",3],"Writing equations":["Expressions & equations",3],"Think of a number":["Number puzzles & reasoning",4],"Equations with division":["Expressions & equations",3],"Decimal equations":["Expressions & equations",3],"Complementary angles":["Angles",3],"Angles in a triangle":["Angles",1],"Can it be a triangle?":["Shapes & geometry",3],"Radius from area":["Area, perimeter & volume",3],"Semicircles":["Area, perimeter & volume",4],"Composite area":["Area, perimeter & volume",3],"Enlargement area":["Area, perimeter & volume",5],"Counting outcomes":["Probability",2],"Sample estimates":["Data & statistics",3],"Original price":["Percent, ratio & rates",4],"Percents to decimals":["Decimals",2],"Spot the sign slip":["Number puzzles & reasoning",2],"Approximating with π":["Area, perimeter & volume",1],"Relative frequency":["Probability",2],"Writing inequalities":["Inequalities",4],"Inequality number lines":["Inequalities",2],"Proportional graphs":["Functions & graphs",3],"Journey times":["Percent, ratio & rates",3],"Mean absolute deviation":["Data & statistics",4],"Angles on a straight line":["Angles",1],"Negative decimals":["Decimals",3],"Missing integers":["Subtraction",3],"Map distances":["Measurement",3],"Interest rate":["Money",4],"Dice events":["Probability",1],"Adding a tip":["Money",2],"Commission":["Money",2],"Markup":["Money",4],"Rate conversions":["Percent, ratio & rates",3],"Additive inverses":["Counting & number sense",1],"Integer distance":["Subtraction",2],"Sign of a product":["Multiplication",1],"Terminating or repeating":["Decimals",3],"Percent multipliers":["Percent, ratio & rates",3],"Substituting negatives":["Expressions & equations",4],"Perimeter equations":["Expressions & equations",5],"Fixed fee plus rate":["Expressions & equations",3],"Most you can afford":["Money",4],"Testing inequality values":["Inequalities",1],"Quarter circles":["Area, perimeter & volume",4],"Wheel revolutions":["Area, perimeter & volume",5],"Angle pair equations":["Angles",4],"Angles around a point":["Angles",2],"How many triangles?":["Shapes & geometry",3],"Cross sections":["Shapes & geometry",3],"Finding the scale":["Measurement",3],"Cube from its surface":["Area, perimeter & volume",5],"Prism surface area":["Area, perimeter & volume",5],"Comparing populations":["Data & statistics",5],"Fair samples":["Data & statistics",1],"Complement probability":["Probability",1],"Likelihood words":["Probability",1],"Without replacement":["Probability",5],"Two-dice sums":["Probability",3],"Ordering rational numbers":["Comparing & ordering",3],"Is it proportional?":["Percent, ratio & rates",3],"Tricky percents":["Percent, ratio & rates",3],"Perimeter expressions":["Expressions & equations",3],"Percent estimates":["Percent, ratio & rates",2]},"8":{"Variables both sides":["Expressions & equations",2],"Slope":["Functions & graphs",2],"Pythagoras":["Shapes & geometry",1],"Exponent laws":["Exponents, roots & scientific notation",1],"Scientific notation":["Exponents, roots & scientific notation",2],"Simultaneous equations":["Expressions & equations",3],"Cylinder volume":["Area, perimeter & volume",2],"Cube roots":["Exponents, roots & scientific notation",1],"Reflections":["Coordinates & transformations",2],"Median":["Data & statistics",2],"Linear functions":["Functions & graphs",2],"Cone volume":["Area, perimeter & volume",3],"Significant figures":["Exponents, roots & scientific notation",2],"Multi-step linear":["Functions & graphs",3],"Multi-step Pythagoras":["Shapes & geometry",3],"Multi-step systems":["Expressions & equations",4],"Negative exponents":["Exponents, roots & scientific notation",2],"Multiplying standard form":["Exponents, roots & scientific notation",3],"Estimating roots":["Exponents, roots & scientific notation",2],"Rule from a table":["Functions & graphs",3],"Rotations":["Coordinates & transformations",2],"Irrational numbers":["Counting & number sense",2],"Intercept from two points":["Functions & graphs",4],"Distance between points":["Coordinates & transformations",4],"Cylinder and cone":["Area, perimeter & volume",4],"Ticket systems":["Expressions & equations",4],"Zero and negative powers":["Exponents, roots & scientific notation",3],"Power of a power":["Exponents, roots & scientific notation",1],"Dividing powers":["Exponents, roots & scientific notation",1],"Standard form sums":["Exponents, roots & scientific notation",4],"Scientific notation ÷":["Exponents, roots & scientific notation",3],"How many times bigger":["Exponents, roots & scientific notation",4],"Tiny numbers":["Exponents, roots & scientific notation",2],"Solving x³":["Exponents, roots & scientific notation",2],"Repeating decimals":["Counting & number sense",4],"Rounding square roots":["Exponents, roots & scientific notation",3],"Ordering irrationals":["Exponents, roots & scientific notation",5],"Solving x²":["Expressions & equations",2],"Number of solutions":["Expressions & equations",3],"Substituting a line":["Expressions & equations",3],"Break-even point":["Expressions & equations",5],"Where lines meet":["Functions & graphs",4],"Function or not":["Functions & graphs",2],"Comparing functions":["Functions & graphs",5],"Initial value":["Functions & graphs",2],"Slope from an equation":["Functions & graphs",3],"Point on a line":["Functions & graphs",1],"Translations":["Coordinates & transformations",1],"Naming the rotation":["Coordinates & transformations",3],"Dilations":["Coordinates & transformations",1],"Angles in a triangle":["Angles",1],"Exterior angle":["Angles",2],"Parallel line angles":["Angles",1],"Pythagoras converse":["Shapes & geometry",3],"Finding a leg":["Shapes & geometry",2],"AA similarity":["Angles",3],"Hemisphere volume":["Area, perimeter & volume",3],"Cylinder height":["Area, perimeter & volume",3],"Scatter association":["Data & statistics",1],"Best-fit predictions":["Data & statistics",1],"Two-way tables":["Data & statistics",4],"Angle algebra":["Angles",4],"Volume comparisons":["Area, perimeter & volume",4],"Brackets both sides":["Expressions & equations",3],"Combined transformations":["Coordinates & transformations",4],"Pythagoras then area":["Shapes & geometry",4],"Undoing the volume":["Area, perimeter & volume",4],"Cone height":["Area, perimeter & volume",2],"Roots of fractions":["Exponents, roots & scientific notation",3],"Square and cube":["Exponents, roots & scientific notation",2],"Comparing standard form":["Exponents, roots & scientific notation",3],"Proper standard form":["Exponents, roots & scientific notation",1],"Same power, different bases":["Exponents, roots & scientific notation",5],"Fraction to a power":["Exponents, roots & scientific notation",2],"Parallel slopes":["Functions & graphs",3],"Steepest line":["Functions & graphs",5],"Linear or not":["Functions & graphs",2],"Crossing the x-axis":["Functions & graphs",2],"Line from slope and point":["Functions & graphs",2],"Clearing fractions":["Expressions & equations",1],"Equations with decimals":["Expressions & equations",1],"Sum and difference puzzle":["Expressions & equations",4],"System solution count":["Expressions & equations",3],"Checking a system":["Expressions & equations",2],"Shadow problems":["Shapes & geometry",4],"Area scale factor":["Area, perimeter & volume",4],"Rigid motions":["Coordinates & transformations",2],"Transversal algebra":["Angles",5],"Box diagonal":["Shapes & geometry",5],"Isosceles height":["Shapes & geometry",5],"Melting and recasting":["Area, perimeter & volume",5],"Doubling dimensions":["Area, perimeter & volume",5],"Spotting an outlier":["Data & statistics",1],"What the numbers mean":["Functions & graphs",1],"Finding the input":["Expressions & equations",1],"Negative cube roots":["Exponents, roots & scientific notation",1],"Irrational between":["Exponents, roots & scientific notation",4],"Rearranging formulas":["Expressions & equations",2],"Exact hypotenuse":["Shapes & geometry",2],"Like terms first":["Expressions & equations",1]},"9":{"Quadratic roots":["Quadratics",3],"Simplifying radicals":["Exponents, roots & scientific notation",2],"Discriminant":["Quadratics",2],"Inequalities":["Inequalities",1],"Functions":["Functions & graphs",1],"Expanding":["Polynomials & factoring",2],"Difference of squares":["Polynomials & factoring",2],"Substitution":["Expressions & equations",1],"Absolute value":["Expressions & equations",2],"Vertex of a parabola":["Quadratics",3],"Polynomial subtraction":["Polynomials & factoring",2],"Factorising quadratics":["Polynomials & factoring",2],"Completing the square":["Quadratics",3],"Multi-step algebra":["Expressions & equations",3],"Multi-step quadratics":["Quadratics",3],"Multi-step functions":["Functions & graphs",3],"Finding a factor":["Quadratics",2],"Growth and decay":["Logs & exponentials",2],"Literal equations":["Expressions & equations",2],"Slope from standard form":["Functions & graphs",2],"Flipping inequalities":["Inequalities",2],"Elimination":["Expressions & equations",4],"Area equations":["Quadratics",5],"Consecutive integers":["Expressions & equations",3],"Parallel lines":["Functions & graphs",4],"Function tables":["Functions & graphs",3],"Range of a function":["Functions & graphs",2],"Interpreting slope":["Functions & graphs",2],"Checking solutions":["Functions & graphs",2],"Solutions of a system":["Expressions & equations",3],"Inequality regions":["Inequalities",3],"Domain":["Functions & graphs",3],"Average rate of change":["Functions & graphs",4],"Piecewise functions":["Functions & graphs",2],"Graph shifts":["Functions & graphs",2],"Relations":["Functions & graphs",1],"Linear or exponential":["Logs & exponentials",1],"Recursive sequences":["Patterns & sequences",3],"Growth factor":["Logs & exponentials",3],"Negative exponents":["Exponents, roots & scientific notation",2],"Power of a power":["Exponents, roots & scientific notation",1],"Dividing powers":["Exponents, roots & scientific notation",1],"Fractional exponents":["Exponents, roots & scientific notation",3],"Squaring brackets":["Polynomials & factoring",3],"Common factors":["Polynomials & factoring",2],"Harder factorising":["Polynomials & factoring",4],"Simplifying expressions":["Expressions & equations",1],"Building a quadratic":["Quadratics",3],"Quadratic formula":["Quadratics",4],"Counting real roots":["Quadratics",3],"Zero product property":["Quadratics",2],"Solving by square roots":["Quadratics",3],"Axis of symmetry":["Quadratics",3],"Vertex form":["Quadratics",1],"Projectile height":["Quadratics",5],"Compound inequalities":["Inequalities",3],"Absolute inequalities":["Inequalities",4],"Inequality word problems":["Inequalities",4],"Systems word problems":["Expressions & equations",5],"Compound savings":["Logs & exponentials",4],"Adding radicals":["Exponents, roots & scientific notation",3],"Multiplying radicals":["Exponents, roots & scientific notation",2],"Irrational numbers":["Exponents, roots & scientific notation",2],"Interquartile range":["Data & statistics",3],"Residuals":["Data & statistics",2],"Two-way tables":["Data & statistics",3],"Perpendicular lines":["Functions & graphs",2],"Line through two points":["Functions & graphs",4],"Intercepts of a line":["Functions & graphs",2],"Writing linear models":["Functions & graphs",2],"Table versus rule":["Functions & graphs",5],"Undoing a function":["Functions & graphs",3],"Combining functions":["Functions & graphs",2],"Direct variation":["Percent, ratio & rates",1],"Explicit formulas":["Patterns & sequences",3],"Geometric terms":["Patterns & sequences",2],"Evaluating exponentials":["Logs & exponentials",1],"Doubling time":["Logs & exponentials",3],"Exponential models":["Logs & exponentials",4],"Equal bases":["Expressions & equations",3],"Degree of a polynomial":["Polynomials & factoring",1],"Classifying polynomials":["Polynomials & factoring",2],"Multiplying monomials":["Polynomials & factoring",1],"Dividing by a monomial":["Polynomials & factoring",2],"Binomial times trinomial":["Polynomials & factoring",4],"Factoring by grouping":["Polynomials & factoring",4],"Perfect square trinomials":["Polynomials & factoring",3],"Rationalising denominators":["Exponents, roots & scientific notation",3],"Negative bases":["Exponents, roots & scientific notation",1],"Square root equations":["Expressions & equations",3],"Product puzzles":["Quadratics",4],"Maximum area":["Quadratics",5],"Increasing intervals":["Functions & graphs",3],"Absolute value graphs":["Functions & graphs",2],"Equations with fractions":["Expressions & equations",3],"One, none or infinite":["Expressions & equations",2],"Correlation coefficients":["Data & statistics",1],"Combined means":["Data & statistics",3],"Outlier fences":["Data & statistics",3],"Converting rates":["Percent, ratio & rates",3]},"10":{"Polygon angles":["Angles",2],"Special triangles":["Trigonometry",2],"Distance formula":["Coordinates & transformations",2],"Circle theorems":["Shapes & geometry",2],"Similar triangles":["Shapes & geometry",2],"Sectors":["Area, perimeter & volume",2],"Midpoint":["Coordinates & transformations",1],"Sphere volume":["Area, perimeter & volume",2],"Equation of a circle":["Coordinates & transformations",3],"Perpendicular slopes":["Functions & graphs",2],"Area of a trapezium":["Area, perimeter & volume",1],"Tangent ratio":["Trigonometry",1],"Space diagonal":["Area, perimeter & volume",3],"Multi-step geometry":["Area, perimeter & volume",2],"Multi-step trigonometry":["Trigonometry",3],"Multi-step coordinate geometry":["Coordinates & transformations",3],"Exterior angles":["Angles",3],"Arc length":["Area, perimeter & volume",3],"Radians":["Trigonometry",2],"Cosine rule":["Trigonometry",4],"Sine rule":["Trigonometry",3],"Triangle angle algebra":["Expressions & equations",3],"Sector perimeter":["Area, perimeter & volume",4],"Similar areas":["Shapes & geometry",3],"Sine from sides":["Trigonometry",1],"Sides from angles":["Trigonometry",2],"Finding the hypotenuse":["Trigonometry",3],"Finding an angle":["Trigonometry",2],"Angle of elevation":["Trigonometry",3],"Angle of depression":["Trigonometry",3],"Sine rule angles":["Trigonometry",4],"Angles from three sides":["Trigonometry",4],"Area using sine":["Trigonometry",3],"Tangents to a circle":["Shapes & geometry",3],"Angle in a semicircle":["Angles",1],"Cyclic quadrilaterals":["Angles",2],"Intersecting chords":["Shapes & geometry",3],"Tangent-secant theorem":["Shapes & geometry",4],"Similar volumes":["Area, perimeter & volume",5],"Cone surface area":["Area, perimeter & volume",4],"Pyramid volume":["Area, perimeter & volume",2],"Composite solids":["Area, perimeter & volume",4],"Parallel line equation":["Functions & graphs",2],"Perpendicular bisector":["Coordinates & transformations",4],"Dividing a segment":["Coordinates & transformations",4],"Collinear points":["Coordinates & transformations",3],"Rotating points":["Coordinates & transformations",1],"Dilations":["Coordinates & transformations",1],"Pythagorean identity":["Trigonometry",4],"Cofunctions":["Trigonometry",1],"Acute or obtuse":["Shapes & geometry",5],"Triangle inequality":["Shapes & geometry",1],"Congruence tests":["Shapes & geometry",1],"Midsegments":["Expressions & equations",2],"Angle bisector theorem":["Shapes & geometry",3],"Altitude on hypotenuse":["Shapes & geometry",3],"Rhombus and kite":["Area, perimeter & volume",1],"Cylinder surface area":["Area, perimeter & volume",3],"Hemispheres":["Area, perimeter & volume",3],"Points on a circle":["Coordinates & transformations",2],"Parallelogram diagonals":["Expressions & equations",3],"Chords and radii":["Shapes & geometry",3],"Geometric probability":["Probability",4],"Circle centre and radius":["Coordinates & transformations",4],"Segment area":["Area, perimeter & volume",5],"3D trigonometry":["Trigonometry",5],"Angles on parallel lines":["Angles",2],"Isosceles triangles":["Angles",1],"Equilateral triangle area":["Area, perimeter & volume",3],"Regular polygon area":["Area, perimeter & volume",1],"Triangle centroid":["Coordinates & transformations",2],"Parallel or perpendicular":["Functions & graphs",3],"Translation vectors":["Coordinates & transformations",1],"Reflecting in a line":["Coordinates & transformations",3],"Radius from volume":["Area, perimeter & volume",4],"Chord angles":["Angles",3],"Secant angles":["Angles",3],"Frustum volume":["Area, perimeter & volume",4],"Heron's formula":["Area, perimeter & volume",3],"Polygon diagonals":["Number puzzles & reasoning",4],"Exact trig values":["Trigonometry",2],"Isosceles right triangles":["Trigonometry",2],"Reference angles":["Trigonometry",3],"Area from coordinates":["Coordinates & transformations",3],"Bearings":["Angles",3],"Side splitter theorem":["Shapes & geometry",3],"Exterior angle theorem":["Angles",1],"Density of solids":["Area, perimeter & volume",3],"Euler's formula":["Number puzzles & reasoning",1],"Cross-sections":["Shapes & geometry",2],"Solids of revolution":["Area, perimeter & volume",4],"Transformation sequences":["Coordinates & transformations",3],"Rotational symmetry":["Angles",3],"Ambiguous case":["Trigonometry",5],"Incircle radius":["Shapes & geometry",4],"Tangent line to a circle":["Coordinates & transformations",5],"Converse and contrapositive":["Number puzzles & reasoning",2],"Classifying quadrilaterals":["Coordinates & transformations",4],"Inclination of a line":["Trigonometry",4],"Equidistant points":["Coordinates & transformations",3]},"11":{"Logarithms":["Logs & exponentials",1],"Exponential equations":["Logs & exponentials",1],"Complex numbers":["Complex numbers",2],"Arithmetic sequences":["Patterns & sequences",1],"Geometric sequences":["Patterns & sequences",2],"Remainder theorem":["Polynomials & factoring",2],"Log laws":["Logs & exponentials",2],"Complex modulus":["Complex numbers",2],"Series sums":["Series",3],"Inverse functions":["Functions & graphs",2],"Trig values":["Trigonometry",2],"Binomial coefficients":["Polynomials & factoring",3],"Partial fractions":["Polynomials & factoring",3],"Multi-step logs":["Logs & exponentials",2],"Multi-step sequences":["Series",3],"Multi-step complex":["Complex numbers",3],"Change of base":["Logs & exponentials",3],"Geometric series":["Series",3],"Infinite series":["Series",4],"Complex division":["Complex numbers",4],"Asymptotes":["Functions & graphs",2],"Log equations":["Logs & exponentials",5],"Compound interest":["Logs & exponentials",3],"Scaled exponentials":["Logs & exponentials",2],"Powers of i":["Complex numbers",3],"Complex conjugates":["Complex numbers",1],"Empirical rule":["Data & statistics",2],"Complex roots":["Quadratics",3],"Logs of fractions":["Logs & exponentials",2],"Natural logs":["Logs & exponentials",2],"Log power rule":["Logs & exponentials",3],"z-scores":["Data & statistics",1],"Half-life":["Logs & exponentials",3],"Growth or decay factor":["Logs & exponentials",1],"Sigma notation":["Series",3],"Recursive sequences":["Patterns & sequences",2],"Formula for the nth term":["Patterns & sequences",1],"Quadratic inequalities":["Inequalities",4],"Which term?":["Patterns & sequences",2],"Function composition":["Functions & graphs",2],"Domain of a function":["Functions & graphs",3],"Graph shifts":["Functions & graphs",2],"Odd and even functions":["Functions & graphs",1],"Synthetic division":["Polynomials & factoring",3],"Factor theorem":["Polynomials & factoring",2],"Sum and product of roots":["Quadratics",2],"Average rate of change":["Functions & graphs",3],"Rational equations":["Expressions & equations",3],"Radical equations":["Expressions & equations",3],"Fractional exponents":["Exponents, roots & scientific notation",2],"Arcs in radians":["Trigonometry",3],"Unit circle in radians":["Trigonometry",3],"Pythagorean identity":["Trigonometry",3],"Amplitude and period":["Trigonometry",1],"Inverse trig values":["Trigonometry",2],"Permutations":["Probability",2],"Binomial term":["Polynomials & factoring",4],"Spot the log mistake":["Logs & exponentials",1],"Piecewise functions":["Functions & graphs",1],"Determinants":["Matrices",1],"Matrix products":["Matrices",2],"Conditional probability":["Probability",1],"Inverting log functions":["Logs & exponentials",5],"Polynomials from zeros":["Polynomials & factoring",4],"Distance in the complex plane":["Complex numbers",2],"Matching bases":["Logs & exponentials",3],"Choosing a team":["Probability",2],"Expected value":["Probability",3],"Binomial probability":["Probability",4],"At least one":["Probability",3],"Overlapping events":["Probability",2],"Standard deviation":["Data & statistics",5],"Margin of error":["Data & statistics",1],"Continuous growth":["Logs & exponentials",4],"Logs on a calculator":["Logs & exponentials",2],"Nested logs":["Logs & exponentials",2],"Expanding logarithms":["Logs & exponentials",4],"Conjugate root pairs":["Complex numbers",3],"Complex argument":["Complex numbers",3],"De Moivre's theorem":["Complex numbers",5],"Nature of roots":["Quadratics",3],"End behaviour":["Functions & graphs",1],"Zero multiplicity":["Polynomials & factoring",2],"Rational root test":["Polynomials & factoring",4],"Stretches and reflections":["Functions & graphs",3],"Three-variable systems":["Expressions & equations",4],"Matrix inverses":["Matrices",5],"Trig equations":["Trigonometry",4],"Phase shift":["Trigonometry",3],"Double-angle formulas":["Trigonometry",5],"Angle addition":["Trigonometry",5],"Geometric means":["Series",3],"Logarithmic scales":["Logs & exponentials",4],"Unknown log base":["Logs & exponentials",2],"Exponentials from two points":["Logs & exponentials",4],"Rational expressions":["Polynomials & factoring",3],"Holes in graphs":["Functions & graphs",4],"Square roots of negatives":["Complex numbers",4],"Arranging letters":["Probability",3],"Joint variation":["Percent, ratio & rates",3]},"12":{"Derivatives":["Derivatives",1],"Chain rule":["Derivatives",2],"Definite integrals":["Integrals",2],"Limits":["Limits & continuity",1],"Trig derivatives":["Derivatives",1],"Stationary points":["Derivatives",1],"Second derivatives":["Derivatives",2],"Product rule":["Derivatives",2],"Exponential derivatives":["Derivatives",1],"L'Hôpital":["Limits & continuity",2],"Power rule integration":["Integrals",1],"Implicit differentiation":["Derivatives",3],"Area between curves":["Integrals",4],"Multi-step calculus":["Derivatives",3],"Multi-step optimisation":["Derivatives",3],"Multi-step integration":["Integrals",3],"Quotient rule":["Derivatives",2],"Log derivatives":["Derivatives",1],"Tangent lines":["Derivatives",3],"Kinematics":["Derivatives",2],"Integration by substitution":["Integrals",3],"Trig integrals":["Integrals",1],"Related rates":["Derivatives",5],"Local maximum":["Derivatives",3],"Higher derivatives":["Derivatives",2],"Total area":["Integrals",5],"Normal lines":["Derivatives",2],"Antiderivatives":["Integrals",1],"Initial value problems":["Integrals",2],"Convergence tests":["Series",4],"Inverse trig derivatives":["Derivatives",1],"Integrating 1/x":["Integrals",1],"Exponential integrals":["Integrals",1],"Limits at infinity":["Limits & continuity",1],"Continuity":["Limits & continuity",3],"Limits giving e":["Limits & continuity",5],"Differentiability":["Limits & continuity",2],"Displacement":["Integrals",2],"Increasing and decreasing":["Derivatives",3],"Inflection points":["Derivatives",3],"Maximum or minimum":["Derivatives",3],"Absolute extrema":["Derivatives",3],"Mean value theorem":["Derivatives",3],"Average rate of change":["Derivatives",1],"Riemann sums":["Integrals",3],"Trapezium rule":["Integrals",3],"FTC derivatives":["Integrals",3],"Linear approximation":["Derivatives",3],"Newton's method":["Derivatives",3],"Integration by parts":["Integrals",4],"Volumes of revolution":["Integrals",4],"Chain rule from a table":["Derivatives",3],"Inverse derivatives":["Derivatives",5],"Derivative mistakes":["Derivatives",2],"Growth equations":["Differential equations",3],"Euler's method":["Differential equations",5],"Derivatives of aˣ":["Derivatives",1],"First principles":["Derivatives",1],"Accumulation":["Integrals",3],"Concavity":["Derivatives",3],"Symmetry in integrals":["Integrals",4],"Integral properties":["Integrals",3],"Improper integrals":["Integrals",4],"Box optimisation":["Derivatives",5],"Parametric derivatives":["Derivatives",3],"Taylor polynomials":["Series",4],"Partial fraction integrals":["Integrals",5],"Separable equations":["Differential equations",4],"Logistic growth":["Differential equations",3],"Slope fields":["Differential equations",5],"Equilibrium solutions":["Differential equations",5],"Radius of convergence":["Series",3],"Ratio test limits":["Series",3],"Telescoping series":["Series",5],"Curve length":["Integrals",5],"Polar area":["Integrals",3],"Parametric speed":["Derivatives",3],"Logarithmic differentiation":["Derivatives",4],"Trig limits":["Limits & continuity",4],"One-sided limits":["Limits & continuity",2],"Holes in graphs":["Limits & continuity",3],"Intermediate values":["Limits & continuity",3],"Riverside fence":["Derivatives",4],"Closest point":["Derivatives",5],"Maximum revenue":["Derivatives",4],"Speeding up or slowing down":["Derivatives",4],"Integrals as areas":["Integrals",4],"Limit of a sum":["Integrals",5],"Double-angle integrals":["Integrals",4],"Arctan integrals":["Integrals",3],"Checking ODE solutions":["Differential equations",1],"Which grows fastest":["Limits & continuity",4],"Work by a spring":["Integrals",3],"Newton's cooling":["Differential equations",5],"Recognising series":["Series",3],"Cross-section volumes":["Integrals",5],"Shell method":["Integrals",5],"Integration slip":["Integrals",2],"Sign charts":["Derivatives",4],"Conjugate limits":["Limits & continuity",3]}};
 const TOPIC = BANK.map(l => l.gens.map(g => { try { return g().t; } catch(e){ return "?"; } }));
 
 /* Which generators in each grade are multi-step — a question you cannot finish
@@ -11033,24 +11096,13 @@ TOPIC.forEach((ts,L)=>ts.forEach((t,g)=>{ if(g>=ADD_BASE[L] && ADD_HARD_T.has(t)
    `avoid` is the run's set of topics already seen, so a chest or a hatch
    cannot hand back a type one of the rooms has already used. */
 function challengeProblem(level, tight, avoid){
-  let pool = HARD[level] || BANK[level].gens.map((_,i)=>i);
-  if(avoid && avoid.size){
-    const fresh = pool.filter(g=>!avoid.has(TOPIC[level][g]));
-    if(fresh.length) pool = fresh;
-    else {
-      /* every hard type is spoken for — a fresh ordinary type beats a repeat */
-      const any = BANK[level].gens.map((_,i)=>i).filter(g=>!avoid.has(TOPIC[level][g]));
-      if(any.length) pool = any;
-    }
-  }
-  /* every hard type already used this cycle — an unused ordinary one beats a repeat */
-  const u = cycleUsed(level);
-  if(pool.every(g=>u.has(g))){
-    const spare = BANK[level].gens.map((_,i)=>i).filter(g=>!u.has(g) && (MULTI[level]||[]).indexOf(g)<0
-      && !(avoid && avoid.has(TOPIC[level][g])));
-    if(spare.length) pool = spare;
-  }
-  const gi = unusedFirst(level, pool)[0];
+  const on = onTypes(level), isM = g => (MULTI[level]||[]).indexOf(g)>=0;
+  const fresh = g => !(avoid && avoid.has(TOPIC[level][g]));
+  let pool = on.filter(g=>fresh(g) && !isM(g));
+  if(!pool.length) pool = on.filter(fresh);
+  if(!pool.length) pool = on.length ? on : BANK[level].gens.map((_,i)=>i);
+  /* a step above the room you are in: the hatch a step and a half */
+  const gi = nearestType(level, pool, targetD(S.room, tight ? 1.5 : 1));
   if(avoid) avoid.add(TOPIC[level][gi]);
   const p = makeProblem(level, gi, rampFor(S.room, 0.15));
   if(tight) tighten(p);
@@ -11062,19 +11114,16 @@ function challengeProblem(level, tight, avoid){
    here the rooms have not already handed out. If every multi type has somehow
    been used, fall back to an ordinary hard challenge rather than repeat one. */
 function grandProblem(level, avoid){
-  let pool = MULTI[level] || [];
-  if(avoid && avoid.size){
-    const fresh = pool.filter(g=>!avoid.has(TOPIC[level][g]));
-    pool = fresh;
-  }
+  const pool = onTypes(level).filter(g => (MULTI[level]||[]).indexOf(g)>=0
+                 && !(avoid && avoid.has(TOPIC[level][g])));
   if(!pool.length) return null;
-  const gi = unusedFirst(level, pool)[0];
+  const gi = nearestType(level, pool, targetD(S.room, 1));
   if(avoid) avoid.add(TOPIC[level][gi]);
   return makeProblem(level, gi, rampFor(S.room, 0.15));
 }
 /* is there an unused multi-step type left for a grand chest? */
 function grandLeft(level, avoid){
-  return (MULTI[level]||[]).some(g => !avoid || !avoid.has(TOPIC[level][g]));
+  return onTypes(level).some(g => (MULTI[level]||[]).indexOf(g)>=0 && (!avoid || !avoid.has(TOPIC[level][g])));
 }
 
 /* ---------- difficulty tiers ----------
@@ -12285,7 +12334,7 @@ function applyTheme(){
    moment it goes out. Shown on the setup screen and at the foot of the
    report card, so a player can say which build they are playing.
    ===================================================================== */
-const BUILD = 28, RELEASED = "15 Oct 2026, 19:02";
+const BUILD = 29, RELEASED = "17 Oct 2026, 10:18";
 const COPYRIGHT = "© 2026 m1keLima. All rights reserved.";
 const VERSION_LINE = `v${BUILD} · released ${RELEASED} · ${COPYRIGHT}`;
 
@@ -12294,7 +12343,7 @@ const VERSION_LINE = `v${BUILD} · released ${RELEASED} · ${COPYRIGHT}`;
    ===================================================================== */
 const KEY="hauntedhouse.v2";
 const blank=()=>({name:"",avatar:"witch",level:0,world:0,unlock:{},sfx:true,music:true,kid:false,family:{},help:0,theme:"auto",schema:2,
-  best:{candy:0,score:0,rooms:0},prog:{},cycle:{},totals:{runs:0,rooms:0,correct:0,attempts:0,wins:0,shortcuts:0},topics:{}});
+  best:{candy:0,score:0,rooms:0},prog:{},cycle:{},off:{},askTopics:true,totals:{runs:0,rooms:0,correct:0,attempts:0,wins:0,shortcuts:0},topics:{}});
 let save=blank();
 /* SCHEMA is the shape of the level list. Bump it whenever levels are added or
    removed in front of existing ones, and migrate here — `unlock` and `prog` are
@@ -12309,6 +12358,7 @@ function load(){
   if(!save.family || typeof save.family!=="object"){ save.family={}; }
   if(!save.prog   || typeof save.prog!=="object"){ save.prog={}; }
   if(!save.cycle  || typeof save.cycle!=="object"){ save.cycle={}; }
+  if(!save.off    || typeof save.off!=="object"){ save.off={}; }
 
   /* older saves kept one ladder for every grade — hand it to the grade they were on */
   if(typeof save.maxWorld==="number"){ if(save.maxWorld>0) save.unlock[save.level||0]=save.maxWorld; delete save.maxWorld; }
@@ -12458,10 +12508,12 @@ function buildSetup(){
     `<button class="av" data-id="${a.id}" aria-pressed="${a.id===save.avatar}">${avSVG(a.id,74)}<span>${a.name}</span></button>`).join("");
   $("#nameInput").value = save.name||"";
   $("#tierNote").innerHTML = tierLine(save.level);
+  paintTopicsBtn();
   $("#levelGrid").onclick=e=>{const b=e.target.closest(".lvl"); if(!b)return;
     save.level=+b.dataset.i; store(); SFX.click();
     [...$("#levelGrid").children].forEach(c=>c.setAttribute("aria-pressed", c===b));
-    $("#tierNote").innerHTML=tierLine(save.level); renderWorlds();};
+    $("#tierNote").innerHTML=tierLine(save.level); renderWorlds(); paintTopicsBtn();
+    if(save.askTopics!==false) openTopics(save.level);};
   $("#avGrid").onclick=e=>{const b=e.target.closest(".av"); if(!b)return;
     save.avatar=b.dataset.id; store(); SFX.click();
     [...$("#avGrid").children].forEach(c=>c.setAttribute("aria-pressed", c===b));};
@@ -12539,65 +12591,79 @@ function paintFamilies(){
 function rampFor(room, extra){
   const w = Math.max(0, Math.min(1, (S.world|0)/(WORLDS.length-1)));
   const r = Math.max(0, Math.min(1, (room|0)/9));
-  return Math.min(1, 0.6*w + 0.4*r + (extra||0));
+  return Math.min(1, 0.35*w + 0.65*r + (extra||0));
+}
+/* ---------- difficulty and topics (v29) ----------
+   Every type has a difficulty 1–5 within its grade and an area ("Time",
+   "Money", …) in TYPE_META, keyed by topic. A run deals room 1 the easiest
+   type it can and each room after a slightly harder one: the target is
+   1 at the first room of the Forest and 5 at the last room of the Castle
+   (the room counts for 65 %, the place for 35 %). Chests aim one step above
+   the room, the hatch one and a half, the final challenge at 5. */
+function typeD(level, g){
+  const m = (TYPE_META[level]||{})[TOPIC[level][g]];
+  if(m) return m[1];
+  return (MULTI[level]||[]).indexOf(g)>=0 || (HARD[level]||[]).indexOf(g)>=0 ? 4 : 2;
+}
+function typeArea(level, g){
+  const m = (TYPE_META[level]||{})[TOPIC[level][g]];
+  return m ? m[0] : "Other";
+}
+function targetD(room, extra){
+  const w = Math.max(0, Math.min(1, (S.world|0)/(WORLDS.length-1)));
+  const r = Math.max(0, Math.min(1, (room|0)/9));
+  return Math.min(5.5, 1 + 4*(0.35*w + 0.65*r) + (extra||0));
+}
+/* topics a grown-up switched off for this grade (save.off, by topic name) */
+function isOn(level, g){
+  const off = (save.off||{})[level];
+  return !off || off.indexOf(TOPIC[level][g])<0;
+}
+const onTypes = level => BANK[level].gens.map((_,i)=>i).filter(g=>isOn(level,g));
+/* Of `cands`, the one nearest difficulty T, taken from the types not used this
+   cycle. Only when `protect` is set (the first two rooms) may a used type win,
+   and only if no unused one is anywhere near T: an easy start matters more than
+   never meeting a type twice, but nothing else does. Ties are broken at random. */
+function nearestType(level, cands, T, protect){
+  if(!cands.length) return -1;
+  const u = cycleUsed(level);
+  const score = g => Math.abs(typeD(level,g) - T) + Math.random()*0.6;
+  const best = arr => arr.map(g=>({g,k:score(g)})).sort((x,y)=>x.k-y.k)[0];
+  const un = best(cands.filter(g=>!u.has(g))), any = best(cands);
+  if(!un) return any.g;
+  if(protect && un.k - any.k > 1.5) return any.g;
+  return un.g;
 }
 function buildPlan(level, used){
   const spec=TIERS[tierFor(level)];
   const world=S.world|0;
   const usedTopics = used || new Set();
-  /* unused types come first, so a run is dealt from what this grade has not shown yet */
-  const pool = unusedFirst(level, BANK[level].gens.map((_,i)=>i));
-  /* Near the end of a cycle there are not enough unused types left for a whole
-     run. Then that kind starts over now, at the deal: the last unused ones still
-     lead the pool (it was ordered above), and everything after them is the first
-     of the new cycle — so nothing is ever shown twice inside one cycle. */
-  { const isM = x => (MULTI[level]||[]).indexOf(x)>=0, u = cycleUsed(level);
-    [[true,3],[false,13]].forEach(([kind,need])=>{
-      const left = pool.filter(g=>isM(g)===kind && !u.has(g)).length;
-      if(left < need) save.cycle[level] = (save.cycle[level]||[]).filter(x=>isM(x)!==kind);
-    }); }
-  const usedBefore = cycleUsed(level);
-  const hard = HARD[level] || [];
-  /* two hard types are held back for the chest and the hatch */
-  /* later places ask for more of the grade's hard types */
-  const wantHard = Math.max(0, Math.min(spec.hard + Math.floor(world/2), hard.length-2));
+  const on = onTypes(level);
+  const isM = x => (MULTI[level]||[]).indexOf(x)>=0;
   const fresh = g => !usedTopics.has(TOPIC[level][g]);
-  const multiTypes = MULTI[level] || [];
-  const slot = g => { pool.splice(pool.indexOf(g),1); usedTopics.add(TOPIC[level][g]);
-                      return {lvl:level, gen:g, hard:hard.indexOf(g)>=0, tight:false}; };
-  const take = wantsHard => {
-    /* ordinary rooms never take a multi-step type: those are dealt out
-       deliberately below, and one is always left over for the grand chest */
-    const ok = g => fresh(g) && multiTypes.indexOf(g)<0;
-    const isHard = g => hard.indexOf(g)>=0, unused = g => !usedBefore.has(g);
-    const pick = pred => pool.findIndex(g => ok(g) && pred(g));
-    /* an unused type always beats a repeat, even if it is not the hard one asked for */
-    let idx = wantsHard ? pick(g=>unused(g) && isHard(g)) : -1;
-    if(idx<0) idx = pick(g=>unused(g) && (wantsHard || !isHard(g)));
-    if(idx<0) idx = pick(unused);
-    if(idx<0 && wantsHard) idx = pick(isHard);
-    if(idx<0) idx = pick(g=>wantsHard || !isHard(g));
-    if(idx<0) idx = pool.findIndex(ok);
-    if(idx<0) idx = pool.findIndex(fresh);
-    if(idx<0) return null;
-    return slot(pool[idx]);
-  };
-  /* multi-step rooms are guaranteed, not left to chance: one at the lower
-     grades, two from Grade 5 up. One multi type is always held back so the
-     grand chest has something the rooms have not already used. */
-  const multi = pool.filter(g => multiTypes.indexOf(g)>=0 && fresh(g));
-  const wantMulti = Math.max(0, Math.min(level>=5?2:1, multi.length-1));
+  /* multi-step rooms are guaranteed — one at the lower grades, two from Grade 5
+     up — and dealt last (room 10, or rooms 9 and 10). One multi type is held back for
+     the grand chest. */
+  const multiOn = on.filter(isM);
+  const wantMulti = Math.max(0, Math.min(level>=5?2:1, multiOn.length-1));
+  const multiSlots = wantMulti===2 ? [8,9] : wantMulti===1 ? [9] : [];
   const plan=[];
-  for(let i=0;i<wantMulti;i++) plan.push(slot(multi[i]));
-  for(let i=plan.length,h=0;i<10;i++){ const s=take(h++<wantHard); if(s) plan.push(s); }
-  /* each room a little harder than the last: hard and multi-step rooms are
-     dealt towards the end, and the close-answer rooms are the last ones — one
-     more of them for every place further along */
-  const weight = sl => (sl.hard?2:0) + (multiTypes.indexOf(sl.gen)>=0?1.5:0) + Math.random()*1.2;
-  const order = plan.map(sl=>({sl, k:weight(sl)})).sort((a,b)=>a.k-b.k).map(o=>o.sl);
-  const tightN = Math.min(spec.tight + world, order.length);
-  for(let i=order.length-tightN; i<order.length; i++) order[i].tight=true;
-  return order;
+  for(let i=0;i<10;i++){
+    const T = targetD(i);
+    const wantM = multiSlots.indexOf(i)>=0;
+    let cands = on.filter(g=>fresh(g) && isM(g)===wantM);
+    if(!cands.length) cands = on.filter(fresh);
+    if(!cands.length) cands = on.length ? on : BANK[level].gens.map((_,j)=>j);
+    const g = nearestType(level, cands, T, i<2);
+    usedTopics.add(TOPIC[level][g]);
+    plan.push({lvl:level, gen:g, hard:typeD(level,g)>=4 || (HARD[level]||[]).indexOf(g)>=0, tight:false, m:wantM});
+  }
+  /* whatever was dealt, the rooms run easiest to hardest (multi-step last) */
+  plan.sort((x,y)=>(x.m-y.m) || (typeD(level,x.gen)-typeD(level,y.gen)));
+  /* the close-answer rooms are the last ones, one more for every place further on */
+  const tightN = Math.min(spec.tight + world, plan.length);
+  for(let i=plan.length-tightN; i<plan.length; i++) plan[i].tight=true;
+  return plan;
 }
 
 /* The near-miss treatment: the wrong answers move to ±1, ±2, ±10 of the right
@@ -13756,14 +13822,12 @@ function bossSVG(){
 /* the hardest types the grade has, multi-step ones included, fresh within the fight */
 function dragonProblem(){
   const lvl=S.level, D=S.dragon;
-  const strong=[...new Set([...(HARD[lvl]||[]), ...(MULTI[lvl]||[])])];
-  const all=BANK[lvl].gens.map((_,i)=>i);
+  const all=onTypes(lvl).length ? onTypes(lvl) : BANK[lvl].gens.map((_,i)=>i);
   const notFought=g=>!D.used.has(TOPIC[lvl][g]);
-  let pool=strong.filter(g=>notFought(g) && !S.usedTopics.has(TOPIC[lvl][g]));
-  if(!pool.length) pool=strong.filter(notFought);
+  let pool=all.filter(g=>notFought(g) && !S.usedTopics.has(TOPIC[lvl][g]));
   if(!pool.length) pool=all.filter(notFought);
   if(!pool.length) pool=all;
-  const g=unusedFirst(lvl, pool)[0]; D.used.add(TOPIC[lvl][g]);
+  const g=nearestType(lvl, pool, 5); D.used.add(TOPIC[lvl][g]);
   return makeProblem(lvl,g,1);   /* the final challenge is the top of the ramp */
 }
 
@@ -15064,6 +15128,81 @@ function toggleMusic(){ musicOn=!musicOn; save.music=musicOn; store();
   if(musicOn){ ac(); musicStart(); } musicGain(); }
 
 /* shown unasked on a first visit, and from the front page after that */
+/* ---------- the topic picker ----------
+   Every type of the chosen grade, grouped by area (TYPE_META), easiest first,
+   each with a fresh example. Unticked topics go in save.off[level] by name and
+   are never dealt: rooms, chests, the hatch and the final challenge all draw
+   from onTypes(). At least MIN_ON have to stay ticked so a run of ten rooms
+   never has to repeat a topic. */
+const MIN_ON = 12;
+function paintTopicsBtn(){
+  const L=save.level, n=onTypes(L).length, all=BANK[L].gens.length;
+  $("#topicsBtn").textContent = n===all ? `Choose topics · all ${all} on` : `Choose topics · ${n} of ${all} on`;
+}
+function topicDots(d){ return "●".repeat(d)+"<i>"+"●".repeat(5-d)+"</i>"; }
+function openTopics(level){
+  const L=level, gens=BANK[L].gens;
+  if(!save.off) save.off={};
+  const groups={};
+  gens.forEach((_,g)=>{ const a=typeArea(L,g); (groups[a]=groups[a]||[]).push(g); });
+  const areas=Object.keys(groups).sort((x,y)=>groups[y].length-groups[x].length || x.localeCompare(y));
+  const example = g => { try{ return String(gens[g]().q).replace(/\s+/g," "); }catch(e){ return ""; } };
+  $("#tpTitle").textContent = `${BANK[L].name} · topics`;
+  $("#tpBody").innerHTML = areas.map(a=>{
+    const gs=groups[a].slice().sort((x,y)=>typeD(L,x)-typeD(L,y) || TOPIC[L][x].localeCompare(TOPIC[L][y]));
+    return `<details class="tp-area" data-area="${esc(a)}"><summary>
+        <input type="checkbox" class="tp-a" aria-label="${esc(a)}: all on or off">
+        <span class="nm">${esc(a)}</span><span class="n"></span><span class="chev">›</span></summary>
+      ${gs.map(g=>`<label class="tp-row" data-g="${g}">
+        <input type="checkbox" class="tp-t" data-g="${g}">
+        <span><span class="t">${esc(TOPIC[L][g])}</span><span class="ex">${esc(example(g))}</span></span>
+        <span class="tp-dots" title="Difficulty ${typeD(L,g)} of 5">${topicDots(typeD(L,g))}</span></label>`).join("")}
+      </details>`;}).join("");
+  const sync=()=>{
+    const off=new Set(save.off[L]||[]);
+    $("#tpBody").querySelectorAll(".tp-t").forEach(c=>{ const g=+c.dataset.g; c.checked=!off.has(TOPIC[L][g]);
+      c.closest(".tp-row").classList.toggle("off",!c.checked); });
+    $("#tpBody").querySelectorAll(".tp-area").forEach(d=>{
+      const cs=[...d.querySelectorAll(".tp-t")], n=cs.filter(c=>c.checked).length, a=d.querySelector(".tp-a");
+      a.checked = n===cs.length; a.indeterminate = n>0 && n<cs.length;
+      d.querySelector(".n").textContent = `${n} of ${cs.length}`; });
+    const n=onTypes(L).length;
+    $("#tpCount").textContent = `${n} of ${gens.length} on.`;
+    const low = n<MIN_ON;
+    $("#tpWarn").textContent = low ? `Leave at least ${MIN_ON} ticked, so a run never repeats a topic.` : "";
+    $("#tpWarn").classList.toggle("hidden",!low); $("#tpDone").disabled = low;
+    paintTopicsBtn();
+  };
+  const setOff=(g,off)=>{ const t=TOPIC[L][g], arr=save.off[L]||(save.off[L]=[]), i=arr.indexOf(t);
+    if(off && i<0) arr.push(t); if(!off && i>=0) arr.splice(i,1); };
+  $("#tpBody").onclick=e=>{ if(e.target.classList.contains("tp-a")) e.stopPropagation(); };
+  $("#tpBody").onchange=e=>{
+    const c=e.target;
+    if(c.classList.contains("tp-t")) setOff(+c.dataset.g, !c.checked);
+    if(c.classList.contains("tp-a")) c.closest(".tp-area").querySelectorAll(".tp-t").forEach(t=>setOff(+t.dataset.g, !c.checked));
+    if(!(save.off[L]||[]).length) delete save.off[L];
+    store(); sync();
+  };
+  $("#tpAll").onclick=()=>{ delete save.off[L]; store(); sync(); };
+  $("#tpEasy").onclick=()=>{ save.off[L]=gens.map((_,g)=>g).filter(g=>typeD(L,g)>2).map(g=>TOPIC[L][g]); store(); sync(); };
+  $("#tpOpen").onclick=()=>{ const ds=[...$("#tpBody").querySelectorAll(".tp-area")], open=!ds.every(d=>d.open);
+    ds.forEach(d=>d.open=open); $("#tpOpen").textContent = open ? "Hide the topic lists" : "Show every topic"; };
+  $("#tpOpen").textContent="Show every topic";
+  $("#tpAsk").checked = save.askTopics!==false;
+  $("#tpAsk").onchange=e=>{ save.askTopics=e.target.checked; store(); };
+  sync();
+  $("#topics").classList.remove("hidden");
+  $("#tpBody").scrollTop=0;
+}
+function closeTopics(){
+  if(onTypes(save.level).length<MIN_ON) return;
+  $("#topics").classList.add("hidden"); paintTopicsBtn();
+}
+$("#topicsBtn").onclick=()=>{ SFX.click(); openTopics(save.level); };
+$("#topicsX").onclick=closeTopics;
+$("#tpDone").onclick=()=>{ SFX.click(); closeTopics(); };
+$("#topics").onclick=e=>{ if(e.target===$("#topics")) closeTopics(); };
+
 function openHelp(){ $("#help").classList.remove("hidden"); }
 function closeHelp(){
   $("#help").classList.add("hidden");
@@ -15092,6 +15231,7 @@ $("#sfxBtn2").onclick=toggleSfx;
 $("#nameInput").addEventListener("keydown",e=>{ if(e.key==="Enter") $("#startBtn").click(); });
 window.addEventListener("resize",()=>{ if(!$("#game").classList.contains("hidden")) renderChase(); });
 document.addEventListener("keydown",e=>{
+  if(!$("#topics").classList.contains("hidden")){ if(e.key==="Escape") closeTopics(); return; }
   if(!$("#help").classList.contains("hidden")){ if(e.key==="Escape") closeHelp(); return; }
   if($("#game").classList.contains("hidden")||!$("#overlay").classList.contains("hidden")) return;
   if(e.key>="1"&&e.key<="4"){ const b=$("#choices").children[+e.key-1]; if(b&&!b.disabled) b.click(); }
