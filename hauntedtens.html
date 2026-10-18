@@ -213,7 +213,7 @@ button{font:inherit;color:inherit;cursor:pointer}
     <details class="grown"><summary>For grown-ups</summary>
       <p>This is the explainer behind Haunted House's Grade 1 tens questions — teen numbers, tens and ones, 62 + 10, adding and taking away tens, adding ones and making a new ten, comparing, the hundred square and counting to 120. It does not ask quiz questions from a bank: each room shows the idea with pumpkins you can move, says it aloud, and then asks the child to <i>do</i> it — build a number, press + ten, bundle ten ones, move the bat on the hundred square.</p>
       <p>A wrong try gets a hint, never the answer (the same rule as Haunted House). After three tries a Skip appears. The explanation comes after the child gets it. Rooms run in the suggested order but every room is open. Nothing leaves this device; progress is kept in this browser only.</p>
-      <p><b>A nicer voice:</b> the voice menu at the top picks the best natural voice the device has. The best ones (★★ Premium, ★ Enhanced) must be downloaded once — on an iPad: <i>Settings → Accessibility → Read &amp; Speak (or Spoken Content) → Voices → English</i>, then download <b>Ava (Premium)</b> or <b>Samantha (Enhanced)</b>, and reload this page. On a Mac: <i>System Settings → Accessibility → Spoken Content → System voice → Manage Voices</i>.</p>
+      <p><b>The voice:</b> the Pumpkin King speaks with recorded lines (a neural voice, recorded in advance and kept beside this page), so it sounds natural on every device. If you prefer the device's own voice, pick one in the voice menu: it picks the best natural voice the device has. The best ones (★★ Premium, ★ Enhanced) must be downloaded once — on an iPad: <i>Settings → Accessibility → Read &amp; Speak (or Spoken Content) → Voices → English</i>, then download <b>Ava (Premium)</b> or <b>Samantha (Enhanced)</b>, and reload this page. On a Mac: <i>System Settings → Accessibility → Spoken Content → System voice → Manage Voices</i>.</p>
     </details>
   </div>
   <div class="foot" id="ver"></div>
@@ -241,19 +241,28 @@ button{font:inherit;color:inherit;cursor:pointer}
 
 <script>
 "use strict";
-const BUILD = 2, RELEASED = "18 Oct 2026, 15:10";
+const BUILD = 3, RELEASED = "18 Oct 2026, 16:30";
 const COPYRIGHT = "© 2026 m1keLima";
 const $ = s => document.querySelector(s);
-const R = (a,b) => a + Math.floor(Math.random()*(b-a+1));
-const P = a => a[Math.floor(Math.random()*a.length)];
+/* Practice numbers come from NSEED fixed number sets per room (seeded), so every
+   line the King can say is known in advance and has a recording (v3). */
+let RNG = Math.random;
+const R = (a,b) => a + Math.floor(RNG()*(b-a+1));
+const P = a => a[Math.floor(RNG()*a.length)];
+const NSEED = 6;
+function seeded(n){ let t=n>>>0; return ()=>{ t=(t+0x6D2B79F5)>>>0; let r=Math.imul(t^(t>>>15),1|t); r^=r+Math.imul(r^(r>>>7),61|r); return ((r^(r>>>14))>>>0)/4294967296; }; }
+function strHash(x){ let h=2166136261; for(let i=0;i<x.length;i++) h=Math.imul(h^x.charCodeAt(i),16777619); return h>>>0; }
+function practiceFor(d,k){ RNG=seeded(strHash(d.id)+k*7919+1); try{ return d.practice(); } finally { RNG=Math.random; } }
 const T = n => Math.floor(n/10)%10, O = n => n%10;
 
 /* ===================================================================
    SAVE — key hauntedtens.v1, wrapped so blocked storage never breaks it
    =================================================================== */
 const KEY="hauntedtens.v1";
-let save={done:{}, best:{}, read:true, sfx:true, voice:"auto"};
+let save={done:{}, best:{}, read:true, sfx:true, voice:"rec", seed:{}};
 try{ const s=JSON.parse(localStorage.getItem(KEY)||"null"); if(s) save=Object.assign(save,s); }catch(e){}
+if(save.voiceV!==3){ save.voice="rec"; save.voiceV=3; }   /* v3: the recorded voice is the default */
+save.seed=save.seed||{};
 function store(){ try{ localStorage.setItem(KEY,JSON.stringify(save)); }catch(e){} }
 
 /* ===================================================================
@@ -322,7 +331,8 @@ const SPEECH={u:null,cancelAt:0,unlocked:false};
 function unlockSpeech(){ if(SPEECH.unlocked||!window.speechSynthesis) return; SPEECH.unlocked=true;
   try{ const u=new SpeechSynthesisUtterance(" "); u.volume=0; speechSynthesis.speak(u); }catch(e){} }
 ["pointerdown","touchend","keydown"].forEach(ev=>document.addEventListener(ev,unlockSpeech,{once:true,capture:true}));
-function stopSpeech(){ try{ const ss=window.speechSynthesis; if(ss&&(ss.speaking||ss.pending)){ ss.cancel(); SPEECH.cancelAt=Date.now(); } }catch(e){} }
+function stopTTS(){ try{ const ss=window.speechSynthesis; if(ss&&(ss.speaking||ss.pending)){ ss.cancel(); SPEECH.cancelAt=Date.now(); } }catch(e){} }
+function stopSpeech(){ audTok++; try{ if(AUD) AUD.pause(); }catch(e){} stopTTS(); }
 function speakable(html){
   const d=document.createElement("div"); d.innerHTML=html; let s=d.textContent||"";
   s=s.replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}\u{FE0F}\u{200D}]/gu,"");
@@ -350,16 +360,52 @@ function loadVoices(){
 }
 function chosenVoice(){
   if(!VOICES.length) loadVoices();
-  if(save.voice&&save.voice!=="auto"&&save.voice!=="device"){ const v=VOICES.find(x=>x.voiceURI===save.voice||x.name===save.voice); if(v) return v; }
+  if(save.voice&&save.voice!=="auto"&&save.voice!=="device"&&save.voice!=="rec"){ const v=VOICES.find(x=>x.voiceURI===save.voice||x.name===save.voice); if(v) return v; }
   if(save.voice==="device") return null;
   return VOICES.find(v=>goodRank(v)<99)||null;      /* auto: best allow-listed voice, else the device default */
 }
+/* THE RECORDED VOICE (v3). Every line the page can say was recorded with the
+   Kokoro neural voice af_heart (hauntedtens-voice/build_voice.py) into
+   hauntedtens-audio/<id>.m4a; CLIPS lists them. A line is looked up by its spoken
+   text (speakable), so changing a sentence needs a rebuild or it falls back to the
+   device voice. One <audio> element, kept in the page and woken inside the first
+   tap, so iPad lets later lines play from timers too. */
+const AUDIO_DIR="hauntedtens-audio/";
+const CLIPS=new Set(/*CLIPS*/["0041ba12490835a2","00500da8f814731c","00744c44b9cc4ae4","00a14c152ae485b5","00c5f3ac7145d770","00d38880fcbb1ff0","010d28af09eacacb","0152dd8f4929acaf","01a53a616430146d","0200e5ca18ae966e","0226c44923bf4785","027bdabaaa25100e","0293a798c03302b8","02f2a22c77997328","0312cbaff5b637af","041cf73bca3d67d7","04c0aaee7372889e","04d122b140072a49","04dc1171766ec20d","050971985c555188","052f3cb103c5aa1d","05355efe428e734e","056a2c57fbfc715f","05aeddcda83ad841","05ff7f2699bc61fe","064a540c8cafd87c","0684340a4c1ac526","07024cd03d698e98","071e566e966b4836","07bcda3ee0ed81fe","07c54d17e1c69dc7","07cc2b2a742265ce","080a96fde47d62f5","080daf55031f9621","081b2f49214069e1","08cbb6487f23ae68","08f98fe5d87e5db9","0955693f39958c9f","099a6ba3fc6abda7","09db2631fb24dca9","09edc5f50f4592d1","0a0ae4084ae29654","0a4a90459ee69735","0a52ad6925760849","0a68c1b40aeeb960","0a8c9cc0a1217e98","0a9f0f1445acd8e4","0ade5e06da2ba0f6","0b5037ec326b0878","0b9d4f9e0e890116","0c197a730b220def","0d07fd7918be0cf1","0d665156b152c3ee","0d83d16cb52df2cc","0db70a46117a5e96","0dcc8b8a7f2c3c02","0dff6f192bb908b5","0e194eb775595497","0e2b5ce9666ebd7d","0e3c60b50a5e41e9","0e7da6f0b6b56fc8","0eb923101e5caa94","0f78900c2bfbe0dc","0fb1ca6d33d36f71","0fbdfc8f6a177acb","0fc5d1846ebf115c","0ffca4a584fd5629","1035a4b5b111d8e1","10635c004caf1ef0","1120ed8088a84218","1187e5cbf1a6650b","11a37bd58fadecdd","11ace42d90540699","11e563407faa3d0c","11f921f581519451","1262a5ae14addcfa","12d41d78b2f9f358","12ecf3c81c5dba90","130896a05750800c","1385481c7882a054","13a33e7ab6941b56","13e24a433c5e3b17","13e8553897d24650","1427fd709a084818","1436d05b7903ebd7","145844cf5d8ef123","1477f3592134e9dd","148e3bbeb05d0e1e","14da72e9760eadf5","16266f55f9ed7f99","1634a7e5a7a5a225","163c3cc91c24a3d5","165d1535b18d0211","167d4a9cdc2d24b8","16b55f5c4dd63548","17196f45a0c59959","171e9129e7cd623d","176e4f58911fb948","18318d1715ab9b63","1849d7cc50fe754c","1852361afaf35db6","189df5b6d894a1d6","18e075c9e2b579a9","191ab30373f13d57","1951b63cf10f856c","1953c23da58a4ddd","19bc33de2131f03e","19c28bf1ffdda5f1","19d59262ba116b66","19d9e778b591ffa8","19e57a70f2bd3064","1a956a359a15ddfd","1aea8c98df6cfec0","1af1dcea6c26924e","1b1379a6139ecdd6","1b3ea143e5230e1b","1b49b82597d4490d","1b541543bd622333","1b6b559e37711db6","1b85a59ef044beee","1c64c3cb8f041b4b","1c713a66947235e6","1cd0128ef1ed196e","1d0ddef8fd880dd8","1d35e96236a64f0a","1d74603e3f88a2a6","1d7898474eb68a83","1da80f0e8903149e","1dce19496deeab41","1dd883e7cbc155b7","1de074fd645b8e15","1e0666627c545766","1e1632bc8024f3d8","1e4c484f71f44887","1ed6145f2b75e07b","1f1c20cb0af27bd3","1f37c3e488a84094","1f63f87ea0dac636","2015eed347e0bfab","20262be2e9b3b336","203dc0a660db4ec2","2080727ec2e671fe","20a0ddfe3a494662","213beb2c07ab8b10","2169938042eb6e24","21888bee8db2843e","21b4071a00e708f6","21ca382836ebf360","21ed50b07b37133c","2218e4ae2c268702","222ddbae87448e4e","229d4918335f72dc","22e75b33b8996a63","22e84730145271e4","22fb3382e11d4aaa","2381eff08bf9a4e4","23b62105bd19b431","23c988fd43013f35","23e69873f2c67c77","23ed673a1e9af79e","2408a482c8c43abe","241d2bf87e86a600","243b18133ef49183","2443d305d5a568c1","2475208edfbd4b86","2480710d648a01c1","248f7b97cf9f7fdb","2493f8c516e27b49","2494bba0db6a36f4","2593db3e24d2679a","26575a2ada02dffe","269a21b4b98c6c44","269d19859ab8d261","270a0db59bd4874d","2721e84e3aa985b6","27349afb6a5123f7","274a7bdb77be89c7","274ba5323dc37872","277799bba3fb2ff3","2784b128834143c4","27a69dbfad44c463","27a6e8a287aeb6d2","27a7d90f24ebd0cb","27c1e124e69264bc","281b31514c91ab3d","283c5c3d2040a56d","288e142d15dd9c2d","28a0b64021f162e4","28bb0060353eb5f8","28e1c26fd6a709e3","28eb6a034aad6493","2902f5ec656213a0","293b903af85f26e2","297fb46c0d7f64bc","29882f1b6614e617","2990ee48a1488838","29958d7163bcbebd","29a5ff13a87e70fb","2a7b470ca5b114e8","2a7de942eb148896","2aaf2cf5dd680215","2adbeffdeca2b771","2ba4b5cbb6077a23","2beb92ba367b8f42","2c09a7cede556356","2ca4a6b4e26aed88","2cd7206b14e82ffb","2d21e1f270c41fb6","2e73b76fe7882fcb","2efeab7dc34071f9","2f1baa8b5e0f57a3","2f69f5a5d9cbaa2d","2f7d62ec71476f0c","2f955285a482981d","2f9e61cc1bee497c","2fa89af267020daa","2fcaaa4ca29d8aa0","2fceffa7afab5f7f","2fe02674c2da2c8c","304e03a200f887ca","31538d59b7f335bd","315440357b0f38f5","31694b6df42cd5f5","31b9e7394f3824e1","31e6d8405db2a9d0","320607dd940f3a19","32226d2d1ab1e7f1","324cd48f8d7aee67","32b29b5d333c051d","32b709dea696ef6a","3342723f54faf313","3344bd1b8b3c0e97","33545783d03c4f6f","3368cdbe3d91b98a","337b0d8cc0e86a8c","340b5ad6c4452462","346cd7ec02513c4c","34ad2406243633ba","34d8486c96722ed4","34f03102231ede2a","3563a4ff4ec396d7","3583acfe32d1bad2","358c5f90da16d824","3665f6801adffc88","36881c2a0297bb16","36c9117b0726dbdb","37254bae448320f2","37348a60e08c54e8","373d031297e7f8fe","37447efdeb0016bd","37461e62fcf09f26","377149cee5bae6e6","3773a4c709be6943","3778d1399e8d8415","379616325462d9e2","379b32da049ce79e","37ca98f1620a1ed1","37fc59c04eb479c4","38090e6d994c061d","381c0ad0b99ae850","383f44471fb47893","394e4f597f17ff5d","395104efbc7e119b","39b1d8e2bce4de22","39d1a773f6c4c207","3a0d0d031c98375f","3a1f322a503ece62","3aee8a14abbc6230","3b0b395e1b8d3d7e","3b2d5b22a9fb09c6","3b608b8ce8b71f60","3bf3aede915b8afa","3c889099abc9749d","3ca06421c172ba8d","3cbd07bd305d6b39","3cc237502257e358","3cd9694e38383162","3cf46a4f55155baf","3d639e94d8e26bd4","3d6417140ebd127c","3da40b13f364bb77","3ddfee3cab324f14","3e3613296fa07729","3e760296dcdc510e","3ef9b279f79d0f7d","3f53132c5f2cd638","3f6ad8b4473d4710","3f7aac94af3774d4","401c069c3045a39c","412858215532f54d","41385a432474200f","4141768843eeae14","417bfd5f08e00867","417c7ece0be5864a","4186aed5388c62d9","41998754a7f29ff0","41cfb17acb2e1292","425d0a64d46d67dc","434b8030f9a515ac","434e45a1d7b4d2d5","43c9c67282eea2f2","43f9b6c351dd49ab","441517ec5a3b6a70","44a5bdcc00669340","45035b58b76e4dfc","45716d783fcc0c38","4574201690502f36","45e022c46355e118","45e0800ce129c6c0","46769f0261283356","4681b28441c056d4","46b6b3aae6d2361e","46cafa69eb832bcd","47102a718dbb23dd","4714a79f9fa46533","47a9a77c61e481a4","47b308fa71622222","47b97cfb5f7cbf7b","47c76fd628731e3a","4816b622fe0930e2","488e339eeb598f8e","48bfafeec1148436","490f2a5dbff9a611","493624addbe8fdc9","49861c3e4c454d6a","49b6db8f14c0137f","4a0c0923c5cc43db","4a41234d255e1bcd","4a6a21b05535ed7c","4a792b87c7419f4f","4a9e67d923579d8d","4aa01865adbd638d","4ab83b59c38ce051","4b017b73a1d33883","4b23844834b29e00","4b45e04f38ceebf7","4b64efaca7ebbe64","4b66598a4444a9d2","4b6a0831700bcd61","4b7dc70b462def7f","4b8005a2b776f3ae","4b818320342f45e8","4b8244391ea5335d","4bb778154da357a9","4c818e3707a64633","4dceea71c67b6c01","4e4deae5724dfd8d","4e53b5646d640324","4e8f2b9095008394","4eb5f5a6945be7f6","4ef14f41d9d14689","4efcfe4b3c077273","4f05ca2f3b0d1757","4f2cffbfe337455b","4f5dda2bd84c186f","4facb3739f0f419b","4fc92ad4e0185b4c","4fce69a581bc18ad","5004b27f18c5487b","500875c043791000","505d666cf5c7f584","511be14eef1ca806","517b4f9d9f4efce9","518198059588b49d","519fffbc5f9bd078","51c8a13b04c02ebf","51ca3e58c83b5f20","51f01b75e8a217f5","52017faa5769dbe2","52436a1ff1eeaf17","524d65b786d2a3ff","5256f52cd8eb152c","52a25288dc5c61c8","52b918d6024b7726","533d3c6602db8c22","536f0481abed28b9","53f42ecf5b30b027","541368abbf7ca4eb","54550fc799f0741b","54ab48974185c903","54d9270b9f26f843","5545ca8aa636e782","55627f5a7396ae3a","557e7421c70e0fd9","559740b5d93a6ea1","56064ccf79926d33","565eb1070a52193f","56a6f96ad2a386f6","571e49b3baa975bf","5736af39ee0e4f39","57385623e030beab","577f55e838f5a8e0","57832efaf8b06d32","5821d9f7ad1543ab","5884a98e772457ea","58d6bbfa550854f6","58f20f27c128da37","5913ddbccce7ac10","597bd93d7196d79d","598103a68b697ca2","59bb29f6bde9ed8e","59c35905221847d5","59cb5c4c417c8590","5a003812be2e6302","5a0da4d5849478a1","5a114142ab4a5e26","5aa76e9dd950147d","5ab94c38e0a61294","5ad26b1393439cbb","5b08d76a599a3882","5b0ad9c9b7fd5f95","5b0f56f78659def3","5be0b6e71b2d799b","5c5b91112f37f329","5c922e39679f5df5","5d0ea858bdeaa1a8","5d1a23b141d04fb9","5d5967de1f0d6602","5d6136d887da3750","5db25e53a5db6de3","5dd1caca830a0106","5dd5542c5bded004","5e565aa4de947ea0","5e7b2b447ac89b0c","5ef5edbecafbc48e","5f0b61f1a5fba955","5f20ff21ede26461","5f57fba5a9ed7535","5f68a469db18a5d5","5fa7222a20c6baf2","5fb5b0917b57eb19","5fc3b2386b428dd0","5fe760d3c35099b7","5ff34dc1b217c1e5","5ff608c0ff54c850","601402576908fb87","60f0366b722d6483","6101518e044f39ee","6114d946b6a7b376","6142f92699bb2c26","6156cf3a2904cc86","61ee78bc26f725ac","61eea68bbacee1eb","6232229c3a24e004","623bb1682d787efc","625f3c15b29f63e5","62acfa2adac97f52","630f9e5b85f11ea3","63374a36b36a1eee","6370eb4941d62be1","63cba296f86ac4be","63fc8478978ed1e0","64169be10fef4a2d","646d31915d763e5d","64779709fddf7c55","64d6dd1bc7b75ab3","64fefd707ecd53b0","6523c40a962f6966","65493d3ed58322aa","6566b38a5eac7076","659088225a05f46a","6616af3a56fbe19e","665eb60938547f4d","66974611be518561","66c07264218bedb4","66c82e7631de2f36","66d1e5e183a93aad","66ddc36d75dc2cb9","66e40dd62c8b608e","66e691b7d3a4856f","66fca2ef6708133b","670753aeb32d5426","670eba838b7d682f","6757a1fc29e67564","67bde92618bbc36a","6802237b6b60bbcb","682d949ba9b07b87","687cb92e2dc52eba","6904a0c6626c660a","690ae8d934f68369","69151ced7db16d55","694389e9eefb4fe9","697716e623613aae","69fb3bed36567d11","6a8b355562f7d171","6a93a633e4b00eeb","6acb7eb20ca11d76","6b56b49dab2ec0c9","6b5863a2454e6db2","6cd5321b362bbca7","6ce7323ea245ce4e","6cf709d052f7fb54","6d45635f2896448f","6dac8eabf31bf3af","6e12bb1706122aa7","6e90bda476cb2768","6e937fda92e1e3aa","6e97fd0828d27668","6ed22eaa17c8c732","6f1b88ae579caf26","6f277bfbed6177ab","6fa09d5747dcf7f3","6ff57a696a03d25d","703d239fe705edb7","70d07746bc7b2a26","70f1de4ac65d519e","70f658f67a7ad2e2","710c4ede3939f4ea","715d429e2b6619d2","716c7ce4020e80c8","71bc82ba980d55e2","71c8262102cdde71","71dc263735c986c7","71f66d3ba8195ca3","722f14be568b0c6e","7247c2c41204059c","72b64c2852da9c6c","7335731d5a11fe71","735b82233e608297","73b65eb58a538cf5","74011f2fd0953b33","742d11be2ff8dad6","746bf0a6ee20672a","747356129c18060a","7480d57d49fbf8b9","749f490e893dff7a","74b77d3ef59e7706","74e055466b69d6fa","7559c260ec6a8bb0","75ad7ba8283c6ac4","75d2edacddb7d7c0","762689915012e1f1","7673546078e62374","769a2381812af7a1","76cf0fe6baadbab2","76d5f6216ead0d41","76f364ed86a69edd","76f7511a1bbffc9a","777cd0582728df1c","77a31361e6c6c5f9","78786a4b092786bf","789e80acc30ba358","78b87530ae8fa4ac","78fbac94a7b21b5c","790093bb7be2517b","79456fb1ea3a8689","7a513e9b4e0b2013","7a834d3fa1555f23","7a930b5b13892d4f","7aa14c47574708e3","7b9cee05ee75b119","7bd62b7467d5de90","7c13c4a283c96b6a","7c3e3a3300cbf557","7c69b72e2adc98be","7c6e7946fe41552e","7cd2d494915a65cc","7dc2f1281e6f6ca8","7e5924b335e51b37","7ee60d7ba6114fd7","7eee86e8acac43c0","7f14a95c83414668","7f1b8a3e9449fc7e","7f295bd1e87121c1","7f6e0b83acaee31b","7f781a6b543743cb","7f9523fed2b8a7c6","7fc73790e9c5edd4","7ff2f9e42ff1d014","80efbddaf25850da","80fadc9bed43d4cf","81112569e7f4e2e5","812de45a62771ea6","81304de82a15ba10","8151aa7dce17843d","817e50c5222a7375","8185ba1d3537ef79","81a037d29d303e5a","81ce64f4b0d6747c","81ec24ebe4f5f363","81faae91483b4ad5","8223e572a804de72","825d8b1f0aba0bdf","829901c4107c03d8","82ba244fed2e3557","8310a7d70df84b1b","8352d381f77384ed","83a51c0a8099d576","83aa61110951c9b1","840f75b22a1a0246","8444495006959214","8450c7a123265a01","84b8b32868ad0248","8531a7b648b6a73a","854fdd691d7dacdd","8555e5135d04c5ef","8583378f901ca37b","85ac0ab835e2d1a8","86eedd3693a411e6","87732ccf13606d4f","878304604a422fb8","87b09314757ee6ac","87b23f588aee45f8","87ba64b4eb317b54","87df5ddd1c9d6031","87f65242bf8523ca","88430794988195c0","887932f8dc1319cc","888603c36c46ee2f","88f47bbc93764cbc","8901fbb4bb559a0c","8936a096f1f18016","897b25be4e61b54a","899b11bdb2ba5669","89a93759f81714cd","89dcd39168b185ad","89fd00a167786ea1","8a49179cca9c5074","8a4c314edaba44d2","8a6ae9bb659eced7","8aa1e505f3d2e315","8ab91d084b49224c","8ad6e77211669dda","8b6cb9092ac8bc9d","8b6fe763e576f6a7","8b7776c5bf7ea7f9","8c1528e86168d568","8c19a616724c05e6","8d08e008fe6ca168","8d360a3de0439589","8d4bbfa476a3091c","8d6d471a8558651a","8da735e3b6b82067","8de7b867cc38f3d7","8e1e605563be0261","8e855704a7813a08","8eaf5f3433fc2560","8ede06e297780932","8f1a89cf14229637","8f2f014f35b80a47","8f6802a5bd5d46bd","8fd5f60eb5201e9e","8ff5368015bd2a74","8fff05acad964480","901eed634de7fef3","9059609843394120","9088af0eeb791f32","90a6ff367c773626","90af968e96073c82","90c528a9b222cf55","90eae468539e89f4","911d8247ef995f7f","914f96c5ac2b6d95","91c8bc4e37e6fc42","922d244add9aabea","9289573459451af8","92f2d501ad73070d","931077e4984e1968","9310d36a823d167a","933ee57cdbae2240","93539e1f41006253","93dc45e71762effb","944b892640bf6352","94af3bb614efdbba","94e872f1173fb821","9538f2bb33109c5b","95926109870105b5","95cb52f9b901dd85","962b08add4a23015","96609e0507010a4d","96dc13e5d0872929","96e567dc325dd928","96e690df193e1e1b","9705679348952297","97237d566d738c7a","97a36c7509b08d89","97d6721878477340","97f948dcd4b8b8b4","9844f109a8a0e081","984eb1b552951e65","98508bef8917a377","987949b4e46e6210","9880c32d35cc8831","989425b069df6694","98955017b29d337f","98aa27da3edb7052","98f5214794ae7677","98fbb078057418a4","9907e63f89475b2b","990ea233aa3960c7","992eae930d108d57","992f83796b72f5ad","9939ff4f040d0b23","99411803a635286b","99437955dd75a271","997094e4b4f3ad94","999861046d773c28","99df83a1e0ae650d","9a115bcc28ad65d8","9a204df80805cf98","9a57a9245916f614","9a59af4a6db0e09a","9a7133385cc064f4","9a9d9a73addf5413","9aa84e1a6d23b5f2","9ab122e59947a17d","9ab446bf2ee89467","9ad084758570c265","9b0153db30c07cd7","9b043ebc06f4c8bc","9b0d889eec29277e","9b2866170de157a3","9b354c1837bd5654","9b6c25ccd6408880","9b7d5a79bbb65bb9","9b80e4b0d3f69a0c","9b8e33f6b8a40532","9ba6eb27f1618567","9bbf897f300499bf","9bffb90114f21b65","9c0ef31b7fa7359b","9c3b07ab5badb137","9d1bbb9913240ff9","9d469b5b9641eabf","9d9ecbcf1941ba7f","9e780544ebef0c9c","9ea51fed31e4e7d1","9ec9f010a450c8a4","9eeffde2fa6f31ea","9f23778b7014ba9f","9f3f49297aa63da9","9f60e278ee110a4c","9fa0b3cf77b201cf","9fb0e53b35a190df","a000467c533f0a40","a017b9f72819a64b","a0298ccdb0bec6a9","a04e4ffcc69a3efc","a05277b0775ff4b4","a05e15e7fae1def3","a07228a9d859fa09","a07a1a45bc0664a5","a09b39c3227a9b8f","a0b4fed9bd298dc1","a0c377bfce3579fb","a114553e7bf23586","a13c452a55142542","a19761f2af3c24f6","a1f12f61634e6369","a202f41dfac89325","a22b4d88c0bc5e24","a23f3c2aa087a0a2","a27726db501d3db3","a2efc5aa6f4097f2","a3444f65746dd191","a37ea3c24a18e52e","a3d68b7e5582c08e","a3e5e1f5def57411","a422cdc6ad23f056","a42a5389e9780d69","a464aa9001d737cc","a484eefa5729a37e","a4b3c94dbc52a55d","a4c6ff6638827c86","a4ffd7594059dec5","a504bc19efbc00e5","a57e9c107d851cdc","a6013e5b91d5ee7f","a615b442b32da7ea","a66e3347063f8a53","a69e8287cdf92887","a6cf939f59284663","a6edf04b17234bd7","a7122cd7a29a10b3","a719e37e214f32e6","a7a1fcbc98e0be90","a83fb1624f3a6e9e","a8b5b9b2245b857a","a8beb40465fba910","a8c346f98869ccdd","a8cc7f09092ce749","a8f9b1cd7fb7a0c1","a9031d78fe4b1830","a90afd7c9798aa6c","a92508feb69f787a","a931e9759e49ea21","a96cc84da1cdc9d9","a97154a5f1ca5765","a99815dee99f9c8e","a9afbd4a44acf04e","aa20c1a6ffd40f5a","aa6c6b04373e9bb8","aa7ce8ed64ffe7b9","aa8214e114a72fb1","aa94ba0c76413bbc","aa993a945aaa6858","aabfe3f808cd8e34","aaee71a51b4a7221","aaf234b80d0dcce4","aaf6b8386b904830","aafa86649354f430","ab04505b1d91f793","ab53cfefa1f8e353","ab9c39d1918744b1","abb0372a8e02e0e6","abccc3aa6854f7e2","abf1d3621912d166","ac0f7b1bb6d0cf6b","ac525b97c893bd7f","ac6c93769f0543de","ac8ed5c5a6e02da5","acc90c059c804a71","ad728cb259295cf2","ada18ce275436052","adc6c63241eca136","adf3cf02f092c376","ae0225afed0e25d7","ae083908e9e47a18","ae40303df180aa8d","ae82604fbbbd0bab","aeb443954d080109","aeb7b1209a59c26c","aebdd783159286f3","aede33bc7ffc40c4","aeef75db067af193","aef33a8f7859b4fb","aef45b387d8621c8","af6f7b996f5e45a1","af7b2c7bd03bc517","af7f5bcbab6ee16b","af8ba05cb8d3c9fc","af976006ccb9a46e","afce0c78a89f6a74","b03823cd786181dd","b03d3a6de4e7bf99","b069983bd05e619f","b08b7ba3737136af","b0b4c23690416ee6","b0bcafb1efec8765","b0f8f99de642eaed","b12598c28899346a","b1a2ac7141945c79","b1d3a08d29c1f505","b1d4dfa9d59735d5","b1e2f35ebbbe8246","b25535cb61190b27","b2797cec9ef59714","b2af8499710c305d","b2c30c512d7f6e65","b2ef68785b971168","b37b658e4002f34a","b4124238acf1f614","b43086fcc2b700fc","b4642a3972db7f05","b466182560510d41","b48afde9972826dd","b4f92fd387b0a683","b527e85bf8756307","b53583f1697d3c15","b53cdec04730fee4","b571f59dd4d914b5","b581df072539fac7","b5f416f121fe4ed5","b616aa4e55df5ab6","b6fde32fc1475137","b724064951c564b1","b72d4e5d4ec6641d","b7778f0d33f70ac9","b788bc0d6a5995e1","b78d649bb200b9fb","b7a1ee9d1bf8dc39","b7cb3aee1884cef6","b808f2247b53a288","b830024796547e27","b857ab4b1d8642ff","b8734a198c50b929","b87f0e28ff4708bc","b9448b7d1bd0fe19","b98de751c11fcabd","b99081e19d4579fd","b9c4444ecb8a3e3a","b9c814d7fb20dd33","b9ced777ff76db87","b9def3f730ba1bd3","ba2719eff92b720f","bb032da287dc1562","bb766ebf533aa52b","bb8c1cc88852dd54","bbb9614d0861f69d","bbcb7e2b26df4153","bc13cfe963474dd5","bc17ca755ee1b2fd","bc4bfc52f88825d6","bc95dcee0c74e136","bc99414854ec5f2c","bcbb0b8479ca9eb0","bcbcc16db42ce305","bce68531f41ea98d","bd01f454ac08f494","bd04059e8437906e","bd808516f33ad806","bd93ede151516ddd","bdb4a0d6a543fe9e","bddc14d62fc2c0c6","bdf6d08733723c43","be1ca15c60926148","be20db45c0314d45","be248829eab1c39d","be6cee4da34fa05d","bed25768439cf224","bee0663d32eee659","bf223a77a052f36f","bf2c159a1bb84ad6","bf3a3064ce2808e4","bf3f91a8d722ee98","bf46997257646766","bfb7b0323e4e76ae","bfc42604a004d30c","bfca9f3f84ba6b5f","c0a634f9dbfbd469","c0d35955420cce89","c0fccc9eac174f3a","c10adee843923cc8","c110c1e3510f1a23","c146bd368c37ba5a","c17cc086f9d46d42","c1b7d6eb5e99559f","c1e565bea967461a","c1faa93e8423191e","c2095e37389322bb","c21797cf970f760b","c2645d2c4072e980","c31234fc7774f9d4","c33121e0f22fba18","c35c65e66a1a353e","c39a844078d0c538","c3a3a758a46d02f4","c3bb6f087bee6d88","c3e06d531cf4644b","c462c30658716cf6","c463e2187c810240","c4d91d8885523a84","c4f296d408ed0578","c508a206423e0b62","c57c3511abb72e91","c5d13fab2a7375fb","c5d8ff9bc888952b","c5ec66543873d4c4","c66839b15332e1c1","c6bb752df2abf6f5","c6ecc2354f6cb74d","c6fd413a21510c1a","c7bcccd6d5af343e","c81e239c1907c868","c825360af32a452e","c91eea60802a41ac","c9352620b651d3c4","c93b88c40a4001d0","c977db34d7150ad0","c9ad66129bbb08ba","c9befa3433c9bfd0","c9e389fceb5bb57c","ca3007ab7021f277","ca4f1b7f1077beff","ca88cd2496b89a0c","cb664c0f00799383","cbb23167b7b2c4eb","cbb9407017d6c060","cbd0467b1bffd707","cc0fcc480f945d10","cc354232017954e2","cc81d86248eace62","cc883a45ca579fd5","ccaa76980181e508","ccf544fb26201343","cd75f468d7f43950","cd81c99cce599f8c","cdae644f96eae57b","cddf778c234bef5c","ce1b45ec37c825d8","ce560622694a6862","cee1e15a8ab1736e","cf227e0fe16d668f","cf2b3441e269ecbd","cf7500cf0eb5e2af","cf76daa2f5bed632","cf88e8109be4d808","cf95d93b90b804df","cfa97343352c85d7","cfb2912e0dd5d0e6","cfc118d049714ddc","d01ba6407e1740d0","d03b291cd3990778","d098aae0554a9c34","d0d1793fa9c957b3","d0e9976e32fc96ae","d0f3291fd30966b7","d0ffd349df770d11","d11bf88d3506e3f5","d129fe8eaa66f54e","d13b1c06ce455aa2","d14bf5d2755c32ce","d16dba3f7fc7326b","d1eb9f4340d45dcb","d1ebe1366ebd26be","d2031178aa5317e4","d253ca9da2fe1a91","d26744f5527cc155","d372f258730cbba8","d3b18e4a626ceebe","d3ba98e084f9a998","d45462f1bb731635","d4a39fd96e4deba9","d4e3a2384fa8600c","d4fa84700ebe27b0","d5056e034e7afb9f","d52d1380a8c6fd48","d54374b14c2248cd","d5790463b121ffab","d5b22617430bc51b","d5dc6b24e6ebed90","d5eb838da1020675","d6b4d001f298230d","d73ea330b2d47944","d74b767c0c122ac0","d80106b0f2b1de74","d888aedea0b252b6","d89af2c06c5c3158","d98761b14382aed9","d9a2cd80d6584fb8","d9b9e545e8e684c9","d9f87fcfc7f25957","d9fb95fa6bfc092a","da2f520c502a49c4","da33c821476e8661","da552cfd6360e615","da71db3252c6b13e","dab4aa3c461f8a14","db05931be9a0e037","db29904ab2066a92","db3e90077f25e157","db60d864fbc977a8","dbbb16a2e2673ea6","dbc5fdfa839c7086","dbeae4cdbc927329","dc2d482321f3bd77","dc65ec4e192ef36e","dc6e074eecb6d342","dc7ecc9363c3978b","dc811cc391301cf7","dc88cb85a70978ad","dcbc89d761d01b93","dcf2b410baddc8c4","dd2accd570be7c31","dd3aaefc4b150bac","dd4b2a646fea0ccc","dd50be6c09fd3f14","dd578cd108d89f05","de0c4183f8a750a7","de30fcd71a6ed83b","de457c07ff5c46cb","ded240a65b749b6a","dedf5e4f2649febb","def98db6ea7a6656","defd5b26ffc7caba","df0010401eb8270c","df235662d5cbf1e2","dff354ba101d63c6","e03e5fc921548aa5","e0468ac7a52ecb5b","e0a2e9fad3945772","e0cf122fa498296b","e11407f80f85b900","e1181f52a16e9172","e14d9923aba9d2b3","e169f50a15e903ae","e1aa631268680e36","e1c915b02a343194","e1cf84cf37cf4757","e21b1581965ef5c1","e21ee631fe5081b9","e224f37d1532e00d","e28fdf5137f600c9","e2915e47a43f7c8f","e29fd52042ddd020","e307f42b609c601f","e343d245a5d82515","e3e4437918103769","e40018c231c3acf2","e43c63cabcfd963a","e4922a0150500cdd","e49dfc937e3e546b","e4a9fab6b2eae186","e50de3203e92e754","e50e48d6df4251be","e5498a8e586411ae","e54ea53ce8889690","e5adc4abe79b515b","e5b7f67a841d596e","e5bbf37de438147d","e676904d4adb23a1","e70b16237cd7f35f","e736ece76ce08bcf","e73ac4f17adc3b6d","e77aa178eb50190c","e78a74e3c3e385eb","e7a5335ec7c6b442","e7b57ba307397793","e848b35a7c524c2a","e879ae0a0bf1328e","e93c50c4a973a334","e93cef315e66a5cd","e9581c5d202f5f71","e9a202063e4f3f46","e9c46b404fe7ed00","ea1ccc1bb293aa2f","ea38f9d09b6a9200","eabaed2306f16ab3","eb46a2650ef77721","eb71e6b4fc25db94","ebc0364d84a5d721","ec7266dca25a35d8","ec8acbe74ddc48c7","ecf245c060e5110c","ed0e99e0d4ac30d4","ed2a48a870bb043c","ed595f09fd8bcfd1","ed5c04034aba6c03","ed694c600e3c2400","ed6aa3acafee8a50","eddce9d30d678d53","edea97f29deb0de6","ee1c7ef3a2cb2963","ee4ea116e18e34e6","eec989699f22aa31","eecf5af0368365a8","eed7e583c24d9cd7","ef50cec36d9f4cbb","ef98568e7cdf4e4a","ef9cd3bc08b51c88","efb0cb5be78bc737","efde7704073b4ad8","eff47e4233d030e2","f050a1400c894d58","f0b090b24f8fffd2","f1a7004c3e67a94c","f1b6d1d40c295ec0","f1b901a835ba0970","f1d01e526088516a","f1d95323c9532483","f2b1057ac704ce2e","f2bd5fcbabf048cb","f328fb4588c76759","f3364d88eda17730","f356203a52bda12a","f361e2e9fa208615","f36daf98d945b874","f3bb253783b0e647","f3c3cc98123f4ea8","f4062f215eecc23d","f48686345ae8b78c","f4a4d86b92ed3b03","f4a5df35cf427ab1","f4db006deb514635","f51ffdafc39c77bf","f5223c4634e57bee","f5352bb420159e78","f55e257395b364d3","f5c4756cf2e05290","f5ddafdc325830f0","f621127170551df9","f6258f9f3eb19d57","f644f911f0491afd","f66e0db26802f2f6","f756efbac2ef8972","f77584543f1203c0","f89939feb22872da","f8c819954eacd07d","f8e027b60ba62fde","f90981eb6df5acff","f9a473bc7ebfc16c","f9a7172937fbee1d","f9cf2de8a84f3470","f9d6e31ea14a22c2","f9db5d72cef5a21a","f9dd3e2469ea3624","f9efd56c560431a8","fa513fe23cabf536","fa59669ab5ce2472","fa8313a11023876d","fabb806d21957949","fad38e3a82ec626e","fae2a37e8f11c4e2","fb174ad4ceca7b1c","fb4ebdb927b12a1d","fb63d43771bf1a57","fbb3e4da69e9afda","fbe30c9f976685a3","fc227b19b6b2575d","fc2d3411c4e4630d","fc484acb2bc48353","fc6826ce01fdb832","fc8489af44915adb","fc99ffc3e323f683","fcdf2612f28b8612","fcf9e8e52df3b9a1","fd150f6330ed1f3b","fd1c25a893c9a918","fd2419eda61d61d5","fd45ac65a43ff50d","fd6d78e698ceda06","fd779591da95a02d","fd95133d939ca52d","fdd226ba92050846","fdf2de0fec373feb","fe29cff9ab76e4f1","fe31bd62e7bd0ea6","fe43437abb0029c6","feb95a6bfc4737ff","ff7bcd904bec3a8c"]/*END CLIPS*/);
+function clipId(t){ let a=0x811c9dc5, b=0x9e3779b9;
+  for(let i=0;i<t.length;i++){ const c=t.charCodeAt(i); a=Math.imul(a^c,16777619); b=Math.imul(b^c,2246822519); }
+  return (a>>>0).toString(16).padStart(8,"0")+(b>>>0).toString(16).padStart(8,"0"); }
+let AUD=null, audTok=0, LAST=null;
+function audEl(){ if(!AUD){ AUD=document.createElement("audio"); AUD.setAttribute("playsinline",""); AUD.preload="auto"; AUD.style.display="none"; document.body.appendChild(AUD); } return AUD; }
+function unlockClipAudio(){ const a=audEl(); if(a.dataset.ok) return; a.dataset.ok="1";
+  try{ a.src=SILENT_WAV; const r=a.play(); if(r&&r.catch) r.catch(()=>{ delete a.dataset.ok; }); }catch(e){} }
+["pointerdown","touchend","keydown"].forEach(ev=>document.addEventListener(ev,unlockClipAudio,true));
+function playClips(ids,parts,h){
+  stopTTS(); const tok=++audTok, a=audEl(); let i=0;
+  const bail=()=>{ if(tok!==audTok) return; audTok++; ttsSay(parts.slice(Math.max(0,i-1)).join(" "),0,h); };
+  const next=()=>{ if(tok!==audTok) return;
+    if(i>=ids.length){ if(h.onend) h.onend(); return; }
+    a.onended=next; a.onerror=bail; a.src=AUDIO_DIR+ids[i++]+".m4a";
+    try{ const r=a.play(); if(r&&r.catch) r.catch(bail); }catch(e){ bail(); } };
+  next();
+}
 if(window.speechSynthesis){ loadVoices(); try{ speechSynthesis.addEventListener("voiceschanged",loadVoices); }catch(e){ speechSynthesis.onvoiceschanged=loadVoices; } }
-function say(text,rate){
+/* say(text) or say([part, part…]) — parts play back to back */
+function say(x,rate){
+  const parts=(Array.isArray(x)?x:[x]).filter(Boolean); if(!parts.length) return null;
+  const h={onend:null,onerror:null};
+  if(save.voice==="rec"&&CLIPS.size){ const ids=parts.map(p=>clipId(speakable(p)));
+    if(ids.every(id=>CLIPS.has(id))){ playClips(ids,parts,h); return h; } }
+  audTok++; try{ if(AUD) AUD.pause(); }catch(e){}
+  return ttsSay(parts.join(" "),rate,h);
+}
+function ttsSay(text,rate,h){
+  h=h||{onend:null,onerror:null};
   const ss=window.speechSynthesis; if(!ss||!text) return null;
   try{
     const make=()=>{ const u=new SpeechSynthesisUtterance(speakable(text)); u.rate=rate||0.9; u.pitch=1; u.lang="en"; const v=chosenVoice(); if(v){ try{ u.voice=v; u.lang=v.lang; }catch(e){} } return u; };
     const u=make(); SPEECH.u=u;
+    u.onend=()=>{ if(h.onend) h.onend(); }; u.onerror=()=>{ if(h.onerror) h.onerror(); };
     if(ss.speaking||ss.pending){ ss.cancel(); SPEECH.cancelAt=Date.now(); }
     const go=(utt)=>{ if(SPEECH.u!==u) return; try{ ss.resume(); }catch(e){} ss.speak(utt); };
     const wait=Math.max(0,250-(Date.now()-SPEECH.cancelAt));
@@ -368,12 +414,12 @@ function say(text,rate){
     setTimeout(()=>{ if(started||SPEECH.u!==u) return;
       const again=make(); again.onend=u.onend; again.onerror=u.onerror; again.addEventListener("start",()=>{ started=true; });
       try{ ss.cancel(); }catch(e){} SPEECH.cancelAt=Date.now(); setTimeout(()=>go(again),250); }, wait+1500);
-    return u;
+    return h;
   }catch(e){ return null; }
 }
 /* speaks only with read-aloud on; the 🔊 button always speaks */
 function narrate(html){
-  if(!save.read) return;
+  LAST=html; if(!save.read) return;
   const u=say(html), b=$("#sayBtn");
   if(u&&b){ b.classList.add("talking"); const done=()=>b.classList.remove("talking"); u.onend=done; u.onerror=done; setTimeout(done,15000); }
 }
@@ -523,7 +569,7 @@ function after(b,before){
   if(!done && !b.hide && save.read && b===B){
     clearTimeout(numTimer);
     numTimer=setTimeout(()=>{ if(b.o<10&&b.t<10) say(words(val(b)));
-      else say(`${plural(b.t,"ten")} and ${plural(b.o,"one")}`); },650);
+      else say([`${plural(b.t,"ten")} and`, plural(b.o,"one")]); },650);
   }
 }
 
@@ -608,8 +654,8 @@ function gridMove(n,tapped){
   if(GRID.trail.length>8) GRID.trail=GRID.trail.slice(-8);
   SFX.tap(); drawGrid();
   if(save.read){ clearTimeout(numTimer); numTimer=setTimeout(()=>{
-    const m={10:"ten more, ",[-10]:"ten less, ",1:"one more, ",[-1]:"one less, "}[d]||"";
-    say(m+words(n)); },350); }
+    const m={10:"ten more",[-10]:"ten less",1:"one more",[-1]:"one less"}[d];
+    say(m?[m,words(n)]:words(n)); },350); }
   stepAct(null);
 }
 
@@ -818,9 +864,9 @@ practice:()=>{ const mk=()=>{ const tA=R(3,9), oA=R(0,4), tB=R(1,tA-1), oB=R(oA+
   const [a1,b1]=mk(); const t2=R(2,9), o2a=R(0,8), o2b=R(o2a+1,9);
   const s1=R(12,89), s2=P([s1, s1+10, T(s1)*10+(O(s1)+R(1,9))%10, R(12,98)]);
   let x3=R(12,98), y3; do y3=R(12,98); while(y3===x3);
-  const d=[R(1,4),R(5,9)].sort(()=>Math.random()-.5); const d3=[]; while(d3.length<3){ const k=R(1,9); if(!d3.includes(k)) d3.push(k); }
+  const d=RNG()<.5?[R(1,4),R(5,9)]:[R(5,9),R(1,4)]; const d3=[]; while(d3.length<3){ const k=R(1,9); if(!d3.includes(k)) d3.push(k); }
   const sw=R(1,8), sw2=R(sw+1,9);
-  const side=Math.random()<.5;
+  const side=RNG()<.5;
  return [
   cmpS(side?a1:b1,side?b1:a1,"big","Tap the <b>bigger</b> number. Look at the tens first!",`Yes! ${a1} has ${T(a1)} tens and ${b1} has only ${T(b1)} — the tens decide.`),
   cmpS(t2*10+o2b,t2*10+o2a,"small","Tap the <b>smaller</b> number.",`Same tens, so look at the ones: ${o2a} is less than ${o2b}. ${t2*10+o2a} is smaller.`),
@@ -889,7 +935,8 @@ function openStation(id,practiceOnly){
   stopSpeech();
   const d=ALLST.find(s=>s.id===id);
   const lesson=practiceOnly?[]:d.lesson().map(s=>Object.assign(s,{p:false}));
-  const prac=d.practice().map(s=>Object.assign(s,{p:true}));
+  const k=(save.seed[id]||0)%NSEED; save.seed[id]=k+1; store();
+  const prac=practiceFor(d,k).map(s=>Object.assign(s,{p:true}));
   ST={d,steps:lesson.concat(prac),i:0,tries:0,stars:0,solved:false,nprac:prac.length};
   $("#map").classList.add("hidden"); $("#lesson").classList.remove("hidden");
   $("#ttl").textContent=d.icon+"  "+d.name;
@@ -939,8 +986,8 @@ function succeed(msg){
 }
 function miss(hint){
   const s=ST.steps[ST.i]; ST.tries++; SFX.wrong();
-  const h=(hint||s.hint||"Have another go.")+(ST.tries>=2&&(s.type==="ask")?" <i>Use the pumpkins to help.</i>":"");
-  feedback("hint","💡 "+h); narrate(h);
+  const h=hint||s.hint||"Have another go.", more=ST.tries>=2&&s.type==="ask";
+  feedback("hint","💡 "+h+(more?" <i>Use the pumpkins to help.</i>":"")); narrate(more?[h,"Use the pumpkins to help."]:h);
   if(ST.tries>=3){ const a=$("#acts"); if(!a.querySelector(".skip")){ const b=document.createElement("button"); b.className="btn ghost skip"; b.textContent="Skip this one"; b.onclick=next; a.appendChild(b); } }
 }
 /* every bench or grid move comes here; returns true if it finished a step */
@@ -955,12 +1002,30 @@ function checkBuild(){
   if(v===t && B.o>=10) return feedback("info",`That is ${t} pumpkins — now bundle ten loose ones so it can be written with digits.`), narrate("Now bundle ten loose ones.");
   if(v===t) return feedback("info","Right amount! Now pack ten tens into a hundred."), narrate("Now pack ten tens into a hundred.");
   if(s.hint) return miss(s.hint);
-  const th=Math.floor(t/100), tt=T(t), to=O(t), vh=Math.floor(v/100), vt=T(v), vo=O(v);
-  if(B.o>=10) return miss("Too many loose ones — bundle ten of them, then look again.");
-  if(th!==vh) return miss(th>vh?"You need a hundred. Ten tens make a hundred.":"Too many hundreds.");
-  if(tt!==vt) return miss(tt>vt?`Not enough <span class='t'>tens</span>. Look at the tens digit of ${t}.`:`Too many <span class='t'>tens</span>. Look at the tens digit of ${t}.`);
-  return miss(to>vo?`The tens are right! Not enough <span class='o'>ones</span> — look at the ones digit of ${t}.`:`The tens are right! Too many <span class='o'>ones</span> — look at the ones digit of ${t}.`);
+  const th=Math.floor(t/100), tt=T(t), to=O(t), vh=Math.floor(v/100), vt=T(v), vo=O(v), H=buildHints(t);
+  if(B.o>=10) return miss(H.loose);
+  if(th!==vh) return miss(th>vh?H.needH:H.tooH);
+  if(tt!==vt) return miss(tt>vt?H.fewT:H.manyT);
+  return miss(to>vo?H.fewO:H.manyO);
 }
+function buildHints(t){ return {
+  loose:"Too many loose ones — bundle ten of them, then look again.",
+  needH:"You need a hundred. Ten tens make a hundred.", tooH:"Too many hundreds.",
+  fewT:`Not enough <span class='t'>tens</span>. Look at the tens digit of ${t}.`,
+  manyT:`Too many <span class='t'>tens</span>. Look at the tens digit of ${t}.`,
+  fewO:`The tens are right! Not enough <span class='o'>ones</span> — look at the ones digit of ${t}.`,
+  manyO:`The tens are right! Too many <span class='o'>ones</span> — look at the ones digit of ${t}.` }; }
+const CMP_HINTS={symT:"Compare the tens first. The open side of the sign faces the bigger number.",
+  symO:"The tens are the same — compare the ones. The open side faces the bigger number.",
+  tens:"Look at the tens first. More tens means bigger.", ones:"The tens are the same. Look at the ones."};
+const CARD_HINTS={big:"The tens place is worth more. Which card should go there?",small:"For a small number, which card should go in the tens place?"};
+function cmpSymAfter(a,b){
+  const right=a>b?">":a<b?"<":"=";
+  const why=a===b?"They are the same number.":T(a)!==T(b)?`Look at the tens: ${T(a)} tens and ${T(b)} tens.`:`Same tens, so look at the ones: ${O(a)} and ${O(b)}.`;
+  return `<b>${a} ${right==="<"?"&lt;":right===">"?"&gt;":"="} ${b}</b>. ${why}`;
+}
+function cardsWant(s){ const ds=s.digits.slice().sort((x,y)=>y-x); return s.want==="big"?ds[0]*10+ds[1]:ds[ds.length-1]*10+ds[ds.length-2]; }
+function cardsAfter(s){ const want=cardsWant(s); return s.after||(s.want==="big"?`${want}! The biggest digit goes in the tens place — tens are worth more.`:`${want}! The smallest digit goes in the tens place.`); }
 function checkAsk(){
   const s=ST.steps[ST.i]; if(ST.solved||!PAD) return;
   const v=parseInt(PAD.v,10);
@@ -972,25 +1037,20 @@ function checkCmp(pick,el){
   if(s.mode==="sym"){
     const right=a>b?">":a<b?"<":"=";
     $("#sym").textContent=pick;
-    if(pick===right){
-      const w=right===">"?"is greater than":right==="<"?"is less than":"is equal to";
-      const why=a===b?"They are the same number.":T(a)!==T(b)?`Look at the tens: ${T(a)} tens and ${T(b)} tens.`:`Same tens, so look at the ones: ${O(a)} and ${O(b)}.`;
-      succeed(`${a} ${right==="<"?"&lt;":right===">"?"&gt;":"="} ${b}: ${a} ${w} ${b}. ${why}`);
-    } else { $("#sym").textContent="?"; miss(T(a)!==T(b)?"Compare the tens first. The open side of the sign faces the bigger number.":"The tens are the same — compare the ones. The open side faces the bigger number."); }
+    if(pick===right) succeed(cmpSymAfter(a,b));
+    else { $("#sym").textContent="?"; miss(T(a)!==T(b)?CMP_HINTS.symT:CMP_HINTS.symO); }
     return;
   }
   const want=s.mode==="big"?(a>b?"a":"b"):(a<b?"a":"b");
   if(pick===want){ el.classList.add("right"); succeed(s.after); }
   else { el.classList.add("wrong"); setTimeout(()=>el.classList.remove("wrong"),700);
-    miss(T(a)!==T(b)?"Look at the tens first. More tens means bigger.":"The tens are the same. Look at the ones."); }
+    miss(T(a)!==T(b)?CMP_HINTS.tens:CMP_HINTS.ones); }
 }
 function checkCards(){
   const s=ST.steps[ST.i]; if(ST.solved) return; const v=cardsValue();
   if(v===null) return feedback("info","Put a card in both places first."), narrate("Put a card in both places first.");
-  const ds=s.digits.slice().sort((x,y)=>y-x);
-  const want=s.want==="big"?ds[0]*10+ds[1]:ds[ds.length-1]*10+ds[ds.length-2];
-  if(v===want) succeed(s.after||(s.want==="big"?`${want}! The biggest digit goes in the tens place — tens are worth more.`:`${want}! The smallest digit goes in the tens place.`));
-  else miss(s.want==="big"?"The tens place is worth more. Which card should go there?":"For a small number, which card should go in the tens place?");
+  if(v===cardsWant(s)) succeed(cardsAfter(s));
+  else miss(CARD_HINTS[s.want]);
 }
 function checkGrid(){
   const s=ST.steps[ST.i]; if(ST.solved) return;
@@ -1004,8 +1064,8 @@ function finish(){
   const i=STATIONS.indexOf(d), nx=STATIONS[i+1];
   $("#work").innerHTML=`<div class="card done-card"><div class="big">🎃</div><h2 style="color:var(--gold);margin:6px 0">Lantern lit!</h2>
     <p style="font-size:20px">You finished <b>${d.name}</b>.<br>${ST.stars} of ${ST.nprac} practice ones right first time.</p></div>`;
-  const msg=`Well done! You lit the lantern for ${d.name}. ${ST.stars} of ${ST.nprac} right first time.`;
-  $("#bubble").innerHTML=msg; narrate(msg); $("#dots").innerHTML="";
+  const msg=[`Well done! You lit the lantern for ${d.name}.`,`${ST.stars} of ${ST.nprac} right first time.`];
+  $("#bubble").innerHTML=msg.join(" "); narrate(msg); $("#dots").innerHTML="";
   const b=[["Practise again",()=>openStation(d.id,true),"ghost"]];
   if(nx) b.push([`Next room: ${nx.name} →`,()=>openStation(nx.id)]);
   b.push(["All rooms",toMap,"ghost"]);
@@ -1029,20 +1089,19 @@ $("#tRead").onclick=()=>{ save.read=!save.read; store(); drawMap(); if(save.read
 $("#tSfx").onclick=()=>{ save.sfx=!save.sfx; store(); drawMap(); SFX.tap(); };
 function drawVoices(){
   const sel=$("#voiceSel"); if(!sel) return;
-  if(!window.speechSynthesis){ sel.classList.add("hidden"); $("#voiceTest").classList.add("hidden"); return; }
   const best=VOICES.find(v=>goodRank(v)<99);
   const label=v=>v.name.replace(/\s*\(English \((.*?)\)\)/,"")+(voiceTier(v)===3?" ★★":voiceTier(v)===2?" ★":"")+" · "+v.lang.replace(/^en[-_]/i,"");
-  sel.innerHTML=`<option value="auto">Voice: best (${best?label(best):"device default"})</option>`+
+  sel.innerHTML=`<option value="rec">Voice: Pumpkin King (natural)</option><option value="auto">Device voice: best (${best?label(best):"default"})</option>`+
     VOICES.map(v=>`<option value="${v.voiceURI.replace(/"/g,"&quot;")}">${label(v)}</option>`).join("")+`<option value="device">Device default</option>`;
-  sel.value=[...sel.options].some(o=>o.value===save.voice)?save.voice:"auto";
+  sel.value=[...sel.options].some(o=>o.value===save.voice)?save.voice:"rec";
 }
 $("#voiceSel").onchange=e=>{ save.voice=e.target.value; store(); say("Hello! I am the Pumpkin King. Ten ones make one ten."); };
 $("#voiceTest").onclick=()=>say("Hello! I am the Pumpkin King. Sixty-two plus ten is seventy-two.");
 drawVoices();
 $("#toMap").onclick=toMap;
 $("#skipLesson").onclick=()=>{ ST.i=ST.steps.length-ST.nprac; showStep(); };
-$("#sayBtn").onclick=()=>{ const f=$("#fb").innerHTML;
-  const u=say(f||$("#bubble").innerHTML); const b=$("#sayBtn");
+$("#sayBtn").onclick=()=>{ if(!LAST) return;
+  const u=say(LAST); const b=$("#sayBtn");
   if(u){ b.classList.add("talking"); const done=()=>b.classList.remove("talking"); u.onend=done; u.onerror=done; setTimeout(done,15000);} };
 document.addEventListener("keydown",e=>{
   if($("#lesson").classList.contains("hidden")) return;
