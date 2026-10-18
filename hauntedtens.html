@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<!--
+  Haunted Tens — tens and ones in the Pumpkin King's cellar
+  A hands-on companion to Haunted House: it explains the tens ideas behind the
+  game's Grade 1 problems and lets a child do them with pumpkins.
+  Copyright (c) 2026 m1keLima. All rights reserved.
+  No part of this tool (code, lessons, art) may be copied, modified,
+  redistributed or republished without written permission.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="copyright" content="© 2026 m1keLima. All rights reserved.">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Haunted Tens">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="darkreader-lock">
+<title>Haunted Tens</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%235b2a86'/%3E%3Crect x='12' y='10' width='14' height='44' rx='4' fill='%23ff8a1f'/%3E%3Ccircle cx='42' cy='22' r='7' fill='%23ff8a1f'/%3E%3Ccircle cx='42' cy='42' r='7' fill='%23ff8a1f'/%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%235b2a86'/%3E%3Crect x='12' y='10' width='14' height='44' rx='4' fill='%23ff8a1f'/%3E%3Ccircle cx='42' cy='22' r='7' fill='%23ff8a1f'/%3E%3Ccircle cx='42' cy='42' r='7' fill='%23ff8a1f'/%3E%3C/svg%3E">
+<style>
+:root{
+  --bg:#05040a; --bg2:#0d0a14; --ink:#f0e6d6; --dim:#a597b5;
+  --pumpkin:#ff8a1f; --gold:#ffcf5c; --good:#4fbf7a; --bad:#ff6b5c;
+  --line:#2e2140; --card:rgba(16,10,24,.9); --sky:#1c1028;
+  --tens:#b98cf0; --ones:#5fd08a; --hund:#5fb6f0;
+  --pk:22px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;min-height:100%;overscroll-behavior:none}
+body{background:radial-gradient(1200px 760px at 50% -14%,var(--sky) 0%,var(--bg2) 46%,var(--bg) 100%) fixed;
+  background-color:var(--bg);color:var(--ink);
+  font-family:"Trebuchet MS","Segoe UI",system-ui,-apple-system,sans-serif;font-size:18px;
+  -webkit-font-smoothing:antialiased;overflow-x:hidden;-webkit-user-select:none;user-select:none;touch-action:manipulation}
+#app{max-width:1100px;margin:0 auto;padding:14px 16px 40px}
+h1{font-size:clamp(40px,9vw,72px);text-align:center;line-height:1;margin:6px 0 4px;font-weight:800;
+  background:linear-gradient(180deg,#ffd469 0%,var(--pumpkin) 48%,#8c1d06 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 30px rgba(255,138,31,.25))}
+.sub{text-align:center;color:var(--dim);margin:0 0 18px;font-size:13px;letter-spacing:3px;text-transform:uppercase}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;box-shadow:0 18px 50px rgba(0,0,0,.6)}
+.hidden{display:none!important}
+button{font:inherit;color:inherit;cursor:pointer}
+.btn{background:linear-gradient(180deg,#ff9d3a,#d9620c);border:0;border-radius:12px;padding:11px 20px;font-weight:800;
+  color:#1a0800;font-size:18px;box-shadow:0 4px 0 #7a3105;min-height:48px}
+.btn:active{transform:translateY(2px);box-shadow:0 2px 0 #7a3105}
+.btn.ghost{background:#21182e;color:var(--ink);box-shadow:0 4px 0 #0c0812;border:1px solid var(--line)}
+.btn.good{background:linear-gradient(180deg,#6ee39b,#2f9c5c);box-shadow:0 4px 0 #17532f;color:#04150a}
+.btn:disabled{opacity:.35;cursor:default}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:center}
+.tog{background:#1a1324;border:1px solid var(--line);border-radius:999px;padding:7px 14px;font-size:15px;color:var(--dim)}
+.tog.on{color:var(--ink);border-color:#6b4a94;background:#2a1b3d}
+
+/* ---------- map ---------- */
+#map .intro{display:flex;gap:16px;align-items:center;margin-bottom:16px}
+#map .intro p{margin:0;font-size:18px;line-height:1.5}
+.king{width:84px;flex:none}
+.stations{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.stn{text-align:left;background:#150f1f;border:1px solid var(--line);border-radius:14px;padding:12px 14px;display:flex;gap:12px;align-items:center;min-height:84px}
+.stn:hover{border-color:#6b4a94}
+.stn .ic{font-size:30px;width:44px;text-align:center;flex:none}
+.stn .nm{font-weight:800;font-size:17px}
+.stn .ds{font-size:13.5px;color:var(--dim);margin-top:2px;line-height:1.35}
+.stn .lamp{margin-left:auto;font-size:24px;filter:grayscale(1) brightness(.45);flex:none}
+.stn.done .lamp{filter:none;text-shadow:0 0 12px rgba(255,138,31,.8)}
+.stn .num{font-size:12px;color:var(--dim);font-weight:700}
+.stn.play{background:#101a18;border-color:#244a3a}
+.grown{margin-top:16px;font-size:15px;color:var(--dim);line-height:1.55}
+.grown summary{cursor:pointer;color:var(--ink);font-weight:700}
+.foot{text-align:center;color:#5f5370;font-size:12px;margin-top:18px}
+.toplinks{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px}
+.toplinks a{color:var(--dim);font-size:14px;text-decoration:none}
+
+/* ---------- lesson ---------- */
+#bar{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+#bar .ttl{font-weight:800;font-size:20px;flex:1;min-width:150px}
+#dots{display:flex;gap:4px;flex-wrap:wrap}
+#dots i{width:10px;height:10px;border-radius:50%;background:#2e2140;display:block}
+#dots i.p{border-radius:3px}
+#dots i.done{background:var(--pumpkin)} #dots i.now{background:var(--gold);box-shadow:0 0 8px var(--gold)}
+.stage{display:grid;grid-template-columns:minmax(260px,330px) minmax(0,1fr);gap:14px;align-items:start}
+@media(max-width:820px){.stage{grid-template-columns:minmax(0,1fr)}#talk{position:static}}
+#talk{position:sticky;top:10px}
+#talk .who{display:flex;gap:10px;align-items:flex-start}
+#talk .king{width:64px}
+#bubble{background:#f6ecdc;color:#21140a;border-radius:16px;padding:14px 16px;font-size:20px;line-height:1.45;position:relative;flex:1;min-height:70px}
+#bubble:before{content:"";position:absolute;left:-10px;top:20px;border:8px solid transparent;border-right:12px solid #f6ecdc;border-left:0}
+#bubble b{color:#a2400a}
+#bubble .t{color:#7a4cc0;font-weight:800} #bubble .o{color:#1f8a4a;font-weight:800}
+.say{border:0;background:#2a1b3d;border-radius:50%;width:44px;height:44px;font-size:20px;flex:none}
+.say.talking{animation:pulse 1s infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 8px rgba(255,207,92,.25)}}
+#fb{margin-top:10px;border-radius:12px;padding:10px 14px;font-size:18px;line-height:1.4;display:none}
+#fb.hint{display:block;background:#3a2410;border:1px solid #8a5a1c;color:#ffd9a0}
+#fb.ok{display:block;background:#0f2a1a;border:1px solid #2f7a4a;color:#b9f5cf}
+#fb.info{display:block;background:#1d1530;border:1px solid #4a3570;color:#e0d4f5}
+#acts{margin-top:12px;display:flex;gap:10px;flex-wrap:wrap}
+#work{display:flex;flex-direction:column;gap:12px;min-width:0}
+
+/* ---------- the pumpkin bench ---------- */
+.bench{background:#120c1b;border:1px solid var(--line);border-radius:16px;padding:12px}
+.zones{display:flex;gap:10px;align-items:stretch}
+.zone{border-radius:12px;padding:8px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.zone.tens{flex:1.5;background:rgba(185,140,240,.07);border:1px solid rgba(185,140,240,.25)}
+.zone.ones{flex:1;background:rgba(95,208,138,.06);border:1px solid rgba(95,208,138,.25)}
+.zone.hund{flex:.9;background:rgba(95,182,240,.06);border:1px solid rgba(95,182,240,.25)}
+.zh{font-size:13px;font-weight:800;letter-spacing:2px;text-transform:uppercase;text-align:center}
+.tens .zh{color:var(--tens)} .ones .zh{color:var(--ones)} .hund .zh{color:var(--hund)}
+.pile{flex:1;display:flex;flex-wrap:wrap;gap:6px;align-content:flex-start;justify-content:center;min-height:calc(var(--pk)*10 + 40px)}
+.ones .pile{flex-direction:column;align-items:center;gap:8px}
+.zbtns{display:flex;gap:6px;justify-content:center;flex-wrap:wrap}
+.zb{border:0;border-radius:10px;padding:8px 12px;font-weight:800;font-size:17px;min-width:76px;min-height:44px}
+.tens .zb{background:#3b2858;color:#eadbff} .ones .zb{background:#173a28;color:#cff7de} .hund .zb{background:#173248;color:#d4ecff}
+.zb:disabled{opacity:.22}
+.zb.glow{animation:glow 1.1s infinite;background:var(--gold);color:#2a1a00}
+@keyframes glow{50%{box-shadow:0 0 0 7px rgba(255,207,92,.25)}}
+.pk{width:var(--pk);height:calc(var(--pk)*.86);border-radius:50% 50% 46% 46%/56% 56% 44% 44%;position:relative;flex:none;
+  background:radial-gradient(circle at 34% 32%,#ffc06a 0,#f2801b 45%,#b54a08 100%);box-shadow:inset 0 -2px 0 rgba(0,0,0,.25)}
+.pk:before{content:"";position:absolute;left:44%;top:-22%;width:14%;height:30%;background:#4a7a28;border-radius:2px}
+.pk:after{content:"";position:absolute;left:47%;top:8%;width:6%;height:80%;background:rgba(120,40,0,.35);border-radius:3px}
+.rod{display:flex;flex-direction:column;gap:2px;padding:5px 4px 4px;border:2px solid #8a5cc4;border-radius:10px;background:rgba(138,92,196,.2);position:relative;cursor:pointer}
+.rod.counted{border-color:var(--gold);background:rgba(255,207,92,.16)}
+.rod .lab{position:absolute;top:-11px;left:50%;transform:translateX(-50%);background:var(--gold);color:#2a1a00;font-size:12px;font-weight:800;border-radius:8px;padding:0 5px}
+.frame{display:grid;grid-template-columns:repeat(5,calc(var(--pk) + 6px));grid-auto-rows:calc(var(--pk) + 4px);gap:3px;padding:5px;border:2px dashed #3b5a48;border-radius:10px}
+.frame .cell{display:flex;align-items:center;justify-content:center;border-radius:6px;background:rgba(255,255,255,.025)}
+.frame.full{border-style:solid;border-color:var(--gold);box-shadow:0 0 14px rgba(255,207,92,.35)}
+.flat{display:grid;grid-template-columns:repeat(10,calc(var(--pk)*.42));gap:1px;padding:4px;border:2px solid #4c8fc4;border-radius:8px;background:rgba(76,143,196,.2);cursor:pointer}
+.flat i{display:block;width:calc(var(--pk)*.42);height:calc(var(--pk)*.42);border-radius:30%;background:#f2801b}
+.pop{animation:pop .35s ease-out}
+@keyframes pop{0%{transform:scale(.2);opacity:0}70%{transform:scale(1.15)}100%{transform:scale(1);opacity:1}}
+.fly{transition:transform .55s cubic-bezier(.5,0,.75,0),opacity .55s;}
+.burst{animation:burst .32s ease-in forwards}
+@keyframes burst{to{transform:scale(1.35);opacity:0}}
+.shake{animation:shake .35s}
+@keyframes shake{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.readout{display:flex;align-items:center;gap:16px;justify-content:center;flex-wrap:wrap;margin-top:12px}
+.digits{display:flex;gap:4px}
+.dg{display:flex;flex-direction:column;align-items:center;border-radius:12px;padding:2px 10px 6px;min-width:62px;cursor:pointer}
+.dg small{font-size:11px;letter-spacing:2px;text-transform:uppercase;font-weight:800}
+.dg span{font-size:54px;font-weight:800;line-height:1}
+.dg.t{background:rgba(185,140,240,.14);color:var(--tens)} .dg.o{background:rgba(95,208,138,.13);color:var(--ones)} .dg.h{background:rgba(95,182,240,.13);color:var(--hund)}
+.dg.flash{animation:flash .7s}
+@keyframes flash{30%{transform:scale(1.25);filter:brightness(1.6)}}
+.exp{font-size:19px;line-height:1.5;color:var(--ink);text-align:center}
+.exp .t{color:var(--tens);font-weight:800} .exp .o{color:var(--ones);font-weight:800} .exp .h{color:var(--hund);font-weight:800}
+.exp .w{color:var(--gold);font-style:italic}
+.mystery{font-size:20px;color:var(--gold);text-align:center;padding:10px}
+.bench.mini{padding:8px;--pk:13px}
+.bench.mini .zb,.bench.mini .zbtns{display:none}
+.bench.mini .pile{min-height:calc(var(--pk)*10 + 24px)}
+.bench.mini .dg span{font-size:34px}
+.bench.mini .exp{font-size:15px}
+.bench.mini .frame{grid-template-columns:repeat(5,calc(var(--pk) + 2px));grid-auto-rows:calc(var(--pk) + 1px);gap:2px;padding:3px}
+.bench.mini .zones{gap:6px}.bench.mini .zone{padding:5px}
+.bench.mini .dg{min-width:44px;padding:2px 6px 4px}
+@media(max-width:560px){:root{--pk:15px}.frame{grid-template-columns:repeat(5,calc(var(--pk) + 3px));grid-auto-rows:calc(var(--pk) + 2px);gap:2px;padding:3px}.keys{grid-template-columns:repeat(4,52px)}.zone{padding:5px}.dg span{font-size:42px}.zb{min-width:62px;font-size:15px}}
+
+/* ---------- number pad ---------- */
+.pad{background:#120c1b;border:1px solid var(--line);border-radius:16px;padding:12px;display:flex;gap:14px;align-items:center;justify-content:center;flex-wrap:wrap}
+.padshow{font-size:48px;font-weight:800;min-width:130px;text-align:center;background:#0a0710;border:2px solid #4a3570;border-radius:12px;padding:4px 10px;color:var(--gold);min-height:70px}
+.keys{display:grid;grid-template-columns:repeat(4,58px);gap:8px}
+.key{height:54px;border:0;border-radius:12px;background:#2a1b3d;font-size:26px;font-weight:800}
+.key.ok{background:linear-gradient(180deg,#6ee39b,#2f9c5c);color:#04150a}
+.key:active{transform:translateY(2px)}
+
+/* ---------- compare, cards, grid ---------- */
+.cmp{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:center}
+.cmp .side{border-radius:16px;cursor:pointer;border:3px solid transparent;transition:border-color .2s}
+.cmp .side.pick{border-color:var(--gold)}
+.cmp .side.right{border-color:var(--good)} .cmp .side.wrong{border-color:var(--bad)}
+.sym{font-size:56px;font-weight:800;color:var(--gold);width:80px;height:80px;border-radius:50%;background:#1d1530;display:flex;align-items:center;justify-content:center;border:2px dashed #4a3570}
+.symbtns{display:flex;gap:10px;justify-content:center}
+.symbtns button{width:82px;height:64px;font-size:36px;font-weight:800;border:0;border-radius:14px;background:#2a1b3d}
+@media(max-width:620px){.cmp{grid-template-columns:1fr}.sym{margin:0 auto}}
+.cards{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.dcard{width:74px;height:96px;border-radius:12px;background:#f6ecdc;color:#3a1d06;font-size:52px;font-weight:800;border:0;box-shadow:0 5px 0 #8a6a44}
+.dcard.used{opacity:.2}
+.slots{display:flex;gap:10px;justify-content:center;margin-top:12px}
+.slot{width:86px;height:110px;border-radius:12px;border:3px dashed;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:56px;font-weight:800;background:#0a0710}
+.slot small{font-size:11px;letter-spacing:2px;font-weight:800}
+.slot.t{border-color:var(--tens);color:var(--tens)} .slot.o{border-color:var(--ones);color:var(--ones)}
+.grid{display:grid;grid-template-columns:repeat(10,1fr);gap:3px;background:#120c1b;border:1px solid var(--line);border-radius:14px;padding:8px}
+.gc{aspect-ratio:1.25;border:0;border-radius:6px;background:#1d1530;font-size:clamp(11px,1.9vw,17px);font-weight:700;color:#cbbbe0;position:relative;padding:0}
+.gc.trail{background:#3b2858;color:#fff}
+.gc.bat{background:var(--pumpkin);color:#1a0800;box-shadow:0 0 12px rgba(255,138,31,.7)}
+.gc.bat:after{content:"🦇";position:absolute;top:-9px;right:-5px;font-size:15px}
+.gc.col{background:#2c2240}
+.arrows{display:grid;grid-template-columns:repeat(3,64px);grid-template-rows:repeat(2,56px);gap:6px;justify-content:center}
+.arrows button{border:0;border-radius:12px;background:#2a1b3d;font-size:17px;font-weight:800;line-height:1.05}
+.arrows small{display:block;font-size:11px;color:var(--dim)}
+.gridrow{display:flex;gap:14px;align-items:center;justify-content:center;flex-wrap:wrap}
+.trailtxt{font-size:18px;color:var(--gold);text-align:center;min-height:24px}
+.done-card{text-align:center;padding:10px}
+.done-card .big{font-size:64px}
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- ======================= MAP ======================= -->
+<section id="map">
+  <div class="toplinks"><a id="hhlink" href="hauntedhouse.html">← Haunted House</a>
+    <div class="row"><button class="tog" id="tRead">🔊 Read aloud</button><button class="tog" id="tSfx">🎵 Sounds</button></div></div>
+  <h1>Haunted Tens</h1>
+  <div class="sub">tens and ones in the Pumpkin King's cellar</div>
+  <div class="card">
+    <div class="intro"><div class="king" id="kingMap"></div>
+      <p>Even the Pumpkin King had to learn his tens! In my cellar the pumpkins come <b>one by one</b> or packed in <b>tens</b>. Pick a room, watch, then try it yourself. Every room you finish lights a lantern.</p></div>
+    <div class="stations" id="stations"></div>
+    <details class="grown"><summary>For grown-ups</summary>
+      <p>This is the explainer behind Haunted House's Grade 1 tens questions — teen numbers, tens and ones, 62 + 10, adding and taking away tens, adding ones and making a new ten, comparing, the hundred square and counting to 120. It does not ask quiz questions from a bank: each room shows the idea with pumpkins you can move, says it aloud, and then asks the child to <i>do</i> it — build a number, press + ten, bundle ten ones, move the bat on the hundred square.</p>
+      <p>A wrong try gets a hint, never the answer (the same rule as Haunted House). After three tries a Skip appears. The explanation comes after the child gets it. Rooms run in the suggested order but every room is open. Nothing leaves this device; progress is kept in this browser only.</p>
+    </details>
+  </div>
+  <div class="foot" id="ver"></div>
+</section>
+
+<!-- ======================= LESSON ======================= -->
+<section id="lesson" class="hidden">
+  <div id="bar">
+    <button class="btn ghost" id="toMap">← Rooms</button>
+    <div class="ttl" id="ttl"></div>
+    <div id="dots"></div>
+    <button class="btn ghost hidden" id="skipLesson">Skip to practice ⏭</button>
+  </div>
+  <div class="stage">
+    <div id="talk" class="card">
+      <div class="who"><div class="king" id="kingTalk"></div><div id="bubble"></div></div>
+      <div class="row" style="justify-content:flex-start;margin-top:8px"><button class="say" id="sayBtn" title="Say it again">🔊</button></div>
+      <div id="fb"></div>
+      <div id="acts"></div>
+    </div>
+    <div id="work"></div>
+  </div>
+</section>
+</div>
+
+<script>
+"use strict";
+const BUILD = 1, RELEASED = "18 Oct 2026";
+const COPYRIGHT = "© 2026 m1keLima";
+const $ = s => document.querySelector(s);
+const R = (a,b) => a + Math.floor(Math.random()*(b-a+1));
+const P = a => a[Math.floor(Math.random()*a.length)];
+const T = n => Math.floor(n/10)%10, O = n => n%10;
+
+/* ===================================================================
+   SAVE — key hauntedtens.v1, wrapped so blocked storage never breaks it
+   =================================================================== */
+const KEY="hauntedtens.v1";
+let save={done:{}, best:{}, read:true, sfx:true};
+try{ const s=JSON.parse(localStorage.getItem(KEY)||"null"); if(s) save=Object.assign(save,s); }catch(e){}
+function store(){ try{ localStorage.setItem(KEY,JSON.stringify(save)); }catch(e){} }
+
+/* ===================================================================
+   WORDS
+   =================================================================== */
+const ONESW=["zero","one","two","three","four","five","six","seven","eight","nine","ten","eleven","twelve","thirteen","fourteen","fifteen","sixteen","seventeen","eighteen","nineteen"];
+const TENSW=["","ten","twenty","thirty","forty","fifty","sixty","seventy","eighty","ninety"];
+function words(n){
+  if(n<20) return ONESW[n];
+  if(n<100) return TENSW[T(n)]+(O(n)?"-"+ONESW[O(n)]:"");
+  const h=Math.floor(n/100), r=n%100;
+  return ONESW[h]+" hundred"+(r?" "+words(r):"");
+}
+const plural=(n,w)=>n+" "+w+(n===1?"":"s");
+const tensOnes=(n)=>`<span class="t">${plural(T(n),"ten")}</span> and <span class="o">${plural(O(n),"one")}</span>`;
+
+/* ===================================================================
+   SOUND — the Haunted House rules for iPad: wake audio inside a tap,
+   play through silent mode, resume after an interruption.
+   =================================================================== */
+let AC=null, silentEl=null;
+function ac(){ if(AC===null){ try{ AC=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){ AC=false; } }
+  if(AC && AC.state!=="running" && AC.state!=="closed"){ try{ const r=AC.resume(); if(r&&r.catch) r.catch(()=>{}); }catch(e){} }
+  return AC||null; }
+const SILENT_WAV="data:audio/wav;base64,UklGRvQHAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YdAHAACAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgA==";
+function unlockAudio(){
+  try{ if(navigator.audioSession && navigator.audioSession.type!=="playback") navigator.audioSession.type="playback"; }catch(e){}
+  const c=ac();
+  if(c){ try{ const b=c.createBuffer(1,1,22050), src=c.createBufferSource(); src.buffer=b; src.connect(c.destination); src.start(0); }catch(e){} }
+  if(!silentEl && /iP(ad|hone|od)|Macintosh/.test(navigator.userAgent) && "ontouchend" in document){
+    try{ silentEl=new Audio(SILENT_WAV); silentEl.loop=true; silentEl.setAttribute("playsinline",""); const r=silentEl.play(); if(r&&r.catch) r.catch(()=>{ silentEl=null; }); }catch(e){ silentEl=null; }
+  }
+  if(c && c.state==="running" && (silentEl || !("ontouchend" in document)))
+    ["pointerdown","touchend","click","keydown"].forEach(ev=>document.removeEventListener(ev,unlockAudio,true));
+}
+["pointerdown","touchend","click","keydown"].forEach(ev=>document.addEventListener(ev,unlockAudio,true));
+document.addEventListener("visibilitychange",()=>{ if(!document.hidden && AC) ac(); });
+function tone(freq,dur,type,vol,delay,glideTo){
+  if(!save.sfx) return; const c=ac(); if(!c) return;
+  const t0=c.currentTime+(delay||0), o=c.createOscillator(), g=c.createGain();
+  o.type=type||"sine"; o.frequency.setValueAtTime(freq,t0);
+  if(glideTo) o.frequency.exponentialRampToValueAtTime(Math.max(20,glideTo),t0+dur);
+  g.gain.setValueAtTime(0.0001,t0); g.gain.exponentialRampToValueAtTime(vol||0.1,t0+0.015);
+  g.gain.exponentialRampToValueAtTime(0.0001,t0+dur);
+  o.connect(g).connect(c.destination); o.start(t0); o.stop(t0+dur+0.05);
+}
+const SFX={
+  one(){ tone(660,.09,"triangle",.08); },
+  ten(){ tone(330,.12,"triangle",.1); tone(495,.14,"triangle",.08,.06); },
+  less(){ tone(440,.1,"sine",.07,0,300); },
+  bundle(){ [523,659,784,1047].forEach((f,i)=>tone(f,.12,"triangle",.07,i*.07)); },
+  brk(){ [1047,784,659,523].forEach((f,i)=>tone(f,.1,"triangle",.06,i*.05)); },
+  right(){ tone(392,.12,"triangle",.1); tone(587,.15,"triangle",.09,.09); tone(784,.3,"triangle",.08,.18); },
+  wrong(){ tone(220,.22,"sawtooth",.05,0,160); },
+  tap(){ tone(880,.05,"sine",.05); },
+  win(){ [392,494,587,784,988].forEach((f,i)=>tone(f,.22,"triangle",.08,i*.12)); },
+  nope(){ tone(150,.12,"square",.04); }
+};
+
+/* ===================================================================
+   SPEECH — copied from Haunted House v18/v22 (read its notes): Safari
+   drops a speak() straight after cancel(), so wait 250 ms; unlock on the
+   first tap; retry once; leave the voice to the device.
+   =================================================================== */
+const SPEECH={u:null,cancelAt:0,unlocked:false};
+function unlockSpeech(){ if(SPEECH.unlocked||!window.speechSynthesis) return; SPEECH.unlocked=true;
+  try{ const u=new SpeechSynthesisUtterance(" "); u.volume=0; speechSynthesis.speak(u); }catch(e){} }
+["pointerdown","touchend","keydown"].forEach(ev=>document.addEventListener(ev,unlockSpeech,{once:true,capture:true}));
+function stopSpeech(){ try{ const ss=window.speechSynthesis; if(ss&&(ss.speaking||ss.pending)){ ss.cancel(); SPEECH.cancelAt=Date.now(); } }catch(e){} }
+function speakable(html){
+  const d=document.createElement("div"); d.innerHTML=html; let s=d.textContent||"";
+  s=s.replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}\u{FE0F}\u{200D}]/gu,"");
+  s=s.replace(/\s*\+\s*/g," plus ").replace(/\s*−\s*/g," minus ").replace(/\s*=\s*/g," equals ")
+     .replace(/\s*>\s*/g," is greater than ").replace(/\s*<\s*/g," is less than ")
+     .replace(/(^|[\s(])\?(?=[\s,.)]|$)/g,"$1what").replace(/…/g,", ").replace(/→/g," then ");
+  return s.replace(/\s+/g," ").trim();
+}
+function say(text,rate){
+  const ss=window.speechSynthesis; if(!ss||!text) return null;
+  try{
+    const make=()=>{ const u=new SpeechSynthesisUtterance(speakable(text)); u.rate=rate||0.9; u.pitch=1; u.lang="en"; return u; };
+    const u=make(); SPEECH.u=u;
+    if(ss.speaking||ss.pending){ ss.cancel(); SPEECH.cancelAt=Date.now(); }
+    const go=(utt)=>{ if(SPEECH.u!==u) return; try{ ss.resume(); }catch(e){} ss.speak(utt); };
+    const wait=Math.max(0,250-(Date.now()-SPEECH.cancelAt));
+    wait ? setTimeout(()=>go(u),wait) : go(u);
+    let started=false; u.addEventListener("start",()=>{ started=true; });
+    setTimeout(()=>{ if(started||SPEECH.u!==u) return;
+      const again=make(); again.onend=u.onend; again.onerror=u.onerror; again.addEventListener("start",()=>{ started=true; });
+      try{ ss.cancel(); }catch(e){} SPEECH.cancelAt=Date.now(); setTimeout(()=>go(again),250); }, wait+1500);
+    return u;
+  }catch(e){ return null; }
+}
+/* speaks only with read-aloud on; the 🔊 button always speaks */
+function narrate(html){
+  if(!save.read) return;
+  const u=say(html), b=$("#sayBtn");
+  if(u&&b){ b.classList.add("talking"); const done=()=>b.classList.remove("talking"); u.onend=done; u.onerror=done; setTimeout(done,15000); }
+}
+
+/* ===================================================================
+   THE PUMPKIN KING — same drawing as Haunted House (crown, not a hat)
+   =================================================================== */
+const KING_BODY = `
+  <path d="M12 72 q4 -14 20 -14 q16 0 20 14 Z" fill="#1a0a22"/>
+  <ellipse cx="32" cy="34" rx="22" ry="19" fill="#e8620f"/>
+  <ellipse cx="32" cy="34" rx="8" ry="19" fill="#ff9333" opacity=".45"/>
+  <path d="M30 14 q2 -8 7 -9 l-1 5 q-3 1 -3 4Z" fill="#3d6b22"/>
+  <path d="M18 29 l10 5 -10 5Z" fill="#1a0602"/><path d="M46 29 l-10 5 10 5Z" fill="#1a0602"/>
+  <ellipse cx="23" cy="33" rx="2" ry="2.6" fill="#ffe08a"/><ellipse cx="41" cy="33" rx="2" ry="2.6" fill="#ffe08a"/>
+  <path d="M19 44 l5 -4 4 4 4 -4 4 4 5 -4 2 6 q-12 7 -24 0Z" fill="#1a0602"/>
+  <path d="M12 23 L12 9 L20 17 L26 3 L32 13 L38 3 L44 17 L52 9 L52 23 Z" fill="#ffc83d"/>
+  <path d="M12 23 L12 9 L20 17 L26 3 L32 13 L32 23 Z" fill="#e0a416"/>
+  <rect x="11" y="21" width="42" height="7" rx="2.5" fill="#ffd869"/>
+  <rect x="11" y="25" width="42" height="3" rx="1.5" fill="#c98d0d"/>
+  <circle cx="26" cy="5" r="2.4" fill="#c4121f"/><circle cx="38" cy="5" r="2.4" fill="#c4121f"/>
+  <circle cx="32" cy="15" r="2.2" fill="#4fbf7a"/>
+  <circle cx="19" cy="24.5" r="2.2" fill="#c4121f"/><circle cx="32" cy="24.5" r="2.4" fill="#5f96e0"/>
+  <circle cx="45" cy="24.5" r="2.2" fill="#c4121f"/>`;
+const KING_SVG = `<svg viewBox="0 0 64 80" width="100%">${KING_BODY}</svg>`;
+
+/* ===================================================================
+   THE PUMPKIN BENCH — hundreds (flats), tens (stacks of ten), ones
+   (two-row ten frames). B is the bench in use; act() is every move.
+   =================================================================== */
+const ONES=["+o","-o"], TENS=["+t","-t"], ALL=["+o","-o","+t","-t","bundle","break"],
+      ALLH=ALL.concat(["bundleT","breakH"]);
+const MAXO=29, MAXT=19;
+let B=null, busy=false, numTimer=null;
+const val=b=>100*b.h+10*b.t+b.o;
+function mkBench(n,opt){
+  opt=opt||{};
+  const b=(typeof n==="number")?{h:Math.floor(n/100),t:T(n),o:O(n)}:{h:n.h||0,t:n.t||0,o:n.o||0};
+  b.allow=new Set(opt.allow||[]); b.hide=!!opt.hide; b.count=!!opt.count; b.counted=new Set();
+  b.hund=!!opt.hund || b.h>0; b.mini=!!opt.mini; b.pop=null; b.flash=null; b.label=opt.label||"";
+  return b;
+}
+function useBench(n,opt){ B=mkBench(n,opt); const w=$("#work"); w.innerHTML='<div class="bench" id="bench"></div>'; renderBench($("#bench"),B); return B; }
+
+function pkHTML(cls){ return `<div class="pk ${cls||""}"></div>`; }
+function renderBench(el,b){
+  el.className="bench"+(b.mini?" mini":"");
+  const can=a=>b.allow.has(a);
+  let html='<div class="zones">';
+  if(b.hund){
+    let flats=""; for(let i=0;i<b.h;i++){ let sq=""; for(let k=0;k<100;k++) sq+="<i></i>";
+      flats+=`<div class="flat ${b.pop==="h"&&i===b.h-1?"pop":""}" data-flat="${i}">${sq}</div>`; }
+    html+=`<div class="zone hund"><div class="zh">Hundreds</div><div class="pile">${flats}</div>
+      <div class="zbtns">${can("breakH")?`<button class="zb" data-a="breakH" ${b.h?"":"disabled"}>Open 100</button>`:""}</div></div>`;
+  }
+  let rods="";
+  for(let i=0;i<b.t;i++){ let p=""; for(let k=0;k<10;k++) p+=pkHTML();
+    const c=b.counted.has(i); rods+=`<div class="rod ${c?"counted":""} ${b.pop==="t"&&i===b.t-1?"pop":""}" data-rod="${i}">${c?`<span class="lab">${(b.countOrder.indexOf(i)+1)*10}</span>`:""}${p}</div>`; }
+  html+=`<div class="zone tens"><div class="zh">Tens</div><div class="pile" id="${b.mini?"":"tpile"}">${rods}</div>
+    <div class="zbtns">${can("+t")?`<button class="zb" data-a="+t">+ ten</button>`:""}${can("-t")?`<button class="zb" data-a="-t" ${b.t?"":"disabled"}>− ten</button>`:""}
+    ${can("bundleT")?`<button class="zb ${b.t>=10?"glow":""}" data-a="bundleT" ${b.t>=10?"":"disabled"}>Pack 10 tens</button>`:""}</div></div>`;
+  const frames=Math.max(1,Math.ceil(b.o/10));
+  let fr="";
+  for(let f=0;f<frames;f++){ let cells="";
+    for(let k=0;k<10;k++){ const i=f*10+k; cells+=`<div class="cell">${i<b.o?`<div class="pk ${b.pop==="o"&&i===b.o-1?"pop":""} ${b.pop==="o10"&&i>=b.o-10?"pop":""}" data-one="${i}"></div>`:""}</div>`; }
+    fr+=`<div class="frame ${Math.min(10,b.o-f*10)===10?"full":""}">${cells}</div>`; }
+  html+=`<div class="zone ones"><div class="zh">Ones</div><div class="pile">${fr}</div>
+    <div class="zbtns">${can("+o")?`<button class="zb" data-a="+o">+ one</button>`:""}${can("-o")?`<button class="zb" data-a="-o" ${b.o?"":"disabled"}>− one</button>`:""}</div>
+    ${can("bundle")?`<div class="zbtns"><button class="zb ${b.o>=10?"glow":""}" data-a="bundle" ${b.o>=10?"":"disabled"}>Bundle 10 ➜ a ten</button></div>`:""}</div>`;
+  html+='</div>';
+  html+=readoutHTML(b);
+  el.innerHTML=html;
+  b.pop=null;
+  el.querySelectorAll("[data-a]").forEach(x=>x.onclick=()=>act(b,x.dataset.a,el));
+  el.querySelectorAll("[data-rod]").forEach(x=>x.onclick=()=>rodTap(b,+x.dataset.rod,el));
+  el.querySelectorAll("[data-flat]").forEach(x=>x.onclick=()=>{ if(b.allow.has("breakH")) act(b,"breakH",el); });
+  el.querySelectorAll(".dg").forEach(x=>x.onclick=()=>digitTap(b,x.dataset.p));
+  if(b.flash){ const d=el.querySelector(".dg."+b.flash); if(d) d.classList.add("flash"); b.flash=null; }
+}
+function readoutHTML(b){
+  if(b.hide) return `<div class="mystery">${b.label||"How many? Count the pumpkins."}</div>`;
+  const v=val(b), canon=b.o<10&&b.t<10;
+  if(!canon){
+    const parts=[]; if(b.h) parts.push(`<span class="h">${plural(b.h,"hundred")}</span>`);
+    parts.push(`<span class="t">${plural(b.t,"ten")}</span>`, `<span class="o">${plural(b.o,"one")}</span>`);
+    const tip = b.o>=10 ? "Too many ones to write with one digit — bundle ten of them!" :
+                "That is too many tens for one digit — ten tens make a hundred.";
+    return `<div class="readout"><div class="exp">${parts.join(" and ")}<br>is <b style="color:var(--gold)">${v}</b> pumpkins.<br><small style="color:var(--dim)">${tip}</small></div></div>`;
+  }
+  const dig=[]; if(b.hund||b.h) dig.push(`<div class="dg h" data-p="h"><small>hundreds</small><span>${b.h}</span></div>`);
+  dig.push(`<div class="dg t" data-p="t"><small>tens</small><span>${b.t}</span></div>`,`<div class="dg o" data-p="o"><small>ones</small><span>${b.o}</span></div>`);
+  const sum=[]; if(b.h) sum.push(`<span class="h">${b.h*100}</span>`); sum.push(`<span class="t">${b.t*10}</span>`,`<span class="o">${b.o}</span>`);
+  const desc=(b.h?`<span class="h">${plural(b.h,"hundred")}</span>, `:"")+`<span class="t">${plural(b.t,"ten")}</span> and <span class="o">${plural(b.o,"one")}</span>`;
+  return `<div class="readout"><div class="digits">${dig.join("")}</div>
+    <div class="exp">${desc}<br>${sum.join(" + ")} = <b style="color:var(--gold)">${v}</b><br><span class="w">${words(v)}</span></div></div>`;
+}
+function digitTap(b,p){
+  if(b.hide) return; SFX.tap();
+  if(p==="t") say(`The ${b.t} is in the tens place. ${plural(b.t,"ten")} is ${b.t*10}.`);
+  else if(p==="o") say(`The ${b.o} is in the ones place. It is worth ${b.o}.`);
+  else say(`The ${b.h} is in the hundreds place. It is worth ${b.h*100}.`);
+}
+function rodTap(b,i,el){
+  if(b.allow.has("break")) return act(b,"break",el,i);
+  if(b.count && !b.counted.has(i)){
+    b.countOrder=b.countOrder||[]; b.counted.add(i); b.countOrder.push(i);
+    SFX.ten(); say(words(b.counted.size*10)); renderBench(el,b); stepAct(b); return;
+  }
+  el.querySelector(`[data-rod="${i}"]`).classList.add("shake"); SFX.nope();
+}
+function act(b,a,el,rodIdx){
+  if(busy) return;
+  if(!b.allow.has(a)){ SFX.nope(); return; }
+  const before={h:b.h,t:b.t,o:b.o};
+  if(a==="+o"){ if(b.o>=MAXO||val(b)>=199) return SFX.nope(); b.o++; b.pop="o"; SFX.one(); b.flash="o"; }
+  else if(a==="-o"){ if(!b.o) return SFX.nope(); b.o--; SFX.less(); b.flash="o"; }
+  else if(a==="+t"){ if(b.t>=MAXT||val(b)+10>199) return SFX.nope(); b.t++; b.pop="t"; SFX.ten(); b.flash="t"; }
+  else if(a==="-t"){ if(!b.t) return SFX.nope(); b.t--; SFX.less(); b.flash="t"; }
+  else if(a==="bundleT"){ if(b.t<10) return SFX.nope(); b.t-=10; b.h++; b.pop="h"; SFX.bundle(); b.hund=true; }
+  else if(a==="breakH"){ if(!b.h||b.t+10>MAXT) return SFX.nope(); b.h--; b.t+=10; SFX.brk(); }
+  else if(a==="bundle"){
+    if(b.o<10) return SFX.nope();
+    /* the ten loose ones fly across to the tens, then the stack appears */
+    busy=true; SFX.bundle();
+    const pile=el.querySelector(".zone.tens .pile"), pr=pile.getBoundingClientRect();
+    const tx=pr.left+pr.width/2, ty=pr.top+pr.height/2;
+    [...el.querySelectorAll("[data-one]")].slice(0,10).forEach((p,k)=>{
+      const r=p.getBoundingClientRect(); p.classList.add("fly");
+      p.style.transitionDelay=(k*25)+"ms";
+      requestAnimationFrame(()=>{ p.style.transform=`translate(${tx-r.left-r.width/2}px,${ty-r.top-r.height/2+ (k-5)*3}px) scale(.7)`; });
+    });
+    setTimeout(()=>{ busy=false; b.o-=10; b.t++; b.pop="t"; b.flash="t"; renderBench(el,b); after(b,before); },720);
+    return;
+  }
+  else if(a==="break"){
+    if(!b.t||b.o+10>MAXO) return SFX.nope();
+    busy=true; SFX.brk();
+    const idx=rodIdx===undefined?b.t-1:rodIdx, rod=el.querySelector(`[data-rod="${idx}"]`);
+    if(rod) rod.classList.add("burst");
+    setTimeout(()=>{ busy=false; b.t--; b.o+=10; b.pop="o10"; b.flash="o"; renderBench(el,b); after(b,before); },340);
+    return;
+  }
+  renderBench(el,b); after(b,before);
+}
+function after(b,before){
+  const done=stepAct(b);
+  /* say the new number's name, unless the step just finished and is talking */
+  if(!done && !b.hide && save.read && b===B){
+    clearTimeout(numTimer);
+    numTimer=setTimeout(()=>{ if(b.o<10&&b.t<10) say(words(val(b)));
+      else say(`${plural(b.t,"ten")} and ${plural(b.o,"one")}`); },650);
+  }
+}
+
+/* ===================================================================
+   OTHER TOOLS: number pad, compare, digit cards, hundred square
+   =================================================================== */
+let PAD=null;
+function usePad(){
+  const w=$("#work"), d=document.createElement("div"); d.className="pad"; d.id="pad";
+  d.innerHTML=`<div class="padshow" id="padshow">?</div><div class="keys">${[7,8,9,"⌫",4,5,6,"",1,2,3,"",0].map(k=>
+    k===""?"<span></span>":`<button class="key" data-k="${k}">${k}</button>`).join("")}<button class="key ok" data-k="ok" style="grid-column:span 3">OK ✓</button></div>`;
+  w.appendChild(d); PAD={v:""};
+  d.querySelectorAll("[data-k]").forEach(x=>x.onclick=()=>padKey(x.dataset.k));
+}
+function padKey(k){
+  if(!PAD) return;
+  if(k==="ok"){ if(PAD.v!=="") checkAsk(); return; }
+  if(k==="⌫") PAD.v=PAD.v.slice(0,-1); else if(PAD.v.length<3) PAD.v=(PAD.v+k).replace(/^0(\d)/,"$1");
+  SFX.tap(); $("#padshow").textContent=PAD.v===""?"?":PAD.v;
+}
+
+let CMP=null;
+function useCmp(a,b2,mode){
+  const w=$("#work"); CMP={a,b:b2,mode,picked:null};
+  w.innerHTML=`<div class="cmp"><div class="side" data-s="a"><div class="bench mini" id="cmpA"></div></div>
+    <div class="sym" id="sym">?</div><div class="side" data-s="b"><div class="bench mini" id="cmpB"></div></div></div>
+    ${mode==="sym"?`<div class="symbtns"><button data-y="&lt;">&lt;</button><button data-y="=">=</button><button data-y="&gt;">&gt;</button></div>`:""}`;
+  renderBench($("#cmpA"),mkBench(a,{mini:true})); renderBench($("#cmpB"),mkBench(b2,{mini:true}));
+  w.querySelectorAll(".side").forEach(s=>s.onclick=()=>{ if(mode==="sym"||mode==="show"||ST.solved) return; checkCmp(s.dataset.s,s); });
+  w.querySelectorAll("[data-y]").forEach(x=>x.onclick=()=>{ if(ST.solved) return; checkCmp(x.textContent,x); });
+}
+
+let CARDS=null;
+function useCards(digits){
+  CARDS={d:digits,slot:[null,null]};
+  $("#work").innerHTML=`<div class="bench"><div class="cards" id="cardrow"></div>
+    <div class="slots"><div class="slot t" data-sl="0"><small>TENS</small><b id="sl0"></b></div><div class="slot o" data-sl="1"><small>ONES</small><b id="sl1"></b></div></div></div>
+    <div class="bench mini" id="cardBench"></div>`;
+  drawCards();
+}
+function drawCards(){
+  const used=CARDS.slot.filter(x=>x!==null);
+  $("#cardrow").innerHTML=CARDS.d.map((d,i)=>`<button class="dcard ${used.includes(i)?"used":""}" data-c="${i}">${d}</button>`).join("");
+  $("#cardrow").querySelectorAll("[data-c]").forEach(x=>x.onclick=()=>{ const i=+x.dataset.c; if(used.includes(i)||ST.solved) return;
+    const e=CARDS.slot.indexOf(null); if(e<0) return; CARDS.slot[e]=i; SFX.tap(); drawCards(); });
+  document.querySelectorAll("[data-sl]").forEach(x=>x.onclick=()=>{ if(ST.solved) return; CARDS.slot[+x.dataset.sl]=null; SFX.less(); drawCards(); });
+  [0,1].forEach(k=>$("#sl"+k).textContent=CARDS.slot[k]===null?"":CARDS.d[CARDS.slot[k]]);
+  const full=CARDS.slot.every(x=>x!==null);
+  const n=full?CARDS.d[CARDS.slot[0]]*10+CARDS.d[CARDS.slot[1]]:null;
+  const cb=$("#cardBench");
+  if(full){ cb.classList.remove("hidden"); renderBench(cb,mkBench(n,{mini:true})); } else { cb.classList.add("hidden"); }
+}
+const cardsValue=()=>CARDS.slot.every(x=>x!==null)?CARDS.d[CARDS.slot[0]]*10+CARDS.d[CARDS.slot[1]]:null;
+
+let GRID=null;
+function useGrid(start,opt){
+  opt=opt||{};
+  GRID={pos:start,max:opt.max||100,trail:[start],free:!!opt.free,col:opt.col||null};
+  const w=$("#work");
+  w.innerHTML=`<div class="grid" id="grid"></div>
+    <div class="gridrow"><div class="arrows">
+      <span></span><button data-m="-10">⬆<small>ten less</small></button><span></span>
+      <button data-m="-1">⬅<small>one less</small></button><button data-m="10">⬇<small>ten more</small></button><button data-m="1">➡<small>one more</small></button></div>
+      <div class="trailtxt" id="trailtxt"></div></div>
+    ${GRID.free?'<div class="bench mini" id="gridBench"></div>':""}`;
+  w.querySelectorAll("[data-m]").forEach(x=>x.onclick=()=>gridMove(GRID.pos+(+x.dataset.m)));
+  drawGrid();
+}
+function drawGrid(){
+  let h=""; for(let n=1;n<=GRID.max;n++){
+    const c=n===GRID.pos?"bat":GRID.trail.includes(n)?"trail":(GRID.col!==null&&n%10===GRID.col?"col":"");
+    h+=`<button class="gc ${c}" data-n="${n}">${n}</button>`; }
+  $("#grid").innerHTML=h;
+  $("#grid").querySelectorAll("[data-n]").forEach(x=>x.onclick=()=>gridMove(+x.dataset.n,true));
+  $("#trailtxt").textContent=GRID.trail.join(" → ");
+  if(GRID.free) renderBench($("#gridBench"),mkBench(GRID.pos,{mini:true,hund:GRID.pos>=100}));
+}
+function gridMove(n,tapped){
+  if(n<1||n>GRID.max||ST.solved&&!GRID.free){ SFX.nope(); return; }
+  const d=n-GRID.pos; GRID.pos=n;
+  if(tapped&&!GRID.free) GRID.trail.push(n); else if(tapped) GRID.trail=[n]; else GRID.trail.push(n);
+  if(GRID.trail.length>8) GRID.trail=GRID.trail.slice(-8);
+  SFX.tap(); drawGrid();
+  if(save.read){ clearTimeout(numTimer); numTimer=setTimeout(()=>{
+    const m={10:"ten more, ",[-10]:"ten less, ",1:"one more, ",[-1]:"one less, "}[d]||"";
+    say(m+words(n)); },350); }
+  stepAct(null);
+}
+
+/* ===================================================================
+   STEPS — a room is a lesson (watch and do) then practice (do it alone).
+   say: just listen · do: make the bench match · build: make a number and
+   Check · ask: work it out (pumpkins to help) and type it · cmp: tap the
+   bigger/smaller or pick < = > · cards: make a number from digit cards ·
+   grid: move the bat on the hundred square · free: play.
+   The rule from Haunted House: a wrong try gets a HINT, never the answer;
+   the explanation comes once it is right.
+   =================================================================== */
+const sayS=(text,setup)=>({type:"say",text,setup});
+const doS=(text,setup,check,after,hint)=>({type:"do",text,setup,check,after,hint});
+const buildS=(target,text,setup,after,hint)=>({type:"build",target,text:text||`Make <b>${target}</b> with the pumpkins. Then tap <b>Check</b>.`,
+  setup:setup||(()=>useBench(0,{allow:ALL})),after:after||`Yes! ${target} is ${target>=100?"one hundred, ":""}${tensOnes(target%100)}.`,hint});
+const askS=(text,ans,setup,hint,after)=>({type:"ask",text,ans,setup,hint,after:after||`Yes, it is ${ans}!`});
+const cmpS=(a,b,mode,text,after)=>({type:"cmp",a,b,mode,text,after});
+const cardsS=(digits,want,text,after)=>({type:"cards",digits,want,text,after});
+const gridS=(start,target,text,hint,after,opt)=>({type:"grid",start,target,text,hint,after,opt});
+
+/* -------- room 1: ten ones make a ten -------- */
+const ST1={id:"bundle",icon:"🎃",name:"Ten ones make a ten",desc:"Fill the frame, then pack ten pumpkins into one ten.",
+lesson:()=>[
+  sayS("This is one pumpkin. One pumpkin on its own is called a <b>one</b>.",()=>useBench({o:1})),
+  doS("Tap <b>+ one</b> until the frame is full.",()=>useBench({o:1},{allow:ONES}),b=>b.o===10,
+      "Ten ones! The frame is full.","Keep tapping <b>+ one</b> and watch the frame fill up."),
+  sayS("Ten ones can be packed together into one stack. A stack of ten is called a <b>ten</b>.",()=>useBench({o:10})),
+  doS("Tap <b>Bundle</b> to pack them into a ten.",()=>useBench({o:10},{allow:["bundle"]}),b=>b.t===1&&b.o===0,
+      "That is <b>one ten</b>. It is still ten pumpkins — just packed up.","The yellow Bundle button is under the ones."),
+  doS("Now tap the stack of ten to open it again.",()=>useBench({t:1},{allow:["break"]}),b=>b.t===0&&b.o===10,
+      "Ten ones again! <b>One ten is the same as ten ones.</b>","Tap right on the purple stack."),
+  askS("How many pumpkins are in one ten?",10,()=>useBench({t:1}),"Open the ten in your head — how many ones were inside?","Ten! A ten always holds ten ones."),
+  doS("Here are three tens. Tap each stack to count them in tens.",()=>useBench({t:3},{count:true}),b=>b.counted.size===3,
+      "Ten, twenty, <b>thirty</b>. Three tens is thirty.","Tap each purple stack, one at a time.")
+],
+practice:()=>{ const k=R(4,9), k2=P([2,3,5,6].filter(x=>x!==k)), k3=R(2,8), t0=R(1,4), r=R(1,9);
+ return [
+  askS("How many pumpkins? Tap the stacks to count in tens.",k*10,()=>useBench({t:k},{hide:true,count:true}),
+       "Tap each stack and count in tens: ten, twenty, thirty…",`${plural(k,"ten")} is ${k*10} — ${words(k*10)}.`),
+  doS("Pack the ten loose pumpkins into a ten.",()=>useBench({t:t0,o:10},{allow:["bundle"]}),b=>b.o===0,
+      `Now there are ${t0+1} tens. ${plural(t0+1,"ten")} is ${(t0+1)*10}.`,"Use the yellow Bundle button."),
+  buildS(k2*10,`Make <b>${k2*10}</b> using only tens. Then tap <b>Check</b>.`,()=>useBench(0,{allow:TENS}),`${plural(k2,"ten")} is ${k2*10}.`),
+  askS(`How many tens make ${k3*10}?`,k3,()=>useBench(0,{allow:TENS,hide:true,label:"Add tens and count: ten, twenty, thirty…"}),
+       "Add tens one at a time and count in tens. Stop when you say the number.",`${plural(k3,"ten")} make ${k3*10}.`),
+  askS("How many pumpkins are there?",10+r,()=>useBench({o:10+r},{allow:["bundle"],hide:true}),
+       "Bundle ten ones into a ten first. Then it is one ten and the ones left over.",`One ten and ${plural(r,"one")} is ${10+r}.`)
+ ]; }};
+
+/* -------- room 2: teen numbers -------- */
+const ST2={id:"teens",icon:"👻",name:"Ten and some more",desc:"11 to 19: one ten and some ones. 14 is 10 + 4.",
+lesson:()=>[
+  sayS("Here is one ten.",()=>useBench({t:1})),
+  doS("Add <b>4</b> ones.",()=>useBench({t:1},{allow:ONES}),b=>b.t===1&&b.o===4,
+      "One ten and four ones make <b>fourteen</b>. 10 + 4 = 14.","Tap <b>+ one</b> four times. Too many? Use <b>− one</b>."),
+  sayS("Look at 14. The <span class='t'>1</span> means one ten. The <span class='o'>4</span> means four ones. Tap a digit to hear it.",()=>useBench(14)),
+  sayS("Every number from 11 to 19 is <b>one ten and some ones</b>. 17 is one ten and seven ones.",()=>useBench(17))
+],
+practice:()=>{ const n1=R(11,19), n2=P([12,13,15,16,18].filter(x=>x!==n1)), r=R(1,9), r2=R(2,9), a=R(6,9), b=R(11-a,9), n3=R(11,15), g=R(2,9);
+ return [
+  buildS(n1),
+  askS(`${n2} is ten and how many more?`,n2-10,()=>useBench({t:1},{allow:ONES,hide:true,label:`Add ones until you have ${n2}.`}),
+       "Start with the ten. Add ones and count on from ten.",`${n2} is ten and ${n2-10}.`),
+  askS("What number do the pumpkins show?",10+r,()=>useBench({t:1,o:r},{hide:true}),"Say ten for the stack, then count on with the ones.",`One ten and ${plural(r,"one")} is ${10+r}.`),
+  askS(`10 + ${r2} = ?`,10+r2,()=>useBench({t:1},{allow:ONES,hide:true}),"Ten and some ones: the ones digit is the number you added.",`10 + ${r2} = ${10+r2}.`),
+  askS(`There are 10 ghosts in a row and ${g} more in the garden. How many ghosts?`,10+g,()=>useBench({t:1},{allow:ONES,hide:true}),
+       "The row of ten is a ten. Add the others as ones.",`10 and ${g} more is ${10+g}.`),
+  askS(`${a} + ${b} = ?`,a+b,()=>useBench({o:a},{allow:["+o","-o","bundle"],hide:true,label:`Add ${b} ones. When the frame is full, bundle a ten.`}),
+       "Add the ones one at a time. When the frame is full, bundle it into a ten. Then count.",`${a} + ${b} = ${a+b}: one ten and ${plural(a+b-10,"one")}.`),
+  doS(`Make <b>${n3}</b> using only <b>+ one</b>. Then bundle a ten.`,()=>useBench(0,{allow:["+o","-o","bundle"]}),b=>b.t===1&&b.o===n3-10,
+      `${n3} ones is the same as one ten and ${plural(n3-10,"one")}.`,`Count the ones up to ${n3}, then use Bundle.`)
+ ]; }};
+
+/* -------- room 3: tens and ones up to 99 -------- */
+const ST3={id:"tensones",icon:"🏚️",name:"Tens and ones",desc:"34 is 3 tens and 4 ones. What each digit is worth.",
+lesson:()=>[
+  sayS("This is <span class='t'>3 tens</span> and <span class='o'>4 ones</span>. That makes <b>34</b>.",()=>useBench(34)),
+  sayS("The digit on the <b>left</b> says how many <span class='t'>tens</span>. The digit on the <b>right</b> says how many <span class='o'>ones</span>. Tap a digit to hear it.",()=>useBench(34)),
+  buildS(25,"Your turn. Make <b>25</b>. Then tap <b>Check</b>."),
+  sayS("Now watch. <b>52</b> uses the same digits as 25 — but it is <span class='t'>5 tens</span> and <span class='o'>2 ones</span>. Much more!",()=>useBench(52)),
+  buildS(52,"Make <b>52</b>. Then tap <b>Check</b>."),
+  sayS("A number with no ones, like <b>40</b>, is just tens. The 0 says: no loose ones.",()=>useBench(40))
+],
+practice:()=>{ const pick=()=>{ let n; do n=R(21,98); while(T(n)===O(n)||!O(n)); return n; };
+  const n1=pick(), n2=pick(), n3=pick(), n4=pick(), n5=pick(), t=R(2,9), o=R(1,9), z=R(3,9)*10;
+ return [
+  buildS(n1),
+  askS("What number do the pumpkins show?",n2,()=>useBench(n2,{hide:true}),"Count the stacks in tens first, then count on the ones.",`${tensOnes(n2)} is ${n2}.`),
+  askS(`How many tens are in ${n3}?`,T(n3),()=>useBench(0,{allow:ALL}),"Build it if it helps. Count the purple stacks.",`${n3} is ${tensOnes(n3)}.`),
+  askS(`In ${n4}, what is the ${T(n4)} worth?`,T(n4)*10,()=>useBench(0,{allow:ALL}),`Which place is the ${T(n4)} in? Each ten is worth ten.`,`The ${T(n4)} is in the tens place: ${plural(T(n4),"ten")} is ${T(n4)*10}.`),
+  askS(`${n5} = ? + ${O(n5)}`,T(n5)*10,()=>useBench(0,{allow:ALL}),"Split it into the tens and the ones. Which part is missing?",`${n5} = ${T(n5)*10} + ${O(n5)}.`),
+  askS(`${t} tens and ${o} ones make what number?`,t*10+o,()=>useBench(0,{allow:ALL,hide:true,label:"Build it and count."}),
+       "The tens give the left digit, the ones give the right digit.",`${tensOnes(t*10+o)} is ${t*10+o}.`),
+  buildS(z,`Make <b>${z}</b>. Then tap <b>Check</b>.`)
+ ]; }};
+
+/* -------- room 4: ten more, ten less (62 + 10) -------- */
+const ST4={id:"tenmore",icon:"⬆️",name:"Ten more, ten less",desc:"62 + 10 = 72. Only the tens digit changes.",
+lesson:()=>[
+  sayS("Here is <b>62</b>: <span class='t'>6 tens</span> and <span class='o'>2 ones</span>.",()=>useBench(62)),
+  doS("Tap <b>+ ten</b> once to add ten more.",()=>useBench(62,{allow:["+t"]}),b=>b.t===7,
+      "Look! Only the <span class='t'>tens</span> changed: 6 tens became 7 tens. The 2 ones stayed. <b>62 + 10 = 72</b>.","Tap the <b>+ ten</b> button."),
+  doS("Now tap <b>− ten</b> two times.",()=>useBench(72,{allow:["-t","+t"]}),b=>b.t===5,
+      "72 − 10 = 62, then 62 − 10 = <b>52</b>. Ten less takes away one ten.","Tap <b>− ten</b> until 72 becomes two tens smaller."),
+  sayS("<b>+ one</b> changes the <span class='o'>ones</span> digit. <b>+ ten</b> changes the <span class='t'>tens</span> digit. 45 + 1 = 46, but 45 + 10 = 55.",()=>useBench(45,{allow:["+o","-o","+t","-t"]}))
+],
+practice:()=>{ const n=R(11,89), m=R(21,98), k=R(11,89), l=R(21,98), p=P([23,34,45,56,67,71,82]), s=R(12,79), d=R(11,79);
+ return [
+  askS(`${n} + 10 = ?`,n+10,()=>useBench(n,{allow:TENS,hide:true,label:`The pumpkins show ${n}. Use them if you like.`}),
+       "Ten more is one more ten. Which digit changes?",`${n} + 10 = ${n+10}. ${T(n)} tens became ${T(n)+1} tens; the ${O(n)} ones stayed.`),
+  askS(`${m} − 10 = ?`,m-10,()=>useBench(m,{allow:TENS,hide:true,label:`The pumpkins show ${m}.`}),
+       "Ten less is one ten fewer. The ones stay the same.",`${m} − 10 = ${m-10}.`),
+  askS(`What is ten more than ${k}?`,k+10,()=>useBench(k,{allow:TENS,hide:true,label:`The pumpkins show ${k}.`}),"Add one ten. Only the tens digit changes.",`Ten more than ${k} is ${k+10}.`),
+  askS(`What is ten less than ${l}?`,l-10,()=>useBench(l,{allow:TENS,hide:true,label:`The pumpkins show ${l}.`}),"Take away one ten.",`Ten less than ${l} is ${l-10}.`),
+  askS(`Careful! ${p} + 1 = ?`,p+1,()=>useBench(p,{allow:["+o","-o","+t","-t"],hide:true,label:`The pumpkins show ${p}.`}),
+       "Plus ONE, not plus ten. Which digit changes when you add one?",`${p} + 1 = ${p+1}. Adding one changes the ones.`),
+  doS(`Start at ${s}. Make it <b>ten more</b>.`,()=>useBench(s,{allow:ALL}),b=>val(b)===s+10&&b.o<10,`${s} + 10 = ${s+10}.`,"Add one ten — not one one."),
+  askS(`${d} + 10 + 10 = ?`,d+20,()=>useBench(d,{allow:TENS,hide:true,label:`The pumpkins show ${d}.`}),"Two jumps of ten: add two tens.",`${d} + 10 = ${d+10}, then ${d+10} + 10 = ${d+20}.`)
+ ]; }};
+
+/* -------- room 5: jumping in tens -------- */
+const ST5={id:"jumps",icon:"🦇",name:"Jumping in tens",desc:"62 + 20, 77 − 30, counting in tens from any number.",
+lesson:()=>[
+  sayS("Adding tens is just <b>ten more</b>, again and again.",()=>useBench(34)),
+  doS("Add <b>3 tens</b> to 34.",()=>useBench(34,{allow:TENS}),b=>b.t===6,
+      "34 → 44 → 54 → <b>64</b>. So 34 + 30 = 64. The 4 ones never moved.","Tap <b>+ ten</b> three times. Count: 44, 54, …"),
+  doS("Now take away <b>2 tens</b>.",()=>useBench(64,{allow:TENS}),b=>b.t===4,"64 → 54 → <b>44</b>. So 64 − 20 = 44.","Tap <b>− ten</b> two times."),
+  doS("Start at 7 and tap <b>+ ten</b> again and again. Listen: the ones digit never changes!",()=>useBench(7,{allow:["+t"]}),b=>b.t>=4,
+      "7, 17, 27, 37, 47… counting in tens keeps the same ones.","Keep tapping <b>+ ten</b>."),
+  sayS("Tens and tens: <b>40 + 30</b> is 4 tens and 3 tens — 7 tens, which is 70.",()=>useBench(70))
+],
+practice:()=>{ const a=R(11,59), k=R(2,4), b=R(51,98), j=R(2,4), s=R(1,9)+10*R(0,3), f=R(41,98), g=R(2,Math.min(4,T(f))), x=R(1,5), y=R(1,9-x), sp=R(21,59), sj=R(2,3), mm=R(12,49), mk=R(2,4);
+ return [
+  askS(`${a} + ${k*10} = ?`,a+k*10,()=>useBench(a,{allow:TENS,hide:true,label:`The pumpkins show ${a}.`}),`${k*10} is ${k} tens. Add them one ten at a time.`,`${a} + ${k*10} = ${a+k*10}.`),
+  askS(`${b} − ${j*10} = ?`,b-j*10,()=>useBench(b,{allow:TENS,hide:true,label:`The pumpkins show ${b}.`}),`${j*10} is ${j} tens. Take them away one ten at a time.`,`${b} − ${j*10} = ${b-j*10}.`),
+  askS(`Keep counting in tens: ${s}, ${s+10}, ${s+20}, ?`,s+30,()=>useBench(s+20,{allow:TENS,hide:true}),"Counting in tens: the ones digit stays the same.",`${s+20} + 10 = ${s+30}.`),
+  askS(`The cauldron holds ${f} frogs. ${g} groups of ten hop out. How many frogs are left?`,f-g*10,()=>useBench(f,{allow:TENS,hide:true,label:`The pumpkins show ${f} frogs.`}),
+       "Each group of ten is one ten. Take that many tens away.",`${f} − ${g*10} = ${f-g*10}.`),
+  askS(`${x*10} + ${y*10} = ?`,(x+y)*10,()=>useBench(x*10,{allow:TENS,hide:true}),`${x} tens and ${y} tens. How many tens is that?`,`${x} tens + ${y} tens = ${x+y} tens = ${(x+y)*10}.`),
+  askS(`A spider has climbed ${sp} steps. It climbs ${sj*10} more. How many steps is that?`,sp+sj*10,()=>useBench(sp,{allow:TENS,hide:true}),
+       `${sj*10} more is ${sj} more tens.`,`${sp} + ${sj*10} = ${sp+sj*10}.`),
+  askS(`${mm} + ? = ${mm+mk*10}`,mk*10,()=>useBench(mm,{allow:TENS,hide:true,label:`The pumpkins show ${mm}. Add tens until you reach ${mm+mk*10}.`}),
+       "Add tens and count how many you added.",`${mm} + ${mk*10} = ${mm+mk*10}.`)
+ ]; }};
+
+/* -------- room 6: adding ones, making a new ten -------- */
+const ST6={id:"addones",icon:"✨",name:"Adding ones",desc:"32 + 5, and 38 + 5 where the ones make a new ten.",
+lesson:()=>[
+  sayS("Here is <b>32</b>. Let's add 5 ones.",()=>useBench(32)),
+  doS("Add <b>5</b> ones.",()=>useBench(32,{allow:ONES}),b=>b.o===7,"32 + 5 = <b>37</b>. Only the ones changed.","Tap <b>+ one</b> five times."),
+  sayS("Now <b>38</b>. If we add 5 ones, the frame will overflow!",()=>useBench(38)),
+  doS("Add <b>5</b> ones.",()=>useBench(38,{allow:ONES}),b=>b.o===13,"<b>13 ones!</b> That is more than ten.","Tap <b>+ one</b> five times."),
+  doS("Bundle ten of the ones into a <b>new ten</b>.",()=>useBench({t:3,o:13},{allow:["bundle"]}),b=>b.t===4&&b.o===3,
+      "Now it is 4 tens and 3 ones: <b>38 + 5 = 43</b>.","Tap the yellow Bundle button."),
+  sayS("When the ones reach ten, pack them into a ten. That is called <b>making a new ten</b>.",()=>useBench(43))
+],
+practice:()=>{ const a=R(2,8)*10+R(1,5), b=R(1,9-O(a)), c0=R(2,8)*10+R(5,9), c=R(11-O(c0),9), l=R(2,8)*10+R(1,8), t=R(2,7), r=R(1,9), q=R(2,8)*10+R(1,8), s=R(6,9), s2=R(11-s,9);
+ return [
+  askS(`${a} + ${b} = ?`,a+b,()=>useBench(a,{allow:["+o","-o","bundle"],hide:true,label:`The pumpkins show ${a}.`}),"Add the ones. The tens stay the same.",`${a} + ${b} = ${a+b}.`),
+  askS(`${c0} + ${c} = ?`,c0+c,()=>useBench(c0,{allow:["+o","-o","bundle"],hide:true,label:`The pumpkins show ${c0}.`}),
+       "Add the ones. If you get ten or more ones, bundle a new ten.",`${c0} + ${c} = ${c0+c}. The ones made a new ten.`),
+  askS(`${l} + ${10-O(l)} = ?`,l+10-O(l),()=>useBench(l,{allow:["+o","-o","bundle"],hide:true,label:`The pumpkins show ${l}.`}),
+       "Add the ones and look at the frame.",`${l} + ${10-O(l)} = ${l+10-O(l)}. The frame filled up exactly — a new ten and no ones.`),
+  askS(`${t} tens and ${10+r} ones. What number is that?`,t*10+10+r,()=>useBench({t,o:10+r},{allow:["bundle"],hide:true}),
+       "Bundle the extra ones into a ten first, then read the tens and ones.",`${t} tens and ${10+r} ones = ${t+1} tens and ${r} ones = ${t*10+10+r}.`),
+  askS(`How many ones must you add to ${q} to reach ${q-O(q)+10}?`,10-O(q),()=>useBench(q,{allow:["+o","-o"],hide:true,label:`The pumpkins show ${q}.`}),
+       "Add ones until the ten frame is full. Count how many you added.",`${q} + ${10-O(q)} = ${q-O(q)+10}.`),
+  askS(`${s} + ${s2} = ?`,s+s2,()=>useBench(s,{allow:["+o","-o","bundle"],hide:true,label:`Make a ten first!`}),
+       "Fill the frame to make a ten first, then see how many are left over.",`${s} + ${s2} = ${s+s2}: one ten and ${plural(s+s2-10,"one")}.`)
+ ]; }};
+
+/* -------- room 7: taking ones away -------- */
+const ST7={id:"takeones",icon:"🕸️",name:"Taking ones away",desc:"69 − 8, and 43 − 5 where you open a ten.",
+lesson:()=>[
+  sayS("Here is <b>69</b>. Let's take away 8.",()=>useBench(69)),
+  doS("Take away <b>8</b> ones.",()=>useBench(69,{allow:ONES}),b=>b.o===1,"69 − 8 = <b>61</b>. Only the ones changed.","Tap <b>− one</b> eight times."),
+  sayS("Now <b>43</b> take away 5. But there are only 3 loose ones!",()=>useBench(43)),
+  doS("Tap a stack of ten to open it into ten ones.",()=>useBench(43,{allow:["break"]}),b=>b.t===3&&b.o===13,
+      "Now it is 3 tens and 13 ones. It is <b>still 43</b> — just unpacked.","Tap one of the purple stacks."),
+  doS("Now take away <b>5</b> ones.",()=>useBench({t:3,o:13},{allow:ONES}),b=>b.o===8,"43 − 5 = <b>38</b>.","Tap <b>− one</b> five times.")
+],
+practice:()=>{ const a=R(2,9)*10+R(4,9), b=R(1,O(a)), c0=R(2,9)*10+R(0,4), c=R(O(c0)+1,9), n=R(11,17), m=R(O(n)+1,9), s=R(3,9)*10+R(3,9), g=R(1,O(s)), z=R(2,9)*10;
+ return [
+  askS(`${a} − ${b} = ?`,a-b,()=>useBench(a,{allow:["-o","+o","break"],hide:true,label:`The pumpkins show ${a}.`}),"Take away ones. The tens stay.",`${a} − ${b} = ${a-b}.`),
+  askS(`${c0} − ${c} = ?`,c0-c,()=>useBench(c0,{allow:["-o","+o","break"],hide:true,label:`The pumpkins show ${c0}.`}),
+       "Not enough loose ones? Open a ten first.",`${c0} − ${c} = ${c0-c}.`),
+  askS(`${n} − ${m} = ?`,n-m,()=>useBench(n,{allow:["-o","+o","break"],hide:true,label:`The pumpkins show ${n}.`}),
+       `Take away the ${O(n)} loose ones to land on ten, then take the rest from the ten.`,`${n} − ${O(n)} = 10, then 10 − ${m-O(n)} = ${n-m}.`),
+  askS(`There are ${s} sweets in the cauldron. ${g} go away. How many are left?`,s-g,()=>useBench(s,{allow:["-o","+o","break"],hide:true,label:`The pumpkins show ${s}.`}),
+       "Take away ones.",`${s} − ${g} = ${s-g}.`),
+  askS(`${z} − 1 = ?`,z-1,()=>useBench(z,{allow:["-o","+o","break"],hide:true,label:`The pumpkins show ${z}. There are no loose ones!`}),
+       "No loose ones — open a ten, then take one away.",`${z} − 1 = ${z-1}: ${T(z)-1} tens and 9 ones.`)
+ ]; }};
+
+/* -------- room 8: bigger or smaller -------- */
+const ST8={id:"compare",icon:"⚖️",name:"Bigger or smaller",desc:"Look at the tens first. 42 > 37. Make the biggest number.",
+lesson:()=>[
+  sayS("Which is bigger, 42 or 37? <b>Look at the tens first.</b> 4 tens is more than 3 tens — so 42 is bigger, even though 7 ones is more than 2 ones.",()=>useCmp(42,37,"show")),
+  sayS("If the tens are the same, look at the ones. 56 and 53 both have 5 tens. 6 ones is more than 3 — so 56 is bigger.",()=>useCmp(56,53,"show")),
+  sayS("We write it with a sign: <b>42 &gt; 37</b> means 42 is greater than 37. The open mouth faces the bigger number. <b>37 &lt; 42</b> means 37 is less than 42.",()=>{ useCmp(42,37,"show"); $("#sym").textContent=">"; }),
+  cmpS(61,58,"big","Tap the <b>bigger</b> number.","Yes! 61 has 6 tens. 58 has only 5 tens."),
+  cardsS([3,7],"big","Make the <b>biggest</b> number you can with these cards. Tap a card to put it in a place.",
+         "73! Put the bigger digit in the <span class='t'>tens</span> place — tens are worth more.")
+],
+practice:()=>{ const mk=()=>{ const tA=R(3,9), oA=R(0,4), tB=R(1,tA-1), oB=R(oA+1,9); return [tA*10+oA, tB*10+oB]; };
+  const [a1,b1]=mk(); const t2=R(2,9), o2a=R(0,8), o2b=R(o2a+1,9);
+  const s1=R(12,89), s2=P([s1, s1+10, T(s1)*10+(O(s1)+R(1,9))%10, R(12,98)]);
+  let x3=R(12,98), y3; do y3=R(12,98); while(y3===x3);
+  const d=[R(1,4),R(5,9)].sort(()=>Math.random()-.5); const d3=[]; while(d3.length<3){ const k=R(1,9); if(!d3.includes(k)) d3.push(k); }
+  const sw=R(1,8), sw2=R(sw+1,9);
+  const side=Math.random()<.5;
+ return [
+  cmpS(side?a1:b1,side?b1:a1,"big","Tap the <b>bigger</b> number. Look at the tens first!",`Yes! ${a1} has ${T(a1)} tens and ${b1} has only ${T(b1)} — the tens decide.`),
+  cmpS(t2*10+o2b,t2*10+o2a,"small","Tap the <b>smaller</b> number.",`Same tens, so look at the ones: ${o2a} is less than ${o2b}. ${t2*10+o2a} is smaller.`),
+  cmpS(s1,s2,"sym","Which sign goes in the middle? Tap <b>&lt;</b>, <b>=</b> or <b>&gt;</b>.",null),
+  cmpS(x3,y3,"sym","Which sign goes in the middle?",null),
+  cmpS(sw*10+sw2,sw2*10+sw,"big",`Same digits, different numbers! Tap the <b>bigger</b> one.`,`${sw2*10+sw} is bigger: ${sw2} tens beats ${sw} tens.`),
+  cardsS(d,"big","Make the <b>biggest</b> number you can with these cards.",null),
+  cardsS(d3,"small","Make the <b>smallest</b> two-digit number you can. Use two of the three cards.",null)
+ ]; }};
+
+/* -------- room 9: the hundred square -------- */
+const ST9={id:"grid",icon:"🗺️",name:"The hundred square",desc:"Down a row is ten more, up a row is ten less.",
+lesson:()=>[
+  sayS("This is the hundred square. Every row has <b>ten</b> numbers. The bat is on 34.",()=>useGrid(34)),
+  gridS(34,44,"Tap the <b>⬇</b> arrow to move the bat down one row. Then tap <b>Here!</b>",
+        "Tap the down arrow once.","34 became <b>44</b>. Down one row is <b>ten more</b>!"),
+  gridS(44,34,"Tap <b>⬆</b> to go up one row. Then tap <b>Here!</b>","Tap the up arrow once.","Back to 34. Up one row is <b>ten less</b>."),
+  sayS("<b>➡</b> is one more and <b>⬅</b> is one less. Look down a column: 4, 14, 24, 34… the ones digit is the same all the way down.",()=>useGrid(34,{col:4}))
+],
+practice:()=>{ const a=R(12,78), b=R(12,89), c=R(21,99), d=R(11,77), e=R(1,9)+10*R(0,5), f=R(32,99), g=R(22,98);
+ return [
+  gridS(a,a+11,`The bat is on ${a}. Go <b>ten more</b>, then <b>one more</b>. Then tap <b>Here!</b>`,"Ten more is down one row. One more is one step right.",`${a} → ${a+10} → ${a+11}.`),
+  gridS(b,b+10,`Move the bat to the number just <b>below</b> ${b}.`,"Below is down one row.",`Just below ${b} is ${b+10} — ten more.`),
+  gridS(c,c-10,`Move the bat to <b>ten less</b> than ${c}.`,"Ten less is up one row.",`Ten less than ${c} is ${c-10}.`),
+  gridS(d,d+22,`The bat is on ${d}. Go <b>two more</b>, then <b>twenty more</b>.`,"Two more is two steps right. Twenty more is two rows down.",`${d} + 2 = ${d+2}, and ${d+2} + 20 = ${d+22}.`),
+  gridS(e,e+30,`The bat is on ${e}. Count on in tens three times. Where does it land?`,"Each ten more is one row down.",`${e}, ${e+10}, ${e+20}, ${e+30}.`),
+  gridS(f,f-21,`The bat is on ${f}. Go up <b>two rows</b> and <b>one</b> to the left.`,"Up one row is ten less. Left is one less.",`${f} − 20 − 1 = ${f-21}.`),
+  gridS(g,g-9,`The bat is on ${g}. Go <b>ten less</b>, then <b>one more</b>.`,"Up one row, then one step right.",`${g} − 10 + 1 = ${g-9}.`)
+ ]; }};
+
+/* -------- room 10: counting past 100 -------- */
+const ST10={id:"to120",icon:"💯",name:"Counting to 120",desc:"Ten tens make a hundred. 99 + 1 = 100, then 101 … 120.",
+lesson:()=>[
+  sayS("Here is <b>99</b>: 9 tens and 9 ones. What happens if we add one more?",()=>useBench(99,{hund:true})),
+  doS("Tap <b>+ one</b>.",()=>useBench(99,{hund:true,allow:["+o"]}),b=>b.o===10,"Ten ones! Time to bundle.","Tap the <b>+ one</b> button."),
+  doS("Bundle the ones into a ten.",()=>useBench({t:9,o:10},{hund:true,allow:["bundle"]}),b=>b.t===10,"Now there are <b>10 tens</b>!","Tap the yellow Bundle button."),
+  doS("Ten tens can be packed too. Tap <b>Pack 10 tens</b>.",()=>useBench({t:10},{hund:true,allow:["bundleT"]}),b=>b.h===1,
+      "<b>One hundred!</b> Ten tens make a hundred. 99 + 1 = 100.","The yellow button is under the tens."),
+  sayS("After 100 we keep counting the same way: 101, 102 … 109, 110, 111 … up to 120. 120 is one hundred and two tens.",()=>useBench(120,{hund:true})),
+  buildS(112,"Make <b>112</b>. Then tap <b>Check</b>.",()=>useBench(100,{hund:true,allow:ALLH}),"112 is one hundred, one ten and two ones.")
+],
+practice:()=>{ const a=R(100,118), b=R(101,120), c=R(100,116), d=R(96,110), e=R(101,119);
+ return [
+  askS(`What number comes just after ${a}?`,a+1,()=>useBench(a,{hund:true,allow:ALLH,hide:true}),"One more. If the ones reach ten, bundle.",`After ${a} comes ${a+1}.`),
+  askS(`What number comes just before ${b}?`,b-1,()=>useBench(b,{hund:true,allow:ALLH,hide:true}),"One less. No loose ones? Open a ten.",`Before ${b} comes ${b-1}.`),
+  askS(`${c}, ${c+1}, ?, ${c+3}`,c+2,()=>useBench(c+1,{hund:true,allow:ALLH,hide:true}),"Counting on by one.",`${c}, ${c+1}, ${c+2}, ${c+3}.`),
+  askS(`What is ten more than ${d}?`,d+10,()=>useBench(d,{hund:true,allow:ALLH,hide:true}),"Add one ten. If there are ten tens, it becomes a hundred.",`Ten more than ${d} is ${d+10}.`),
+  buildS(e,null,()=>useBench(0,{hund:true,allow:ALLH})),
+  askS("99 + 1 = ?",100,()=>useBench(99,{hund:true,allow:ALLH,hide:true}),"Add one and bundle — then bundle the tens.","99 + 1 = 100.")
+ ]; }};
+
+/* -------- free play -------- */
+const FREE1={id:"bench",icon:"🛠️",name:"Pumpkin workbench",desc:"Build any number up to 199 and hear its name.",free:true,
+lesson:()=>[{type:"free",text:"Play! Add and take away ones and tens, bundle and open them, and listen to each number's name.",setup:()=>useBench(0,{allow:ALLH,hund:true})}],practice:()=>[]};
+const FREE2={id:"square",icon:"🔢",name:"Hundred square to 120",desc:"Tap any number to see it in pumpkins.",free:true,
+lesson:()=>[{type:"free",text:"Tap any number, or move the bat with the arrows. The pumpkins below show the number in tens and ones.",setup:()=>useGrid(1,{max:120,free:true})}],practice:()=>[]};
+
+const STATIONS=[ST1,ST2,ST3,ST4,ST5,ST6,ST7,ST8,ST9,ST10];
+const ALLST=STATIONS.concat([FREE1,FREE2]);
+
+/* ===================================================================
+   RUN — showing a step, checking it, moving on
+   =================================================================== */
+let ST=null;
+function openStation(id,practiceOnly){
+  stopSpeech();
+  const d=ALLST.find(s=>s.id===id);
+  const lesson=practiceOnly?[]:d.lesson().map(s=>Object.assign(s,{p:false}));
+  const prac=d.practice().map(s=>Object.assign(s,{p:true}));
+  ST={d,steps:lesson.concat(prac),i:0,tries:0,stars:0,solved:false,nprac:prac.length};
+  $("#map").classList.add("hidden"); $("#lesson").classList.remove("hidden");
+  $("#ttl").textContent=d.icon+"  "+d.name;
+  showStep();
+}
+function dots(){
+  $("#dots").innerHTML=ST.d.free?"":ST.steps.map((s,i)=>`<i class="${s.p?"p":""} ${i<ST.i?"done":i===ST.i?"now":""}"></i>`).join("");
+  $("#skipLesson").classList.toggle("hidden",!(ST.steps[ST.i]&&!ST.steps[ST.i].p&&!ST.d.free&&ST.nprac));
+}
+function setActs(btns){
+  const a=$("#acts"); a.innerHTML="";
+  btns.forEach(([label,fn,cls])=>{ const b=document.createElement("button"); b.className="btn "+(cls||""); b.innerHTML=label; b.onclick=fn; a.appendChild(b); });
+}
+function feedback(kind,html){ const f=$("#fb"); f.className=kind||""; f.innerHTML=html||""; }
+function stepText(s){
+  if(s.type==="ask") return s.text+"<br><small style='color:#6a5a48'>Type your answer on the keys.</small>";
+  return s.text;
+}
+function showStep(){
+  clearTimeout(numTimer); PAD=null; CMP=null; CARDS=null; GRID=null; B=null;
+  const s=ST.steps[ST.i]; if(!s) return finish();
+  ST.tries=0; ST.solved=false; feedback();
+  $("#work").innerHTML="";
+  if(s.type==="cmp") useCmp(s.a,s.b,s.mode==="show"?"show":s.mode);
+  else if(s.type==="cards") useCards(s.digits);
+  else if(s.type==="grid") useGrid(s.start,s.opt);
+  else if(s.setup) s.setup();
+  if(s.type==="ask") usePad();
+  if(s.p && s.type!=="free") $("#bubble").innerHTML=`<small style="color:#8a6a44;font-weight:700">PRACTICE ${ST.i-(ST.steps.length-ST.nprac)+1} of ${ST.nprac}</small><br>`+stepText(s);
+  else $("#bubble").innerHTML=stepText(s);
+  dots();
+  if(s.type==="say") setActs([["Next →",next]]);
+  else if(s.type==="build"||s.type==="cards") setActs([["Check ✓",s.type==="build"?checkBuild:checkCards,"good"]]);
+  else if(s.type==="grid") setActs([["Here! ✓",checkGrid,"good"]]);
+  else if(s.type==="free") setActs([["Back to the rooms",toMap,"ghost"]]);
+  else setActs([]);
+  narrate(s.text);
+}
+function next(){ SFX.tap(); ST.i++; showStep(); }
+function succeed(msg){
+  const s=ST.steps[ST.i]; if(ST.solved) return; ST.solved=true; clearTimeout(numTimer);
+  if(s.p&&ST.tries===0) ST.stars++;
+  SFX.right(); feedback("ok","✔ "+(msg||"Yes!"));
+  narrate(msg||"Yes!");
+  setActs([[ST.i===ST.steps.length-1?"Finish ★":"Next →",next]]);
+  document.querySelectorAll("#work .zb, #work .key, #work .arrows button").forEach(b=>{ if(s.type!=="do") b.disabled=true; });
+}
+function miss(hint){
+  const s=ST.steps[ST.i]; ST.tries++; SFX.wrong();
+  const h=(hint||s.hint||"Have another go.")+(ST.tries>=2&&(s.type==="ask")?" <i>Use the pumpkins to help.</i>":"");
+  feedback("hint","💡 "+h); narrate(h);
+  if(ST.tries>=3){ const a=$("#acts"); if(!a.querySelector(".skip")){ const b=document.createElement("button"); b.className="btn ghost skip"; b.textContent="Skip this one"; b.onclick=next; a.appendChild(b); } }
+}
+/* every bench or grid move comes here; returns true if it finished a step */
+function stepAct(b){
+  const s=ST&&ST.steps[ST.i]; if(!s||ST.solved) return false;
+  if(s.type==="do" && b===B && s.check(b)){ succeed(s.after); return true; }
+  return false;
+}
+function checkBuild(){
+  const s=ST.steps[ST.i]; if(ST.solved) return; const v=val(B), t=s.target;
+  if(v===t && B.o<10 && B.t<10) return succeed(s.after);
+  if(v===t && B.o>=10) return feedback("info",`That is ${t} pumpkins — now bundle ten loose ones so it can be written with digits.`), narrate("Now bundle ten loose ones.");
+  if(v===t) return feedback("info","Right amount! Now pack ten tens into a hundred."), narrate("Now pack ten tens into a hundred.");
+  if(s.hint) return miss(s.hint);
+  const th=Math.floor(t/100), tt=T(t), to=O(t), vh=Math.floor(v/100), vt=T(v), vo=O(v);
+  if(B.o>=10) return miss("Too many loose ones — bundle ten of them, then look again.");
+  if(th!==vh) return miss(th>vh?"You need a hundred. Ten tens make a hundred.":"Too many hundreds.");
+  if(tt!==vt) return miss(tt>vt?`Not enough <span class='t'>tens</span>. Look at the tens digit of ${t}.`:`Too many <span class='t'>tens</span>. Look at the tens digit of ${t}.`);
+  return miss(to>vo?`The tens are right! Not enough <span class='o'>ones</span> — look at the ones digit of ${t}.`:`The tens are right! Too many <span class='o'>ones</span> — look at the ones digit of ${t}.`);
+}
+function checkAsk(){
+  const s=ST.steps[ST.i]; if(ST.solved||!PAD) return;
+  const v=parseInt(PAD.v,10);
+  if(v===s.ans) succeed(s.after);
+  else { miss(s.hint); PAD.v=""; $("#padshow").textContent="?"; $("#pad").classList.add("shake"); setTimeout(()=>$("#pad")&&$("#pad").classList.remove("shake"),400); }
+}
+function checkCmp(pick,el){
+  const s=ST.steps[ST.i], a=s.a, b=s.b;
+  if(s.mode==="sym"){
+    const right=a>b?">":a<b?"<":"=";
+    $("#sym").textContent=pick;
+    if(pick===right){
+      const w=right===">"?"is greater than":right==="<"?"is less than":"is equal to";
+      const why=a===b?"They are the same number.":T(a)!==T(b)?`Look at the tens: ${T(a)} tens and ${T(b)} tens.`:`Same tens, so look at the ones: ${O(a)} and ${O(b)}.`;
+      succeed(`${a} ${right==="<"?"&lt;":right===">"?"&gt;":"="} ${b}: ${a} ${w} ${b}. ${why}`);
+    } else { $("#sym").textContent="?"; miss(T(a)!==T(b)?"Compare the tens first. The open side of the sign faces the bigger number.":"The tens are the same — compare the ones. The open side faces the bigger number."); }
+    return;
+  }
+  const want=s.mode==="big"?(a>b?"a":"b"):(a<b?"a":"b");
+  if(pick===want){ el.classList.add("right"); succeed(s.after); }
+  else { el.classList.add("wrong"); setTimeout(()=>el.classList.remove("wrong"),700);
+    miss(T(a)!==T(b)?"Look at the tens first. More tens means bigger.":"The tens are the same. Look at the ones."); }
+}
+function checkCards(){
+  const s=ST.steps[ST.i]; if(ST.solved) return; const v=cardsValue();
+  if(v===null) return feedback("info","Put a card in both places first."), narrate("Put a card in both places first.");
+  const ds=s.digits.slice().sort((x,y)=>y-x);
+  const want=s.want==="big"?ds[0]*10+ds[1]:ds[ds.length-1]*10+ds[ds.length-2];
+  if(v===want) succeed(s.after||(s.want==="big"?`${want}! The biggest digit goes in the tens place — tens are worth more.`:`${want}! The smallest digit goes in the tens place.`));
+  else miss(s.want==="big"?"The tens place is worth more. Which card should go there?":"For a small number, which card should go in the tens place?");
+}
+function checkGrid(){
+  const s=ST.steps[ST.i]; if(ST.solved) return;
+  if(GRID.pos===s.target) succeed(s.after);
+  else miss(s.hint);
+}
+function finish(){
+  const d=ST.d, first=!save.done[d.id];
+  save.done[d.id]=true; save.best[d.id]=Math.max(save.best[d.id]||0,ST.stars); store();
+  SFX.win(); feedback();
+  const i=STATIONS.indexOf(d), nx=STATIONS[i+1];
+  $("#work").innerHTML=`<div class="card done-card"><div class="big">🎃</div><h2 style="color:var(--gold);margin:6px 0">Lantern lit!</h2>
+    <p style="font-size:20px">You finished <b>${d.name}</b>.<br>${ST.stars} of ${ST.nprac} practice ones right first time.</p></div>`;
+  const msg=`Well done! You lit the lantern for ${d.name}. ${ST.stars} of ${ST.nprac} right first time.`;
+  $("#bubble").innerHTML=msg; narrate(msg); $("#dots").innerHTML="";
+  const b=[["Practise again",()=>openStation(d.id,true),"ghost"]];
+  if(nx) b.push([`Next room: ${nx.name} →`,()=>openStation(nx.id)]);
+  b.push(["All rooms",toMap,"ghost"]);
+  setActs(b); $("#skipLesson").classList.add("hidden");
+}
+function toMap(){ stopSpeech(); clearTimeout(numTimer); ST=null; $("#lesson").classList.add("hidden"); $("#map").classList.remove("hidden"); drawMap(); window.scrollTo(0,0); }
+
+/* ===================================================================
+   MAP
+   =================================================================== */
+function drawMap(){
+  $("#stations").innerHTML=ALLST.map((s,i)=>`<button class="stn ${save.done[s.id]?"done":""} ${s.free?"play":""}" data-id="${s.id}">
+    <div class="ic">${s.icon}</div><div><div class="num">${s.free?"Free play":"Room "+(i+1)}</div><div class="nm">${s.name}</div><div class="ds">${s.desc}</div></div>
+    ${s.free?"":`<div class="lamp" title="${save.done[s.id]?"Lantern lit":"Not yet"}">🎃</div>`}</button>`).join("");
+  $("#stations").querySelectorAll("[data-id]").forEach(b=>b.onclick=()=>{ SFX.tap(); openStation(b.dataset.id); });
+  $("#tRead").classList.toggle("on",save.read); $("#tSfx").classList.toggle("on",save.sfx);
+  $("#tRead").textContent=(save.read?"🔊":"🔈")+" Read aloud "+(save.read?"on":"off");
+  $("#tSfx").textContent=(save.sfx?"🎵":"🔇")+" Sounds "+(save.sfx?"on":"off");
+}
+$("#tRead").onclick=()=>{ save.read=!save.read; store(); drawMap(); if(save.read) say("Read aloud is on."); else stopSpeech(); };
+$("#tSfx").onclick=()=>{ save.sfx=!save.sfx; store(); drawMap(); SFX.tap(); };
+$("#toMap").onclick=toMap;
+$("#skipLesson").onclick=()=>{ ST.i=ST.steps.length-ST.nprac; showStep(); };
+$("#sayBtn").onclick=()=>{ const f=$("#fb").innerHTML;
+  const u=say(f||$("#bubble").innerHTML); const b=$("#sayBtn");
+  if(u){ b.classList.add("talking"); const done=()=>b.classList.remove("talking"); u.onend=done; u.onerror=done; setTimeout(done,15000);} };
+document.addEventListener("keydown",e=>{
+  if($("#lesson").classList.contains("hidden")) return;
+  if(PAD && /^[0-9]$/.test(e.key)) padKey(e.key);
+  else if(PAD && e.key==="Backspace") padKey("⌫");
+  else if(e.key==="Enter"){ if(PAD&&!ST.solved) padKey("ok"); else { const b=$("#acts .btn"); if(b) b.click(); } }
+});
+$("#kingMap").innerHTML=KING_SVG; $("#kingTalk").innerHTML=KING_SVG;
+$("#ver").textContent=`v${BUILD} · ${RELEASED} · ${COPYRIGHT}`;
+/* back to Haunted House: the file beside this one, or the site root when published */
+if(location.protocol!=="file:") $("#hhlink").href="./";
+drawMap();
+</script>
+</body>
+</html>
