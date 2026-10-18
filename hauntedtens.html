@@ -51,6 +51,7 @@ button{font:inherit;color:inherit;cursor:pointer}
 .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:center}
 .tog{background:#1a1324;border:1px solid var(--line);border-radius:999px;padding:7px 14px;font-size:15px;color:var(--dim)}
 .tog.on{color:var(--ink);border-color:#6b4a94;background:#2a1b3d}
+.voicesel{background:#1a1324;border:1px solid var(--line);border-radius:999px;padding:7px 12px;font:inherit;font-size:15px;color:var(--ink);max-width:230px}
 
 /* ---------- map ---------- */
 #map .intro{display:flex;gap:16px;align-items:center;margin-bottom:16px}
@@ -201,7 +202,8 @@ button{font:inherit;color:inherit;cursor:pointer}
 <!-- ======================= MAP ======================= -->
 <section id="map">
   <div class="toplinks"><a id="hhlink" href="hauntedhouse.html">← Haunted House</a>
-    <div class="row"><button class="tog" id="tRead">🔊 Read aloud</button><button class="tog" id="tSfx">🎵 Sounds</button></div></div>
+    <div class="row"><button class="tog" id="tRead">🔊 Read aloud</button><button class="tog" id="tSfx">🎵 Sounds</button>
+      <select class="voicesel" id="voiceSel" title="Which voice reads aloud"></select><button class="tog" id="voiceTest">▶ Try voice</button></div></div>
   <h1>Haunted Tens</h1>
   <div class="sub">tens and ones in the Pumpkin King's cellar</div>
   <div class="card">
@@ -211,6 +213,7 @@ button{font:inherit;color:inherit;cursor:pointer}
     <details class="grown"><summary>For grown-ups</summary>
       <p>This is the explainer behind Haunted House's Grade 1 tens questions — teen numbers, tens and ones, 62 + 10, adding and taking away tens, adding ones and making a new ten, comparing, the hundred square and counting to 120. It does not ask quiz questions from a bank: each room shows the idea with pumpkins you can move, says it aloud, and then asks the child to <i>do</i> it — build a number, press + ten, bundle ten ones, move the bat on the hundred square.</p>
       <p>A wrong try gets a hint, never the answer (the same rule as Haunted House). After three tries a Skip appears. The explanation comes after the child gets it. Rooms run in the suggested order but every room is open. Nothing leaves this device; progress is kept in this browser only.</p>
+      <p><b>A nicer voice:</b> the voice menu at the top picks the best natural voice the device has. The best ones (★★ Premium, ★ Enhanced) must be downloaded once — on an iPad: <i>Settings → Accessibility → Read &amp; Speak (or Spoken Content) → Voices → English</i>, then download <b>Ava (Premium)</b> or <b>Samantha (Enhanced)</b>, and reload this page. On a Mac: <i>System Settings → Accessibility → Spoken Content → System voice → Manage Voices</i>.</p>
     </details>
   </div>
   <div class="foot" id="ver"></div>
@@ -238,7 +241,7 @@ button{font:inherit;color:inherit;cursor:pointer}
 
 <script>
 "use strict";
-const BUILD = 1, RELEASED = "18 Oct 2026";
+const BUILD = 2, RELEASED = "18 Oct 2026, 15:10";
 const COPYRIGHT = "© 2026 m1keLima";
 const $ = s => document.querySelector(s);
 const R = (a,b) => a + Math.floor(Math.random()*(b-a+1));
@@ -249,7 +252,7 @@ const T = n => Math.floor(n/10)%10, O = n => n%10;
    SAVE — key hauntedtens.v1, wrapped so blocked storage never breaks it
    =================================================================== */
 const KEY="hauntedtens.v1";
-let save={done:{}, best:{}, read:true, sfx:true};
+let save={done:{}, best:{}, read:true, sfx:true, voice:"auto"};
 try{ const s=JSON.parse(localStorage.getItem(KEY)||"null"); if(s) save=Object.assign(save,s); }catch(e){}
 function store(){ try{ localStorage.setItem(KEY,JSON.stringify(save)); }catch(e){} }
 
@@ -328,10 +331,34 @@ function speakable(html){
      .replace(/(^|[\s(])\?(?=[\s,.)]|$)/g,"$1what").replace(/…/g,", ").replace(/→/g," then ");
   return s.replace(/\s+/g," ").trim();
 }
+/* THE VOICE. Never by list order (Apple lists its novelty voices first — Haunted
+   House v18 got "a deep, scary voice" that way). "auto" takes the best of a short
+   allow-list of natural voices, Premium > Enhanced > plain; the picker on the map
+   lets a grown-up choose any English voice that is not a novelty one. Premium and
+   Enhanced voices appear only once downloaded on the device. */
+const GOOD_VOICES=["Ava","Zoe","Samantha","Allison","Susan","Evan","Nathan","Tom","Joelle","Noelle","Nicky","Aaron",
+  "Karen","Daniel","Serena","Kate","Oliver","Moira","Tessa","Lee","Catherine","Martha","Arthur",
+  "Google US English","Google UK English Female","Microsoft Aria","Microsoft Jenny","Microsoft Ana","Microsoft Guy","Microsoft Sonia","Microsoft Libby"];
+const NOVELTY=/\b(Albert|Bad News|Bahh|Bells|Boing|Bubbles|Cellos|Deranged|Good News|Hysterical|Jester|Junior|Organ|Pipe Organ|Princess|Superstar|Trinoids|Whisper|Wobble|Zarvox|Fred|Ralph|Kathy|Grandma|Grandpa|Eddy|Flo|Reed|Rocko|Sandy|Shelley|Bruce|Agnes|Vicki|Victoria)\b/i;
+let VOICES=[];
+function voiceTier(v){ return /premium/i.test(v.name)?3 : /enhanced|natural|neural|online|google/i.test(v.name)?2 : 1; }
+function goodRank(v){ const i=GOOD_VOICES.findIndex(n=>v.name.toLowerCase().startsWith(n.toLowerCase())); return i<0?99:i; }
+function loadVoices(){
+  try{ VOICES=(speechSynthesis.getVoices()||[]).filter(v=>/^en([-_]|$)/i.test(v.lang)&&!NOVELTY.test(v.name)); }catch(e){ VOICES=[]; }
+  VOICES.sort((a,b)=>voiceTier(b)-voiceTier(a)||goodRank(a)-goodRank(b)||(/en[-_]US/i.test(b.lang)-/en[-_]US/i.test(a.lang))||a.name.localeCompare(b.name));
+  if(typeof drawVoices==="function") drawVoices();
+}
+function chosenVoice(){
+  if(!VOICES.length) loadVoices();
+  if(save.voice&&save.voice!=="auto"&&save.voice!=="device"){ const v=VOICES.find(x=>x.voiceURI===save.voice||x.name===save.voice); if(v) return v; }
+  if(save.voice==="device") return null;
+  return VOICES.find(v=>goodRank(v)<99)||null;      /* auto: best allow-listed voice, else the device default */
+}
+if(window.speechSynthesis){ loadVoices(); try{ speechSynthesis.addEventListener("voiceschanged",loadVoices); }catch(e){ speechSynthesis.onvoiceschanged=loadVoices; } }
 function say(text,rate){
   const ss=window.speechSynthesis; if(!ss||!text) return null;
   try{
-    const make=()=>{ const u=new SpeechSynthesisUtterance(speakable(text)); u.rate=rate||0.9; u.pitch=1; u.lang="en"; return u; };
+    const make=()=>{ const u=new SpeechSynthesisUtterance(speakable(text)); u.rate=rate||0.9; u.pitch=1; u.lang="en"; const v=chosenVoice(); if(v){ try{ u.voice=v; u.lang=v.lang; }catch(e){} } return u; };
     const u=make(); SPEECH.u=u;
     if(ss.speaking||ss.pending){ ss.cancel(); SPEECH.cancelAt=Date.now(); }
     const go=(utt)=>{ if(SPEECH.u!==u) return; try{ ss.resume(); }catch(e){} ss.speak(utt); };
@@ -1000,6 +1027,18 @@ function drawMap(){
 }
 $("#tRead").onclick=()=>{ save.read=!save.read; store(); drawMap(); if(save.read) say("Read aloud is on."); else stopSpeech(); };
 $("#tSfx").onclick=()=>{ save.sfx=!save.sfx; store(); drawMap(); SFX.tap(); };
+function drawVoices(){
+  const sel=$("#voiceSel"); if(!sel) return;
+  if(!window.speechSynthesis){ sel.classList.add("hidden"); $("#voiceTest").classList.add("hidden"); return; }
+  const best=VOICES.find(v=>goodRank(v)<99);
+  const label=v=>v.name.replace(/\s*\(English \((.*?)\)\)/,"")+(voiceTier(v)===3?" ★★":voiceTier(v)===2?" ★":"")+" · "+v.lang.replace(/^en[-_]/i,"");
+  sel.innerHTML=`<option value="auto">Voice: best (${best?label(best):"device default"})</option>`+
+    VOICES.map(v=>`<option value="${v.voiceURI.replace(/"/g,"&quot;")}">${label(v)}</option>`).join("")+`<option value="device">Device default</option>`;
+  sel.value=[...sel.options].some(o=>o.value===save.voice)?save.voice:"auto";
+}
+$("#voiceSel").onchange=e=>{ save.voice=e.target.value; store(); say("Hello! I am the Pumpkin King. Ten ones make one ten."); };
+$("#voiceTest").onclick=()=>say("Hello! I am the Pumpkin King. Sixty-two plus ten is seventy-two.");
+drawVoices();
 $("#toMap").onclick=toMap;
 $("#skipLesson").onclick=()=>{ ST.i=ST.steps.length-ST.nprac; showStep(); };
 $("#sayBtn").onclick=()=>{ const f=$("#fb").innerHTML;
