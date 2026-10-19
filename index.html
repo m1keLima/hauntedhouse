@@ -602,6 +602,7 @@ table.rc td:last-child{text-align:right;font-weight:800;color:var(--gold)}
       <a class="btn ghost" id="tensBtn" href="hauntedtens.html" style="text-decoration:none;display:inline-flex;align-items:center">🎃 Learn tens</a>
       <button class="btn ghost" id="sfxBtn">Sound: on</button>
       <button class="btn ghost" id="musBtn">Music: on</button>
+      <button class="btn ghost" id="voiceBtn" title="Natural voice: the same voice as Haunted Tens and Dog Day. Questions are spoken by a voice model running in this page (about 90 MB, downloaded once). Device voice: the browser's own voice.">Voice: natural</button>
     </div>
     <div id="famline"></div>
     <div id="saveline"></div>
@@ -784,6 +785,7 @@ table.rc td:last-child{text-align:right;font-weight:800;color:var(--gold)}
               thinker loses nothing.</li>
           <li><b>A 🔊 button beside the question</b> reads it out loud on demand. It is always there for
               Kindergarten to Grade 2, bonus round included, whether read-aloud is on or not.</li>
+          <li><b>The voice</b> is a natural-sounding one (the same as Haunted Tens and Dog Day). Questions are made up on the spot, so they are spoken by a voice model that runs inside this page &mdash; it downloads about 90&nbsp;MB once, then works on its own. Until it is ready, offline, or on a slow device, the device&rsquo;s own voice reads instead. <b>Voice</b> on the front page switches between the two.</li>
           <li><b>Read-aloud mode</b> (step 5 on the front page) reads each question out loud &mdash; not the
               four answers &mdash; and removes the clock entirely.</li>
           <li><b>A bonus round</b> at the end offers fresh problems of exactly the kinds they got wrong first
@@ -11770,6 +11772,8 @@ const SAY = [
   [new RegExp("⁻("+SUPC+"+)","g"),(m,a)=>" to the power minus "+unscript(a)+" "],
   /* a hyphen inside a word ("two-digit", "take-away") is not a minus */
   [/([A-Za-z])[-–](?=[A-Za-z])/g,"$1 "],
+  /* an em dash in a sentence is a pause, not a minus ("Snip — a whole ring…"); maths uses − */
+  [/\s*—\s*/g,", "],
   [/\s*\+\s*/g," plus "], [/\s*[−–—-]\s*/g," minus "], [/\s*[×*·]\s*/g," times "],
   [/\s*[÷]\s*/g," divided by "], [/\s*=\s*/g," equals "], [/\s*≈\s*/g," is about "],
   [/\s*≤\s*/g," is less than or equal to "], [/\s*≥\s*/g," is greater than or equal to "],
@@ -11810,17 +11814,144 @@ function unlockSpeech(){
 }
 ["pointerdown","touchend","keydown"].forEach(ev=>document.addEventListener(ev,unlockSpeech,{once:true,capture:true}));
 
-function stopSpeech(){
+function stopTTS(){
   try{ const ss=window.speechSynthesis; if(!ss) return;
     if(ss.speaking||ss.pending){ ss.cancel(); SPEECH.cancelAt=Date.now(); }
   }catch(e){}
 }
-function say(text,rate){
-  const ss=window.speechSynthesis; if(!ss) return;
+function stopSpeech(){ audTok++; try{ if(AUD) AUD.pause(); }catch(e){} stopTTS(); }
+
+/* =====================================================================
+   THE NATURAL VOICE (v33) — the Kokoro neural voice af_heart, the same voice
+   as Haunted Tens and Dog Day.
+   - FIXED lines ("That is right.", the final challenges, endings, families…)
+     are recorded: hauntedhouse-audio/<id>.m4a, listed in CLIPS, made by
+     voice/build_voice.py hauntedhouse. Instant and offline.
+   - QUESTIONS and HINTS are made up on the fly, so they are spoken by Kokoro
+     running in this page (kokoro-js in a Web Worker, model ~90 MB, downloaded
+     once and kept by the browser; the same site, so the same copy serves every
+     game). It is ~2x slower than real time, so each room PREPARES its audio
+     ahead: loadRoom() makes the NEXT room's problem now (S.pre) and queues its
+     question and hint; the bonus round makes all its problems at the start.
+   - Anything not ready within NV_WAIT, or no model (offline, first download
+     still running, too slow, no Worker), falls back to the device voice below
+     (ttsSay — the v18/v22 Safari-safe code, unchanged).
+   Only runs where a question can be read (read-aloud on, or K–Grade 2), and
+   only with save.natural (the "Voice" button on the front page) on.
+   ===================================================================== */
+const AUDIO_DIR="hauntedhouse-audio/";
+const CLIPS=new Set(/*CLIPS*/["0281f7eebae7c442","02f3e78e105620d6","037df7754556e671","049ba22bf0b8b80b","050a50f3567984cb","05b4409517e33b85","084304ca8ecadb02","0addbe6b0678088f","0c0d611226c9daf2","0cb2bd97de9197a3","0ed590433fb5b6ab","0f043126173cec52","103050c37f55f833","11624a60e02ed0c4","124bb3275ed105c7","12ea193e3dbdfdc6","13167aa96b78d62d","13c3baf58fb4ec79","148c912cee301cc4","15ec14f3dd792e23","160d05f53412b6d9","162da6a02742811c","16840633b90fd91b","18780a29db051a89","1889372658ff640e","196f2eec432be988","19d8b784f316cb1c","1a6c20ecf34b4f24","1bf26562f2805faa","1c89439f6e28c5fb","1dde0248e323d2f4","202a6415f2dd29b9","22a1b04a2fb1b232","22f9274091662998","243a358641efd84e","24c09599100950d5","2594d30ae8cb32f6","259938ded52b9112","267646256b9f9609","2876c4f7237e3913","29e396c433cd928c","2ae5e7d8b515f978","2c2147cf01d154db","2c67c60480ff6d44","2db4feb60d74eeaa","2e39a49a034a35f6","2e8173e2c28102b2","2f8ed74fa369aaaf","305b76b4c4d64010","30892f462c881f0a","3094f368d48da6f8","32ee35e5ed31b701","33edf62fb32ac5bb","3494b0bbc58d06d7","3c3c1ca07002f7e0","3d68bbca510eeeca","3ddcdd28776dbdcc","3e3fe45629b29bd2","3ed60f5ff1d1218b","403c006ad9f7569a","4058dea81a4b9268","40a18edf99198c87","41e1b45e4476c11a","42dd1694e8b211e4","4385ab1ae62e863a","45034b63a309f6f3","4674fcf8747ec640","467d04af31c97e43","48a1977a92a2e6ce","4acb301de8835419","4c171c02cd8260ca","4c5817402f1dbe18","4f14096995f404ed","4fb8e6015bef2b01","50cdaa2b7bbdc1fb","52278b72f64b108e","52e7ed284d62b630","546fdba5115bc9ed","54cd455a9d2b8c4a","56d23de1d461309d","57924b6768ba2bdf","5aa271215a0cbc89","5acd3b4a94ae7db6","5b21f410e3c86254","5bce692c34b6f07c","5c3c1ca7297cb023","5d2575430ed98a67","5ea16162f2b0ad52","5f9a057a8c94b456","5fd183c2e1f4b6de","6035b6371f814f53","61f0b0832f8939af","6570cc8f59bcba7b","6643dccc149bbaf0","6768b358e32c0644","6854d0d8f232e5a4","6864002e5c325592","69829b1f8dafabef","6a8c616366500eb3","6bf5c3ba2f90f1c2","6eb1bc074c9ea5df","6edbbe029c2e1e32","6fa70e5b03b8135b","6fb483c39947590f","6fc71dcb029af7ef","6fcec57c01abc6f0","701591cce3a8d160","705d1ee560d9e64d","70e7d4ce18568122","70ec3fd6dc20cc36","71a7aeb66a61875e","73d8822bef6ca923","76074571ead314f5","76d92ce5d171468d","779526956c9cba9d","78cb85468788bd7a","7a45506177011d89","7b25f7dda1436659","7bc324931247b987","7c44f85f29c9586f","7e23cea0adebb568","800cfa79477ce7bd","82489401cdb49015","8255f6e41b82f54c","83a761deb24cfeee","84002d889c5cdcbc","859a1668e6e4cecc","86773538d5dc4f84","86e6ceaf6c90b73f","870a7f1924deaa51","884aaf024c57f366","887927d6c6aed62e","88dcb84c1dc7e3c4","892dc1e8253965a8","8ae3225f245427a3","924c9003f5f04ddb","9267c51a8a0c449a","9281d3b71b05559b","94b0b1387fca3d28","957f4375643ed349","97e891dba98df8f7","9911879008574868","9d2034e15e9bb291","9dba0a4812dd52e8","9dec9d009e010238","a18c4eded200b39e","a8831e74bd67b0b4","a911d7188fa956a8","aa22d36940a9bdf5","aaf5a37b07df4b33","ab258b61075e6539","ab9c54172320c59b","ac669f28f59996c8","acdb4b03c9508fe7","ae07125ba9d33caf","afb2f1c6485bf246","b03fc025e7d45a3d","b12d6d605755d3c8","b3762e71ef11bfb9","b5cbee8f97c9807b","b70ac4aee33b3aee","b84711e836a68ebc","b84bbf1acdc8db1a","b8baa6189c4e6d98","bb21999da3439941","bbe9831065306a50","bc0be83f28338453","bc5fc33022e7802c","bc8cd0ebd90c7373","bdbd5c9219da2e7a","bff0ffeb9ee4d4bf","c0f35a1066f8a840","c614fd2bd672e213","c6c10a60679ae5bc","c6cfbfeed8cee0fe","c999d32e6ef01cb6","ca2245e2855f7e76","cb7275efc837f9df","cbfe381ddd555cc1","cc5bbb031d9c8337","cfb3f0b022d9f4bc","d14993281538e6a4","d36324c127e98525","d433e08333f4fc83","d442eeedb670a461","d4b618e834619a0c","d7029df97bf16421","d87d2bf3f692a6b7","d9176dcbbf8a3ad3","d9c13fcb8a2e465b","db1cfae53abf5015","dc0443764d12f292","dcd46ad79efa2dc3","de30f9434026c8e3","ded273927f961002","e01751a81fab5e78","e2ba0b2e4ba26346","e3100b3332bdb657","e4070e24dd4574e0","e43ab8ff172e435b","e43ac04ed92a102a","e5f2334128c3556d","e82a4fde0be6647e","e836c7eb23019ecf","e892788d9681aeb1","e893bf0b2147782b","e8ada29c4f61adc4","ea9fe870ba9365b0","eba817ecae0b7488","ebdfe94d658f1839","eeeb1508fbb83854","ef2c8c5410862f80","f018cecf8fd5607f","f07d16e1f0866301","f138ecadd2c6b335","f14f912cdedbf004","f196606782793887","f2d7621d01f53c29","f2ec8db423ffe9ac","f43c1fa64bf4b606","f83d004ea96a5c7a","f893de38206c1954","f93a70d2b1f57c06","fb2c4592e5ea9716","fb3785bff894c4cf","fb69511f1d1b464b","fbe2bc33758c7baf","ffea2676d6a0b68a"]/*END CLIPS*/);
+const NV_WAIT=6000, NV_SPEED=0.95;
+function clipId(t){ let a=0x811c9dc5, b=0x9e3779b9;
+  for(let i=0;i<t.length;i++){ const c=t.charCodeAt(i); a=Math.imul(a^c,16777619); b=Math.imul(b^c,2246822519); }
+  return (a>>>0).toString(16).padStart(8,"0")+(b>>>0).toString(16).padStart(8,"0"); }
+let AUD=null, audTok=0;
+function audEl(){ if(!AUD){ AUD=document.createElement("audio"); AUD.setAttribute("playsinline",""); AUD.preload="auto"; AUD.style.display="none"; document.body.appendChild(AUD); } return AUD; }
+function unlockClipAudio(){ const a=audEl(); if(a.dataset.ok) return; a.dataset.ok="1";
+  try{ a.src=SILENT_WAV; const r=a.play(); if(r&&r.catch) r.catch(()=>{ delete a.dataset.ok; }); }catch(e){}
+  if(voiceWanted()) nvStart(); }
+["pointerdown","touchend","keydown"].forEach(ev=>document.addEventListener(ev,unlockClipAudio,true));
+const natOn = () => save.natural!==false;
+const voiceWanted = () => natOn() && (kidMode || (save.level|0) <= 2);
+const NV_SRC=`
+let tts=null;
+self.onmessage=async e=>{ const m=e.data;
+  if(m.t==="load"){
+    try{ const k=await import("https://cdn.jsdelivr.net/npm/kokoro-js@1.2.1/+esm");
+      tts=await k.KokoroTTS.from_pretrained("onnx-community/Kokoro-82M-v1.0-ONNX",{dtype:"q8",device:"wasm"});
+      self.postMessage({t:"ready"}); }catch(err){ self.postMessage({t:"fail",e:String(err)}); } }
+  else if(m.t==="gen"){
+    try{ const t0=performance.now(); const a=await tts.generate(m.text,{voice:"af_heart",speed:m.speed});
+      const pcm=a.audio; self.postMessage({t:"audio",pcm,sr:a.sampling_rate,ms:performance.now()-t0},[pcm.buffer]); }
+    catch(err){ self.postMessage({t:"audio",e:String(err)}); } } };`;
+const NV={state:"off", w:null, q:[], cur:null, prom:new Map(), url:new Map(), n:0, slowN:0};
+function nvStart(){
+  if(NV.state!=="off"||!window.Worker||!natOn()) return;
+  try{ NV.w=new Worker(URL.createObjectURL(new Blob([NV_SRC],{type:"text/javascript"})),{type:"module"}); }
+  catch(e){ NV.state="fail"; return; }
+  NV.state="loading";
+  NV.w.onerror=()=>{ NV.state="fail"; NV.q.forEach(it=>it.no()); NV.q=[]; };
+  NV.w.onmessage=e=>{ const m=e.data;
+    if(m.t==="ready"){ NV.state="ready"; nvPump(); }
+    else if(m.t==="fail"){ NV.state="fail"; NV.q.forEach(it=>it.no()); NV.q=[]; }
+    else if(m.t==="audio"){ const it=NV.cur; NV.cur=null;
+      if(it){ if(m.e) it.no(); else {
+        const url=URL.createObjectURL(wavBlob(m.pcm,m.sr)); NV.url.set(it.text,url); it.yes(url);
+        /* a device that needs over 4x real time cannot keep a room ahead: use the device voice */
+        NV.n++; if(m.ms/1000 > 4*m.pcm.length/m.sr) NV.slowN++;
+        if(NV.n>=3 && NV.slowN>=3){ NV.state="slow"; NV.q.forEach(x=>x.no()); NV.q=[]; }
+        if(NV.url.size>80){ const k=NV.url.keys().next().value; URL.revokeObjectURL(NV.url.get(k)); NV.url.delete(k); NV.prom.delete(k); } } }
+      nvPump(); } };
+  NV.w.postMessage({t:"load"});
+}
+function nvPump(){ if(NV.state!=="ready"||NV.cur||!NV.q.length) return;
+  NV.cur=NV.q.shift(); NV.w.postMessage({t:"gen",text:NV.cur.text,speed:NV_SPEED}); }
+/* the audio for one line (a promise of a blob URL); urgent jumps the queue */
+function nvGet(text,urgent){
+  if(NV.prom.has(text)){ if(urgent){ const i=NV.q.findIndex(x=>x.text===text); if(i>0) NV.q.unshift(NV.q.splice(i,1)[0]); } return NV.prom.get(text); }
+  let yes,no; const pr=new Promise((a,b)=>{ yes=a; no=b; }); pr.catch(()=>{});
+  const it={text,yes,no:()=>{ NV.prom.delete(text); no(); }};
+  urgent?NV.q.unshift(it):NV.q.push(it); NV.prom.set(text,pr); nvPump(); return pr;
+}
+function wavBlob(pcm,sr){
+  const n=pcm.length, b=new ArrayBuffer(44+n*2), v=new DataView(b), w=(o,s)=>{ for(let i=0;i<s.length;i++) v.setUint8(o+i,s.charCodeAt(i)); };
+  w(0,"RIFF"); v.setUint32(4,36+n*2,true); w(8,"WAVE"); w(12,"fmt "); v.setUint32(16,16,true); v.setUint16(20,1,true); v.setUint16(22,1,true);
+  v.setUint32(24,sr,true); v.setUint32(28,sr*2,true); v.setUint16(32,2,true); v.setUint16(34,16,true); w(36,"data"); v.setUint32(40,n*2,true);
+  for(let i=0;i<n;i++){ const x=Math.max(-1,Math.min(1,pcm[i])); v.setInt16(44+i*2,x<0?x*0x8000:x*0x7FFF,true); }
+  return new Blob([b],{type:"audio/wav"});
+}
+/* the model speaks a sentence at a time, so the first one can start while the rest are made */
+function sentences(t){ return t.split(/(?<=[.?!:;])\s+(?=\S)/).map(x=>x.trim()).filter(Boolean); }
+/* queue several lines; urgent ones go to the front, keeping their order */
+function nvGetAll(list,urgent){ if(urgent) list.slice().reverse().forEach(t=>nvGet(t,true)); else list.forEach(t=>nvGet(t,false)); return list.map(t=>NV.prom.get(t)||nvGet(t)); }
+/* get a problem's question and hint ready before they are needed */
+function prefetchP(p,urgent){
+  if(!p||!voiceWanted()) return; nvStart();
+  if(NV.state==="fail"||NV.state==="slow") return;
+  [speakable(p.question), speakable(p.hint)].forEach((t,i)=>{ if(t&&!CLIPS.has(clipId(t))) nvGetAll(sentences(t), urgent&&i===0); });
+}
+function playSeq(srcs,parts,rate,h){
+  stopTTS(); const tok=++audTok, a=audEl(); let i=0;
+  const bail=()=>{ if(tok!==audTok) return; audTok++; ttsSay(parts.slice(i).join(" "),rate,h); };
+  const next=()=>{ if(tok!==audTok) return;
+    if(i>=srcs.length){ if(h.onend) h.onend(); return; }
+    /* give up after NV_WAIT — but if this very sentence is being made right now, wait once more */
+    let timer, more=true;
+    const arm=()=>{ timer=setTimeout(()=>{ if(more && NV.cur && NV.cur.text===parts[i]){ more=false; arm(); return; } timer=null; bail(); }, NV_WAIT); };
+    arm();
+    srcs[i].then(url=>{ if(!timer||tok!==audTok) return; clearTimeout(timer);
+      a.onended=()=>{ i++; next(); }; a.onerror=bail; a.src=url;
+      try{ const r=a.play(); if(r&&r.catch) r.catch(bail); }catch(e){ bail(); } },
+      ()=>{ if(timer){ clearTimeout(timer); bail(); } });
+  };
+  next();
+}
+/* say(text) or say([part, part…]): recorded clip, else the natural voice, else the device voice */
+function say(x,rate){
+  const parts=(Array.isArray(x)?x:[x]).map(t=>speakable(t)).filter(Boolean); if(!parts.length) return null;
+  const h={onend:null,onerror:null};
+  if(natOn()){
+    /* a recorded line plays whole; anything else goes to the model sentence by sentence */
+    const pieces=parts.flatMap(t=>CLIPS.has(clipId(t)) ? [t] : sentences(t));
+    const fresh=pieces.filter(t=>!CLIPS.has(clipId(t)) && !NV.url.has(t));
+    if(!fresh.length || NV.state==="ready"){
+      if(fresh.length) nvGetAll(fresh,true);
+      const srcs=pieces.map(t=>{ const id=clipId(t);
+        return CLIPS.has(id) ? Promise.resolve(AUDIO_DIR+id+".m4a") : NV.url.has(t) ? Promise.resolve(NV.url.get(t)) : NV.prom.get(t); });
+      if(srcs.every(Boolean)){ playSeq(srcs,pieces,rate,h); return h; }
+    }
+  }
+  audTok++; try{ if(AUD) AUD.pause(); }catch(e){}
+  return ttsSay(parts.join(" "),rate,h);
+}
+function ttsSay(text,rate,h){
+  h=h||{onend:null,onerror:null};
+  const ss=window.speechSynthesis; if(!ss) return null;
   try{
     const make=()=>{ const u=new SpeechSynthesisUtterance(speakable(text));
       u.rate=rate||0.92; u.pitch=1; u.lang=document.documentElement.lang||"en"; return u; };
     const u=make(); SPEECH.u=u;
+    u.onend=()=>{ if(h.onend) h.onend(); }; u.onerror=()=>{ if(h.onerror) h.onerror(); };
     if(ss.speaking||ss.pending){ ss.cancel(); SPEECH.cancelAt=Date.now(); }
     const go=(utt)=>{ if(SPEECH.u!==u) return;                 /* something newer has asked to speak */
       try{ ss.resume(); }catch(e){} ss.speak(utt); };
@@ -11832,8 +11963,8 @@ function say(text,rate){
       const again=make(); again.onend=u.onend; again.onerror=u.onerror; again.addEventListener("start",()=>{ started=true; });
       try{ ss.cancel(); }catch(e){} SPEECH.cancelAt=Date.now();
       setTimeout(()=>go(again),250); }, wait+1500);
-    return u;
-  }catch(e){}
+    return h;
+  }catch(e){ return null; }
 }
 /* the question only — the four options are read by the player, not to them */
 function readAloud(p){
@@ -11844,7 +11975,7 @@ function readAloud(p){
    read-aloud on, and for Kindergarten to Grade 2 even with it off — a young
    reader can always ask to hear the question, the bonus round included.
    Only the question is read, never the four answers. */
-const canRead = () => !!window.speechSynthesis && (kidMode || (S.level|0) <= 2);
+const canRead = () => (!!window.speechSynthesis || natOn()) && (kidMode || (S.level|0) <= 2);
 function speakQuestion(p){
   if(!p) return;
   const u=say(p.question, 0.88), b=$("#readBtn");          /* say() does its own cancelling, safely */
@@ -12358,7 +12489,7 @@ function applyTheme(){
    moment it goes out. Shown on the setup screen and at the foot of the
    report card, so a player can say which build they are playing.
    ===================================================================== */
-const BUILD = 32, RELEASED = "18 Oct 2026, 14:36";
+const BUILD = 33, RELEASED = "18 Oct 2026, 19:00";
 const COPYRIGHT = "© 2026 m1keLima. All rights reserved.";
 const VERSION_LINE = `v${BUILD} · released ${RELEASED} · ${COPYRIGHT}`;
 
@@ -12558,6 +12689,7 @@ function buildSetup(){
   $("#startBtn").textContent = (save.world||0)===0 ? "Approach the house" : "Go into the "+wn.toLowerCase();
   $("#sfxBtn").textContent = sfxOn?"Sound: on":"Sound: off";
   $("#musBtn").textContent = musicOn?"Music: on":"Music: off";
+  $("#voiceBtn").textContent = natOn()?"Voice: natural":"Voice: device";
   paintKid();
   paintFamilies();
   renderThemes();
@@ -12730,9 +12862,16 @@ function loadRoom(){
   S.roomQStart=Date.now(); S.roomHeld=0;
   const slot=S.plan[Math.min(S.plan.length-1,S.room)];
   S.slot=slot;
-  S.current=makeProblem(slot.lvl, slot.gen, rampFor(S.room));
+  /* the natural voice: this room's problem may already have been made (and its audio
+     prepared) while the player was in the room before */
+  S.current=(S.pre && S.pre.room===S.room && S.pre.slot===slot) ? S.pre.p : makeProblem(slot.lvl, slot.gen, rampFor(S.room));
+  S.pre=null;
   S.current.hardType = slot.hard;
   if(slot.tight) tighten(S.current);
+  prefetchP(S.current,true);
+  const nslot=S.plan[S.room+1];
+  if(nslot && voiceWanted() && NV.state!=="fail" && NV.state!=="slow"){
+    S.pre={room:S.room+1, slot:nslot, p:makeProblem(nslot.lvl, nslot.gen, rampFor(S.room+1))}; prefetchP(S.pre.p); }
   $("#scene").innerHTML=sceneSVG(S.room,S.avatar);
   $("#roomtag").textContent=`${S.room+1}. ${W().rooms[S.room]}`;
   $("#roomline").textContent=P(SCARELINES);
@@ -12875,7 +13014,7 @@ function answer(btn,mode){
 
   const spd = speedBonus(), secs = (Date.now()-S.qStart)/1000;
   stopTimer(); stopSpeech();
-  if(kidMode) say(right ? "That is right." : "Not that one. "+p.hint, 0.95);
+  if(kidMode) say(right ? "That is right." : ["Not that one.", p.hint], 0.95);
 
   /* ---------------- correct ---------------- */
   if(right){
@@ -13952,7 +14091,7 @@ function dragonAnswer(btn){
   fb.className="no show";
   fb.innerHTML=`<div class="ft">${esc(b.miss)} — ${D.shields} ${D.shields===1?"chance":"chances"} left. The problem is still there to beat.</div>
     <div class="steps"><b>Hint:</b> ${esc(p.hint)}</div>`;
-  if(kidMode) say("Not that one. "+p.hint,0.95);
+  if(kidMode) say(["Not that one.", p.hint],0.95);
 }
 
 function dragonWon(){
@@ -14521,7 +14660,7 @@ function endingScene(E){
   else if(E.mode==="walk") for(let t=7.2;t<9.8;t+=0.4) tone(160,.12,"square",.03,t);
   if(E.mode==="poof") [1568,2093,2637].forEach((f,i)=>tone(f,.4,"sine",.05,7.2+i*0.1));
   [784,988,1175,1568].forEach((f,i)=>tone(f,.4,"triangle",.05,6.4+i*0.12));
-  if(kidMode) say(`${E.q} ${E.ft} ${S.name} ${E.become}`, 0.9);
+  if(kidMode) say([`${E.q} ${E.ft}`, `${S.name} ${E.become}`], 0.9);
 }
 
 /* =====================================================================
@@ -14701,7 +14840,7 @@ function carriageScene(){
   [988,1319,1568].forEach((f,i)=>tone(f,.5,"sine",.045,3.5+i*0.12));
   [1568,1760,2093,1760,2093,2349].forEach((f,i)=>tone(f,.25,"sine",.035,7.6+i*0.09));
   for(let t=7.6;t<10.4;t+=0.21) tone(t%0.42<0.2?760:560,.045,"triangle",.04,t);
-  if(kidMode) say(`A princess in a pumpkin coach. Our coachman ran off, she says. Could you drive us home? ${S.name} takes the reins.`, 0.9);
+  if(kidMode) say(["A princess in a pumpkin coach. Our coachman ran off, she says. Could you drive us home?", `${S.name} takes the reins.`], 0.9);
 }
 
 /* =====================================================================
@@ -14852,6 +14991,7 @@ function bonusScene(){
 
 function startBonus(){
   S.br={q:missedList().slice(0,BONUS_MAX), i:0, candy:0, right:0, first:0};
+  if(voiceWanted()){ S.br.pre=S.br.q.map(sl=>makeProblem(sl.lvl, sl.gen, rampFor(0))); S.br.pre.forEach((p,i)=>prefetchP(p,i===0)); }
   $("#overlay").classList.add("hidden");
   $("#setup").classList.add("hidden"); $("#game").classList.remove("hidden");
   $("#chase").classList.add("hidden");
@@ -14872,7 +15012,7 @@ function nextBonus(){
   if(br.i>=br.q.length) return finishBonus();
   const slot=br.q[br.i];
   S.tries=0;
-  S.practice=makeProblem(slot.lvl, slot.gen, rampFor(0));
+  S.practice=(br.pre && br.pre[br.i]) || makeProblem(slot.lvl, slot.gen, rampFor(0));
   $("#roomnum").textContent=`Bonus ${br.i+1} / ${br.q.length}`;
   askQuestion(S.practice,"practice");
 }
@@ -14900,7 +15040,7 @@ function finishBonus(){
   $("#nextBtn").onclick=()=>{
     $("#chase").classList.remove("hidden"); $("#lanterns").parentNode.classList.remove("hidden");
     endGame(S.won); };
-  if(kidMode) say(`Bonus round over. ${br.candy} extra sweets.`, 0.95);
+  if(kidMode) say(["Bonus round over.", `${br.candy} extra sweets.`], 0.95);
 }
 
 /* =====================================================================
@@ -15239,7 +15379,7 @@ $("#helpGo").onclick=closeHelp;
 $("#help").onclick=e=>{ if(e.target===$("#help")) closeHelp(); };
 
 $("#kidBtn").onclick=()=>{ kidMode=!kidMode; save.kid=kidMode; store(); SFX.click(); paintKid();
-  if(kidMode) say("Read aloud is on. I will read each question to you, and there is no clock.");
+  if(kidMode){ nvStart(); say("Read aloud is on. I will read each question to you, and there is no clock."); }
   else stopSpeech(); };
 $("#readBtn").onclick=()=>{ speakQuestion(S.spoken); };
 $("#startBtn").onclick=()=>{ ac(); musicStart(); startGame(); };
@@ -15250,6 +15390,9 @@ $("#quitBtn").onclick=()=>{
   if(confirm("Walk out? The run ends here.")) endGame(false); else resumeRoomClock();
 };
 $("#sfxBtn").onclick=toggleSfx;
+$("#voiceBtn").onclick=()=>{ save.natural=!natOn(); store(); SFX.click();
+  $("#voiceBtn").textContent = natOn()?"Voice: natural":"Voice: device";
+  if(natOn()){ nvStart(); say("Hello! I am the Pumpkin King. Come in, if you dare."); } else { stopSpeech(); ttsSay("This is the device voice."); } };
 $("#musBtn").onclick=toggleMusic;
 $("#musBtn2").onclick=toggleMusic;
 $("#sfxBtn2").onclick=toggleSfx;
