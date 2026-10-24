@@ -574,6 +574,13 @@ table.rc td{padding:9px 4px;border-bottom:1px solid var(--line)}
 table.rc td:last-child{text-align:right;font-weight:800;color:var(--gold)}
 .rank{text-align:center;font-size:clamp(26px,6vw,40px);font-weight:800;color:var(--pumpkin);margin:10px 0 2px}
 .missed{font-size:16px;color:var(--dim);line-height:1.75}
+#lbook{position:fixed;inset:0;z-index:60;background:rgba(5,3,10,.82);display:flex;align-items:flex-start;justify-content:center;overflow:auto;padding:24px 12px}
+#lbook.hidden{display:none}
+#lbCard{position:relative;max-width:820px;width:100%}
+.lbkid{margin:16px 0 6px;color:var(--gold)}
+.lbs{display:flex;align-items:center;gap:10px;flex-wrap:wrap;border-top:1px solid var(--line);padding:9px 0}
+.lbs .w{flex:1;min-width:200px;font-size:15px} .lbs .w span{color:var(--dim)}
+.lbs .btn{padding:7px 12px;font-size:15px}
 </style>
 </head>
 <body>
@@ -618,6 +625,7 @@ table.rc td:last-child{text-align:right;font-weight:800;color:var(--gold)}
       <button class="btn" id="startBtn">Approach the house</button>
       <button class="btn ghost" id="helpBtn">How this works</button>
       <button class="btn ghost" id="mlogBtn">📒 Mistakes</button>
+      <button class="btn ghost" id="lbBtn">📖 Logbook</button>
       <a class="btn ghost" id="tensBtn" href="hauntedpractice.html" title="Haunted Practice: hands-on rooms that explain the ideas behind the problems — tens and ones, telling the time, decimals, percentages" style="text-decoration:none;display:inline-flex;align-items:center">🎃 Practice</a>
       <button class="btn ghost" id="sfxBtn">Sound: on</button>
       <button class="btn ghost" id="musBtn">Music: on</button>
@@ -735,6 +743,15 @@ table.rc td:last-child{text-align:right;font-weight:800;color:var(--gold)}
 </section>
 
 <div id="overlay" class="hidden"><div class="card" id="overlayCard"></div></div>
+<div id="lbook" class="hidden" role="dialog" aria-modal="true" aria-labelledby="lbTitle">
+  <div class="card" id="lbCard">
+    <button id="lbX" aria-label="Close" style="position:absolute;top:10px;right:12px;width:40px;height:40px;border-radius:12px;cursor:pointer;background:#150e20;border:1px solid var(--line);color:var(--ink);font-size:20px">×</button>
+    <h2 id="lbTitle" style="margin:0 0 4px">📖 Logbook</h2>
+    <p style="color:var(--dim);margin:0 0 12px;font-size:15px">Every exercise each player has done, right and wrong, one session per run — kept on this device.
+      Send a session to a grown-up with 💬: Messages opens with a link to it; add who it goes to and send.</p>
+    <div id="lbBody"></div>
+  </div>
+</div>
 <div id="mlog" class="hidden" role="dialog" aria-modal="true" aria-labelledby="mlTitle">
   <div class="card" id="mlogCard">
     <button id="mlogX" aria-label="Close" style="position:absolute;top:10px;right:12px;width:40px;height:40px;border-radius:12px;cursor:pointer;background:#150e20;border:1px solid var(--line);color:var(--dim);font-size:24px;font-family:inherit">×</button>
@@ -12519,7 +12536,7 @@ function applyTheme(){
    moment it goes out. Shown on the setup screen and at the foot of the
    report card, so a player can say which build they are playing.
    ===================================================================== */
-const BUILD = 37, RELEASED = "24 Oct 2026, 16:00";
+const BUILD = 38, RELEASED = "24 Oct 2026, 17:30";
 const COPYRIGHT = "© 2026 m1keLima. All rights reserved.";
 const VERSION_LINE = `v${BUILD} · released ${RELEASED} · ${COPYRIGHT}`;
 
@@ -12876,7 +12893,7 @@ function startGame(){
   S.room=0; S.lanterns=3; S.candy=0; S.escapeBonus=0; S.speedCandy=0; S.started=Date.now(); S.log=[]; S.jump=0;
   S.tally=newTally();
   S.hatchUsed=false; S.sawFamily=false; S.dragonWon=false; S.rodeCoach=false; S.dragon=null; S.boss=null; S.ending=null;
-  S.missed={}; S.runMistakes=[]; S.br=null; S.brCandy=0; S.brDone=false; S.reported=false; S.won=false; S.unlocked=null;
+  S.session=null; S.missed={}; S.runMistakes=[]; S.br=null; S.brCandy=0; S.brDone=false; S.reported=false; S.won=false; S.unlocked=null;
   $("#chase").classList.remove("hidden"); $("#lanterns").parentNode.classList.remove("hidden");
   save.totals.runs++; save.prog[S.level]=(save.prog[S.level]||0)+1; store();
   $("#setup").classList.add("hidden"); $("#game").classList.remove("hidden");
@@ -12884,6 +12901,7 @@ function startGame(){
   $("#chasetrack").innerHTML=Array.from({length:10},(_,i)=>`<i>${i+1}</i>`).join("");
   $("#tierBadge").textContent=TIERS[S.tier].name;
   musicStart(); SFX.door();
+  startSession();
   loadRoom();
 }
 
@@ -13044,6 +13062,8 @@ function answer(btn,mode){
   }
 
   const spd = speedBonus(), secs = (Date.now()-S.qStart)/1000;
+  logAttempt(mode==="bonus"?(S.bonusGrand?"grand chest":"chest"):mode==="shortcut"?"hatch":mode==="practice"?"bonus round":"room",
+             p, btn.dataset.v, right, (mode==="bonus"||mode==="shortcut")?1:S.tries+1, secs);
   stopTimer(); stopSpeech();
   if(kidMode) say(right ? "That is right." : ["Not that one.", p.hint], 0.95);
 
@@ -14104,6 +14124,7 @@ function dragonAsk(){
 
 function dragonAnswer(btn){
   const D=S.dragon, b=S.boss, p=D.p, right=btn.dataset.v===p.answer, fb=$("#feedback");
+  logAttempt("final challenge", p, btn.dataset.v, right, S.tries+1, null);
   stopSpeech();
   if(right){
     btn.classList.add("right");
@@ -15255,6 +15276,39 @@ function openMistakes(){
 }
 function closeMistakes(){ $("#mlog").classList.add("hidden"); }
 
+/* ---------- the logbook (v38) ----------
+   Every attempt at every exercise — rooms, chests, the hatch, the bonus round, the
+   final challenge — right or wrong, which try and how long, kept per player (by the
+   name typed on the front page) in save.logbook[kidKey] as one session per run.
+   The session is saved as it grows, so closing the iPad mid-run loses nothing.
+   Caps: LOG_SESSIONS per player, LOG_EX attempts per session. */
+const LOG_SESSIONS = 60, LOG_EX = 250;
+const kidKey = n => (n||"").trim().toLowerCase() || "the visitor";
+function startSession(){
+  try{
+    const book=save.logbook||(save.logbook={}), k=kidKey(S.name), kid=book[k]||(book[k]={name:S.name,sessions:[]});
+    kid.name=S.name;
+    S.session={id:Date.now(), d:new Date().toISOString(), g:BANK[S.level|0].name, w:W().name, ex:[], done:false};
+    kid.sessions.push(S.session); if(kid.sessions.length>LOG_SESSIONS) kid.sessions.splice(0,kid.sessions.length-LOG_SESSIONS);
+    store();
+  }catch(e){}
+}
+function logAttempt(kind, p, chosen, right, attempt, secs){
+  try{
+    const ses=S.session; if(!ses||ses.ex.length>=LOG_EX) return;
+    ses.ex.push({k:kind, t:p.topic, q:String(p.question).replace(/\s+/g," ").trim(), x:String(chosen), a:String(p.answer),
+                 ok:!!right, n:attempt|0||1, s:secs==null?null:Math.round(secs)});
+    store();
+  }catch(e){}
+}
+/* the result, written when the report card first shows and again after a bonus round */
+function closeSession(won){
+  const ses=S.session; if(!ses) return;
+  const b=bucketFor(won), log=S.log||[], first=log.filter(l=>l.firstTry).length, secs=Math.round((Date.now()-S.started)/1000);
+  Object.assign(ses,{done:true, won:!!won, sc:b.total, r:rankFor(b.total).name, rm:S.room|0, a:log.length?Math.round(first/log.length*100):0, t:`${Math.floor(secs/60)}m ${secs%60}s`});
+  store();
+}
+
 /* ---------- results by iMessage, with a link to the full results (v37) ----------
    A web page cannot send a message itself, so the button opens Messages with the
    text ready (sms: link) and someone taps Send. The full results travel INSIDE the
@@ -15271,31 +15325,50 @@ async function packResults(obj){
   const z=await new Response(new Blob([raw]).stream().pipeThrough(new CompressionStream("deflate-raw"))).arrayBuffer();
   return "z"+b64url(new Uint8Array(z));
 }
-function runResults(won){
-  const b=bucketFor(won), r=rankFor(b.total), log=S.log||[], first=log.filter(l=>l.firstTry).length;
-  const secs=Math.round((Date.now()-S.started)/1000);
-  return {v:1, n:S.name||"", g:BANK[S.level|0].name, w:W().name, won:!!won, s:b.total, r:r.name, rm:S.room|0,
-    a:log.length?Math.round(first/log.length*100):0, t:`${Math.floor(secs/60)}m ${secs%60}s`, d:new Date().toISOString(),
-    m:(S.runMistakes||[]).slice(-80).map(e=>[e.t, e.q.length>220?e.q.slice(0,218)+"…":e.q, e.x, e.a, e.n, e.k])};
+/* a session as the link carries it: ex = [kind, topic, question, answered, right answer, ok, try, seconds] */
+function sessionPayload(ses, name){
+  return {v:2, n:name||"", g:ses.g, w:ses.w, won:!!ses.won, done:!!ses.done, s:ses.sc||0, r:ses.r||"", rm:ses.rm||0, a:ses.a||0, t:ses.t||"", d:ses.d,
+    ex:ses.ex.map(e=>[e.k, e.t, e.q.length>220?e.q.slice(0,218)+"…":e.q, e.x, e.a, e.ok?1:0, e.n, e.s])};
 }
 function shareText(R, url){
-  const by={}; R.m.forEach(m=>by[m[0]]=(by[m[0]]||0)+1);
+  const by={}; R.ex.forEach(e=>{ if(!e[5]) by[e[1]]=(by[e[1]]||0)+1; });
   const topics=Object.entries(by).sort((a,b)=>b[1]-a[1]).map(([t,n])=>n>1?`${t} (${n})`:t);
-  return `🎃 Haunted House — ${R.n?R.n+", ":""}${R.g}, ${R.w}: ${R.won?"got out":"caught"}, ${R.s} sweets (${R.r}). Right first time ${R.a}%.`
-    + (topics.length?`\nTo practise: ${topics.join(", ")}.`:"\nNo mistakes!") + `\nFull results: ${url}`;
+  const qs=new Set(R.ex.map(e=>e[0]+"|"+e[2])).size, firstOk=R.ex.filter(e=>e[5]&&e[6]===1).length;
+  return `🎃 Haunted House — ${R.n?R.n+", ":""}${R.g}, ${R.w}: ${R.done?`${R.won?"got out":"caught"}, ${R.s} sweets (${R.r})`:"unfinished"}. ${qs} exercises, ${firstOk} right first time.`
+    + (topics.length?`\nTo practise: ${topics.join(", ")}.`:"\nNo mistakes!") + `\nThe whole session: ${url}`;
 }
+function sessionLink(ses, name){ const R=sessionPayload(ses,name); return packResults(R).then(code=>({R, url:RESULTS_URL+"#r="+code})); }
+const openMessages = text => { location.href=`sms:${MSG_TO}&body=${encodeURIComponent(text)}`; };
 function shareBlock(){
-  return `<div class="row" style="margin-top:14px"><button class="btn" id="msgBtn" disabled>💬 Send results by iMessage</button></div>
-    <div class="note" style="text-align:center">Opens Messages with the results and a link to the full report — then tap Send.</div>`;
+  return `<div class="row" style="margin-top:14px"><button class="btn" id="msgBtn" disabled>💬 Send results</button></div>
+    <div class="note" style="text-align:center">Opens Messages with a link to everything done in this session — add who it goes to, then Send.</div>`;
 }
 function wireShareBlock(won){
-  const btn=$("#msgBtn"); if(!btn) return; const R=runResults(won);
-  packResults(R).then(code=>{ const url=RESULTS_URL+"#r="+code, text=shareText(R,url);
+  const btn=$("#msgBtn"); if(!btn||!S.session) return;
+  sessionLink(S.session, S.name).then(({R,url})=>{ const text=shareText(R,url);
     btn.disabled=false;
     /* navigation must happen inside the tap, so everything is ready before it */
-    btn.onclick=()=>{ SFX.click(); location.href=`sms:${MSG_TO}&body=${encodeURIComponent(text)}`; };
+    btn.onclick=()=>{ SFX.click(); openMessages(text); };
   }).catch(()=>{});
 }
+/* the logbook: every player on this device, newest session first, each one to open or send */
+function openLogbook(){
+  const book=save.logbook||{}, kids=Object.values(book).filter(k=>k.sessions.length)
+    .sort((a,b)=>b.sessions[b.sessions.length-1].id-a.sessions[a.sessions.length-1].id);
+  const row=(k,ses,i)=>{ const qs=new Set(ses.ex.map(e=>e.k+"|"+e.q)).size, ok=ses.ex.filter(e=>e.ok&&e.n===1).length, wr=ses.ex.filter(e=>!e.ok).length;
+    return `<div class="lbs"><div class="w"><b>${esc(fmtWhen(ses.d))}</b> · ${esc(ses.g)} · ${esc(ses.w)}<br>
+      <span>${ses.done?`${ses.won?"got out":"caught"} · ${ses.sc} sweets`:"unfinished"} · ${qs} exercises · ${ok} right first time · ${wr} wrong</span></div>
+      <button class="btn ghost" data-open="${esc(kidKey(k.name))}|${i}">Open</button><button class="btn" data-send="${esc(kidKey(k.name))}|${i}" disabled>💬 Send</button></div>`; };
+  $("#lbBody").innerHTML = kids.length ? kids.map(k=>`<h3 class="lbkid">${esc(k.name||"the visitor")} · ${k.sessions.length} session${k.sessions.length===1?"":"s"}</h3>
+      ${k.sessions.map((ses,i)=>[ses,i]).filter(([ses])=>ses.ex.length).reverse().slice(0,30).map(([ses,i])=>row(k,ses,i)).join("")}`).join("")
+    : `<p style="font-size:16px">Nothing yet — play a run and it will appear here.</p>`;
+  /* build every link first: Messages may only be opened inside the tap */
+  $("#lbBody").querySelectorAll("[data-send]").forEach(b=>{ const [k,i]=b.dataset.send.split("|"), kid=book[k], ses=kid.sessions[+i];
+    sessionLink(ses, kid.name).then(({R,url})=>{ b.disabled=false; b.onclick=()=>{ SFX.click(); openMessages(shareText(R,url)); };
+      const o=$("#lbBody").querySelector(`[data-open="${b.dataset.send}"]`); if(o) o.onclick=()=>{ SFX.click(); window.open(url,"_blank"); }; }).catch(()=>{}); });
+  $("#lbook").classList.remove("hidden");
+}
+function closeLogbook(){ $("#lbook").classList.add("hidden"); }
 
 function bucketFor(won){
   const run = won ? S.candy : 0;
@@ -15316,6 +15389,7 @@ function endGame(won){
     if(!won) SFX.lose();
     autoReport(won);
   }
+  closeSession(won);
   /* best is kept on the 100 scale; the old best.candy was on a different one */
   const carried=bucketFor(won).total;
   if(carried>(save.best.score||0)) save.best.score=carried;
@@ -15618,6 +15692,9 @@ function closeTopics(){
 }
 $("#topicsBtn").onclick=()=>{ SFX.click(); openTopics(save.level); };
 $("#mlogBtn").onclick=()=>{ SFX.click(); openMistakes(); };
+$("#lbBtn").onclick=()=>{ SFX.click(); openLogbook(); };
+$("#lbX").onclick=closeLogbook;
+$("#lbook").onclick=e=>{ if(e.target===$("#lbook")) closeLogbook(); };
 $("#mlogX").onclick=closeMistakes;
 $("#mlog").onclick=e=>{ if(e.target===$("#mlog")) closeMistakes(); };
 $("#topicsX").onclick=closeTopics;

@@ -23,7 +23,7 @@ h1{margin:0;font-size:clamp(30px,7vw,46px);text-align:center;background:linear-g
 h2{font-size:20px;margin:0 0 10px}
 .topic{margin:14px 0 6px;font-weight:800;color:var(--gold)}
 .m{border-top:1px solid var(--line);padding:8px 0}
-.m .q{color:var(--ink)} .m .x{color:var(--bad)} .m .a{color:var(--good)} .m small{color:var(--dim)}
+.m .q{color:var(--ink);margin:2px 0} .x{color:var(--bad)} .a{color:var(--good)} .gold{color:var(--gold)} .m small{color:var(--dim)}
 .none{text-align:center;color:var(--good);font-size:20px}
 .err{text-align:center;color:var(--dim)}
 a{color:var(--pumpkin)}
@@ -48,20 +48,31 @@ const tryWord=n=>n<=1?"first try":n===2?"second try":`try ${n}`;
   if(!m){ $("#out").innerHTML=`<div class="card err">This page shows a run's results when opened from the link the game sends.</div>`; return; }
   let R; try{ R=await unpack(m[1]); }catch(e){ $("#out").innerHTML=`<div class="card err">This link is incomplete or damaged — ask for it to be sent again.</div>`; return; }
   const when=new Date(R.d).toLocaleString(undefined,{weekday:"short",day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"});
-  document.title=`${R.n||"Haunted House"} — ${R.s} sweets`;
+  /* v1 links (v37) carried only the mistakes; v2 (v38) carries every attempt */
+  const ex = R.v>=2 ? R.ex : R.m.map(m=>[m[5]||"room",m[0],m[1],m[2],m[3],0,m[4],null]);
+  /* one item per exercise: consecutive attempts at the same question */
+  const items=[]; ex.forEach(e=>{ const last=items[items.length-1];
+    if(last && last.k===e[0] && last.q===e[2] && !last.ok) last.tries.push(e); else items.push({k:e[0],t:e[1],q:e[2],a:e[4],tries:[e],get ok(){ return this.tries.some(x=>x[5]); }}); });
+  const firstOk=items.filter(it=>it.tries[0][5]).length, laterOk=items.filter(it=>!it.tries[0][5]&&it.ok).length, never=items.filter(it=>!it.ok).length;
+  document.title=`${R.n||"Haunted House"} — ${R.done===false?"session":R.s+" sweets"}`;
   $("#sub").textContent=`${R.n?R.n+" · ":""}${R.g} · ${R.w} · ${when}`;
-  const by={}; R.m.forEach(x=>(by[x[0]]=by[x[0]]||[]).push(x));
-  const topics=Object.entries(by).sort((a,b)=>b[1].length-a[1].length);
-  $("#out").innerHTML=`<div class="card">
+  const wrongBy={}; items.filter(it=>!it.tries[0][5]).forEach(it=>wrongBy[it.t]=(wrongBy[it.t]||0)+1);
+  const practise=Object.entries(wrongBy).sort((a,b)=>b[1]-a[1]);
+  const mark=it=> it.tries[0][5]?`<span class="a">✓ first try</span>`: it.ok?`<span class="gold">✓ on try ${it.tries.findIndex(x=>x[5])+1}</span>`:`<span class="x">${R.v>=2?"✗ not this time":"✗ answered wrong"}</span>`;
+  const secs=it=>{ const t=it.tries.map(x=>x[7]).filter(x=>x!=null), n=t.reduce((a,b)=>a+b,0); return n?` · ${n} s`:""; };
+  $("#out").innerHTML=`${R.v>=2&&R.done===false?"":`<div class="card">
       <div class="score"><b>${R.s}</b><span>sweets</span></div><div class="rank">${esc(R.r)}</div>
       <div class="facts"><div class="fact"><i>Result</i><b>${R.won?"🌕 got out":"🎃 caught"}</b></div>
-        <div class="fact"><i>Rooms</i><b>${R.rm} / 10</b></div><div class="fact"><i>Right first time</i><b>${R.a}%</b></div>
-        <div class="fact"><i>Time</i><b>${esc(R.t)}</b></div><div class="fact"><i>Grade</i><b>${esc(R.g)}</b></div></div></div>
-    <div class="card"><h2>📒 To practise${R.m.length?` — ${R.m.length} wrong answer${R.m.length===1?"":"s"}`:""}</h2>
-      ${R.m.length?topics.map(([t,xs])=>`<div class="topic">${esc(t)} · ${xs.length}</div>${xs.map(x=>`<div class="m">
-          <div class="q">${esc(x[1])}</div><div><span class="x">answered ${esc(x[2])}</span> · <span class="a">right: ${esc(x[3])}</span>
-          <small> · ${esc(tryWord(x[4]))}${x[5]?" · "+esc(x[5]):""}</small></div></div>`).join("")}`).join("")
-        :`<div class="none">No mistakes this run!</div>`}
+        <div class="fact"><i>Rooms</i><b>${R.rm} / 10</b></div><div class="fact"><i>Time</i><b>${esc(R.t)}</b></div>
+        <div class="fact"><i>Grade</i><b>${esc(R.g)}</b></div></div></div>`}
+    ${R.v>=2?`<div class="card"><div class="facts" style="margin-top:0">
+        <div class="fact"><i>Exercises</i><b>${items.length}</b></div><div class="fact"><i>Right first time</i><b class="a">${firstOk}</b></div>
+        <div class="fact"><i>Right on a later try</i><b class="gold">${laterOk}</b></div><div class="fact"><i>Not got</i><b class="x">${never}</b></div></div>
+      ${practise.length?`<p style="margin:14px 0 0"><b>To practise:</b> ${practise.map(([t,n])=>esc(t)+(n>1?` (${n})`:"")).join(", ")}</p>`:`<p class="none" style="margin:14px 0 0">Everything right first time!</p>`}</div>`:""}
+    <div class="card"><h2>${R.v>=2?"📝 Every exercise, in order":"📒 To practise"}</h2>
+      ${items.length?items.map((it,i)=>`<div class="m"><small>${i+1}. ${esc(it.k)} · ${esc(it.t)}${secs(it)}</small>
+          <div class="q">${esc(it.q)}</div><div>${mark(it)} · right answer <span class="a">${esc(it.a)}</span>${it.tries.filter(x=>!x[5]).length?` · <span class="x">answered ${it.tries.filter(x=>!x[5]).map(x=>esc(x[3])).join(", then ")}</span>`:""}</div></div>`).join("")
+        :`<div class="none">No exercises in this session.</div>`}
       <p style="margin:16px 0 0;font-size:15px;color:var(--dim)">Practise the ideas behind these in <a href="hauntedpractice.html">Haunted Practice</a>.</p></div>`;
 })();
 </script></body></html>
