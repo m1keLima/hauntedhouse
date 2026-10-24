@@ -128,9 +128,11 @@ input[type=text]::placeholder{color:#5c5070}
 .ledger td.v{text-align:right;font-weight:800;white-space:nowrap;padding-left:12px}
 .ledger .plus{color:var(--gold)} .ledger .minus{color:#ff8a94}
 .ledger tr.total td{border-top:2px solid #c79a2f;border-bottom:none;font-size:17px;padding-top:10px}
-.ledger tr.total.miss td{border-top-color:#6e2a33;font-size:15.5px}
+.ledger tr.total.miss td{border-top-color:#3c5f93;font-size:15.5px}
 .ledhead{font-size:12px;letter-spacing:2.5px;text-transform:uppercase;font-weight:800;color:var(--gold);margin:4px 0 2px}
-.ledhead.miss{color:#ff8a94;margin-top:16px}
+.ledhead.miss{color:#9cc2ff;margin-top:16px}
+.ledger .togo{color:#9cc2ff}
+.ledger .extra{margin-top:12px;padding:10px 12px;border-radius:10px;background:rgba(255,207,92,.1);border:1px solid rgba(255,207,92,.35);color:var(--gold);font-weight:700}
 .coderow{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:10px 0 2px;min-height:30px}
 .codelink{background:none;border:0;color:var(--dim);font:inherit;font-size:14px;cursor:pointer;padding:4px 0;text-decoration:underline dotted}
 #codeBox{display:inline-flex;gap:8px;align-items:center}
@@ -141,8 +143,24 @@ input[type=text]::placeholder{color:#5c5070}
 #codeMsg{font-size:14px;color:var(--gold)}
 .endrow .btn[disabled]{opacity:.38;cursor:not-allowed;box-shadow:none}
 .rcfoot{text-align:center;margin-top:16px;font-size:11.5px;letter-spacing:2px;text-transform:uppercase;color:#5c5070}
-.misslist{margin:14px 0 0;padding:14px 16px;border-radius:12px;background:rgba(196,18,31,.09);
-  border:1px solid rgba(196,18,31,.34);font-size:16px;line-height:1.7}
+.mistakes{margin:14px 0 0;padding:14px 16px;border-radius:12px;background:rgba(95,150,224,.08);border:1px solid rgba(95,150,224,.35)}
+.mistakes h3{margin:0 0 6px;font-size:16px;color:#9cc2ff;letter-spacing:.3px}
+.mistakes .grp{font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--dim);margin:10px 0 4px;font-weight:800}
+.mistakes ul{margin:0;padding-left:18px;font-size:14.5px;line-height:1.5}
+.mistakes li span{color:var(--dim)}
+.mistakes .row{gap:8px;margin-top:12px;justify-content:flex-start;flex-wrap:wrap}
+.mistakes .btn{font-size:15px;padding:10px 16px}
+.mistakes .note{color:var(--dim);font-size:13px;margin-top:8px}
+#mlog{position:fixed;inset:0;background:rgba(3,2,6,.95);display:flex;align-items:center;justify-content:center;padding:20px;z-index:72;backdrop-filter:blur(8px)}
+#mlog.hidden{display:none !important}
+#mlogCard{position:relative;max-width:860px;width:100%;max-height:94vh;overflow:auto}
+#mlog table{width:100%;border-collapse:collapse;font-size:14.5px}
+#mlog td,#mlog th{padding:7px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+#mlog th{color:var(--dim);font-size:12px;letter-spacing:1.5px;text-transform:uppercase}
+#mlog td.n{text-align:center;font-variant-numeric:tabular-nums}
+#mlog .tw{overflow-x:auto}
+.misslist{margin:14px 0 0;padding:14px 16px;border-radius:12px;background:rgba(255,207,92,.07);
+  border:1px solid rgba(255,207,92,.32);font-size:16px;line-height:1.7}
 .misslist b{color:var(--gold)}
 .misslist ul{margin:8px 0 0;padding-left:20px;color:var(--ink)}
 .misslist li{margin:3px 0}
@@ -599,6 +617,7 @@ table.rc td:last-child{text-align:right;font-weight:800;color:var(--gold)}
     <div class="row" style="margin-top:26px">
       <button class="btn" id="startBtn">Approach the house</button>
       <button class="btn ghost" id="helpBtn">How this works</button>
+      <button class="btn ghost" id="mlogBtn">📒 Mistakes</button>
       <a class="btn ghost" id="tensBtn" href="hauntedpractice.html" title="Haunted Practice: hands-on rooms that explain the ideas behind the problems — tens and ones, telling the time, decimals, percentages" style="text-decoration:none;display:inline-flex;align-items:center">🎃 Practice</a>
       <button class="btn ghost" id="sfxBtn">Sound: on</button>
       <button class="btn ghost" id="musBtn">Music: on</button>
@@ -618,11 +637,11 @@ table.rc td:last-child{text-align:right;font-weight:800;color:var(--gold)}
       Some rooms hold a <b style="color:#d9b6ff">multi-step problem</b> &mdash; one you cannot finish in a single move. Every grade gets at
       least one of them a run, and Grade 5 up gets two.<br>
       A <b style="color:var(--gold)">chest</b> may appear once you are below full lanterns: the hardest kind of problem your grade has,
-      worth <b style="color:var(--gold)">half a lantern</b> back. Wrong costs nothing. Later rooms can hold a
-      <b style="color:#d9b6ff">grand chest</b> instead &mdash; a multi-step problem, and it pays
-      <b style="color:#d9b6ff">double: a whole lantern</b>. Chests pay in light, and light is candy at the door.<br>
+      worth <b style="color:var(--gold)">half a lantern</b> back <b style="color:var(--gold)">and 4 sweets plus speed</b> &mdash; more than a room.
+      Wrong costs nothing. Later rooms can hold a <b style="color:#d9b6ff">grand chest</b> instead &mdash; a multi-step problem,
+      and it pays <b style="color:#d9b6ff">double: a whole lantern and 8 sweets</b>. Chests and the hatch can take you past 100.<br>
       A red-rimmed <b style="color:var(--blood)">shortcut hatch</b> in the floor &mdash; labelled, you cannot miss it &mdash;
-      skips three rooms and pays for all three, as if you had got each right first time &mdash; but a wrong answer
+      skips three rooms and pays for all three, as if you had got each right first time, plus 5 for daring &mdash; but a wrong answer
       down there costs <b style="color:var(--blood)">a whole lantern</b>.
       Opening the chest or the hatch <b style="color:var(--good)">stops the room's clock</b>; it starts again from the same
       second when you come back.<br>
@@ -644,7 +663,7 @@ table.rc td:last-child{text-align:right;font-weight:800;color:var(--gold)}
       Rather listen than read? Turn on <b style="color:#7fd7ff">read-aloud mode</b> above: every question is read out
       &mdash; not the answers &mdash; and the clock is put away.
       Get a question wrong first time and it is remembered: at the end you are offered a
-      <b style="color:var(--gold)">bonus round</b> of the same kinds of problem. It wins back a little candy, never as much as getting it right first time, and there is nothing to lose.<br>
+      <b style="color:var(--gold)">bonus round</b> of the same kinds of problem. Right first time there wins back everything the mistake cost, and there is nothing to lose.<br>
       <span style="color:var(--ink)">Keys <kbd>1</kbd>&ndash;<kbd>4</kbd> answer, <kbd>Enter</kbd> continues.</span>
     </div>
   </div>
@@ -716,6 +735,15 @@ table.rc td:last-child{text-align:right;font-weight:800;color:var(--gold)}
 </section>
 
 <div id="overlay" class="hidden"><div class="card" id="overlayCard"></div></div>
+<div id="mlog" class="hidden" role="dialog" aria-modal="true" aria-labelledby="mlTitle">
+  <div class="card" id="mlogCard">
+    <button id="mlogX" aria-label="Close" style="position:absolute;top:10px;right:12px;width:40px;height:40px;border-radius:12px;cursor:pointer;background:#150e20;border:1px solid var(--line);color:var(--dim);font-size:24px;font-family:inherit">×</button>
+    <h2 id="mlTitle" style="margin:0 0 4px">📒 Mistakes</h2>
+    <p style="color:var(--dim);margin:0 0 12px;font-size:15px">Every wrong answer, first and second try, with the date — kept on this device so the
+      topics that need practice can be turned into Haunted Practice rooms.</p>
+    <div id="mlBody"></div>
+  </div>
+</div>
 <div id="topics" class="hidden" role="dialog" aria-modal="true" aria-labelledby="tpTitle">
   <div class="card" id="topicsCard">
     <button id="topicsX" aria-label="Close" style="position:absolute;top:10px;right:12px;width:40px;height:40px;border-radius:12px;cursor:pointer;background:#150e20;border:1px solid var(--line);color:var(--dim);font-size:24px;font-family:inherit">×</button>
@@ -752,13 +780,15 @@ table.rc td:last-child{text-align:right;font-weight:800;color:var(--gold)}
               If it all goes out, he has you.</li>
           <li>Right answers are <b style="color:var(--gold)">sweets</b>. Quick answers are more sweets &mdash;
               but taking your time never costs you anything.</li>
-          <li>A <b style="color:var(--gold)">glowing chest</b> is free to try: get it right and you win back half a lantern.
-              A purple <b style="color:#d9b6ff">grand chest</b> holds a problem that takes more than one step &mdash;
-              and gives back a whole lantern.</li>
-          <li>A perfect run is <b style="color:var(--gold)">100 sweets</b>. Your bucket is your score out of 100,
-              and it puts you in one of <b>five categories</b>.</li>
+          <li>A <b style="color:var(--gold)">glowing chest</b> is free to try: get it right and you win back half a lantern
+              and 4 sweets plus speed &mdash; more than a room. A purple <b style="color:#d9b6ff">grand chest</b> holds a problem
+              that takes more than one step &mdash; a whole lantern and 8 sweets.</li>
+          <li>A perfect run is <b style="color:var(--gold)">100 sweets</b>, and it puts you in one of <b>five categories</b>.
+              Chests and the hatch pay extra, so a great run can go <b style="color:var(--gold)">past 100</b>.</li>
+          <li>Got one wrong first time? The <b style="color:var(--gold)">bonus round</b> at the end gives you a fresh one of the same
+              kind &mdash; right first time wins back <b>everything</b> that mistake cost.</li>
           <li>The <b style="color:var(--blood)">red hatch</b> skips three rooms, and you still get the sweets for all
-              three &mdash; but get it wrong down there and it costs a whole lantern.</li>
+              three, plus 5 for daring &mdash; but get it wrong down there and it costs a whole lantern.</li>
           <li>It is <b>spooky, not scary</b>. Nothing jumps out at you, and nothing in here is real.</li>
         </ul>
       </div>
@@ -789,7 +819,7 @@ table.rc td:last-child{text-align:right;font-weight:800;color:var(--gold)}
           <li><b>Read-aloud mode</b> (step 5 on the front page) reads each question out loud &mdash; not the
               four answers &mdash; and removes the clock entirely.</li>
           <li><b>A bonus round</b> at the end offers fresh problems of exactly the kinds they got wrong first
-              time, for a few sweets back (never as many as a right first answer), with nothing at stake. Offered after a loss too.</li>
+              time, and right first time there wins back everything the mistake cost, with nothing at stake. Offered after a loss too.</li>
           <li>The report card gives first-try accuracy and names the topics worth practising.</li>
           <li><b>Nothing leaves this device.</b> No account, no network, no adverts, no tracking. Progress is
               saved in this browser alone, and the whole game is one file that works offline.</li>
@@ -12489,7 +12519,7 @@ function applyTheme(){
    moment it goes out. Shown on the setup screen and at the foot of the
    report card, so a player can say which build they are playing.
    ===================================================================== */
-const BUILD = 34, RELEASED = "18 Oct 2026, 23:30";
+const BUILD = 35, RELEASED = "24 Oct 2026, 12:36";
 const COPYRIGHT = "© 2026 m1keLima. All rights reserved.";
 const VERSION_LINE = `v${BUILD} · released ${RELEASED} · ${COPYRIGHT}`;
 
@@ -12498,7 +12528,7 @@ const VERSION_LINE = `v${BUILD} · released ${RELEASED} · ${COPYRIGHT}`;
    ===================================================================== */
 const KEY="hauntedhouse.v2";
 const blank=()=>({name:"",avatar:"witch",level:0,world:0,unlock:{},sfx:true,music:true,kid:false,family:{},help:0,theme:"auto",schema:2,
-  best:{candy:0,score:0,rooms:0},prog:{},cycle:{},off:{},askTopics:true,totals:{runs:0,rooms:0,correct:0,attempts:0,wins:0,shortcuts:0},topics:{}});
+  best:{candy:0,score:0,rooms:0},prog:{},cycle:{},off:{},askTopics:true,mistakes:[],mistakesSent:0,totals:{runs:0,rooms:0,correct:0,attempts:0,wins:0,shortcuts:0},topics:{}});
 let save=blank();
 /* SCHEMA is the shape of the level list. Bump it whenever levels are added or
    removed in front of existing ones, and migrate here — `unlock` and `prog` are
@@ -12514,6 +12544,7 @@ function load(){
   if(!save.prog   || typeof save.prog!=="object"){ save.prog={}; }
   if(!save.cycle  || typeof save.cycle!=="object"){ save.cycle={}; }
   if(!save.off    || typeof save.off!=="object"){ save.off={}; }
+  if(!Array.isArray(save.mistakes)) save.mistakes=[];
 
   /* older saves kept one ladder for every grade — hand it to the grade they were on */
   if(typeof save.maxWorld==="number"){ if(save.maxWorld>0) save.unlock[save.level||0]=save.maxWorld; delete save.maxWorld; }
@@ -12845,7 +12876,7 @@ function startGame(){
   S.room=0; S.lanterns=3; S.candy=0; S.escapeBonus=0; S.speedCandy=0; S.started=Date.now(); S.log=[]; S.jump=0;
   S.tally=newTally();
   S.hatchUsed=false; S.sawFamily=false; S.dragonWon=false; S.rodeCoach=false; S.dragon=null; S.boss=null; S.ending=null;
-  S.missed={}; S.br=null; S.brCandy=0; S.brDone=false; S.reported=false; S.won=false; S.unlocked=null;
+  S.missed={}; S.runMistakes=[]; S.br=null; S.brCandy=0; S.brDone=false; S.reported=false; S.won=false; S.unlocked=null;
   $("#chase").classList.remove("hidden"); $("#lanterns").parentNode.classList.remove("hidden");
   save.totals.runs++; save.prog[S.level]=(save.prog[S.level]||0)+1; store();
   $("#setup").classList.add("hidden"); $("#game").classList.remove("hidden");
@@ -12928,7 +12959,7 @@ function speedBonus(){ return kidMode ? SPEED_MAX : Math.round(remaining()/qsecs
 function newTally(){
   return {first:0, retry:0, speed:0, slow:0, wrongs:0,
           chestN:0, chest:0, grandN:0, grand:0, chestShut:0, chestShutN:0,
-          hatch:0, hatchFell:false, hatchLantern:0, lanternWon:0, lanternLost:0};
+          hatch:0, hatchFell:false, hatchLantern:0, lanternWon:0, lanternLost:0, hatchExtra:0};
 }
 /* speed is offered on every question you answer; what you did not take is "slow" */
 function tallySpeed(spd,times){ const t=S.tally; if(!t) return; times=times||1;
@@ -13030,13 +13061,18 @@ function answer(btn,mode){
       S.lanterns=Math.min(3,S.lanterns+(g?1:0.5));
       if(g) S.tally.grandN++; else S.tally.chestN++;
       S.tally.lanternWon+=S.lanterns-lit;
+      /* v35: a chest is a hard question, so it pays more than a room — candy
+         and speed on top of the light */
+      const cc=(g?GRAND_CANDY:CHEST_CANDY)+spd;
+      S.candy+=cc; S.speedCandy+=spd; $("#candynum").textContent=S.candy;
+      if(g) S.tally.grand+=cc; else S.tally.chest+=cc;
       renderLanterns(); renderChase();
       $("#chest").classList.add("hidden");
       const back=S.lanterns-lit;
       fb.className="ok show";
       fb.innerHTML=`<div class="ft">${g?"Every step of it, right. The grand chest opens.":"The lid gives."}
-        ${back===1?"A whole lantern":"Half a lantern"} back — worth
-        <span style="color:var(--gold)">${back*PER_LANTERN} ${TH.treat}</span> if you carry it out of the house.</div>${fbSteps(p)}`;
+        +${cc} ${TH.treat}${spd?` <span style="color:var(--gold)">(${spd} for speed)</span>`:""}${back?` and ${back===1?"a whole lantern":"half a lantern"} back — worth
+        <span style="color:var(--gold)">${back*PER_LANTERN} ${TH.treat}</span> more if you carry it out of the house`:""}.</div>${fbSteps(p)}`;
       $("#nextwrap").classList.remove("hidden");
       $("#nextBtn").textContent="Back to the room";
       $("#nextBtn").onclick=()=>askQuestion(S.current,"normal");
@@ -13047,12 +13083,12 @@ function answer(btn,mode){
       /* less than a right-first-time room ever paid (3 + speed + keeping the
          lantern), so a mistake mended in the bonus round never scores like no
          mistake at all */
-      const gain=S.tries===0?BONUS_FIRST:BONUS_LATER;
+      const full=bonusPay(S.br.q[S.br.i]), gain=S.tries===0?full:Math.ceil(full/2);
       S.br.candy+=gain; S.brCandy+=gain; S.br.right++; if(S.tries===0) S.br.first++;
       $("#candynum").textContent=S.brCandy;
       fb.className="ok show";
       fb.innerHTML=`<div class="ft">${S.tries===0?"Got it — and this is the one that caught you earlier":"Got it, second time"}.
-        +${gain} ${TH.treat}</div>${fbSteps(p)}`;
+        +${gain} ${TH.treat}${S.tries===0?" — everything it cost you, back":""}</div>${fbSteps(p)}`;
       $("#nextwrap").classList.remove("hidden");
       $("#nextBtn").textContent = S.br.i>=S.br.q.length-1 ? "Count it up" : "Next one";
       $("#nextBtn").onclick=()=>{ S.br.i++; nextBonus(); };
@@ -13060,14 +13096,17 @@ function answer(btn,mode){
     }
 
     if(mode==="shortcut"){
-      const base=HATCH_ROOMS*FIRST_TRY, gain=base+HATCH_ROOMS*spd;
+      const base=HATCH_ROOMS*FIRST_TRY, gain=base+HATCH_ROOMS*spd+HATCH_EXTRA;
       S.jump=HATCH_ROOMS; S.candy+=gain; S.speedCandy+=HATCH_ROOMS*spd; $("#candynum").textContent=S.candy;
-      S.tally.hatch+=base; tallySpeed(spd,HATCH_ROOMS);
+      S.tally.hatch+=base; S.tally.hatchExtra+=HATCH_EXTRA; tallySpeed(spd,HATCH_ROOMS);
+      /* the room you dropped from is paid in full by the hatch, so a wrong first
+         guess there lost only its light — the bonus round must not pay the room back */
+      { const m=S.current && S.missed[S.current.topic]; if(m) m.room=0; }
       save.totals.shortcuts++; store();
       $("#hatch").classList.add("hidden");
       fb.className="ok show";
       fb.innerHTML=`<div class="ft">The hatch swallows you and spits you out three rooms deeper — and all three rooms count.
-        +${gain} ${TH.treat} <span style="color:var(--gold)">(${base} for the rooms${spd?`, ${HATCH_ROOMS*spd} for speed`:""})</span></div>${fbSteps(p)}`;
+        +${gain} ${TH.treat} <span style="color:var(--gold)">(${base} for the rooms${spd?`, ${HATCH_ROOMS*spd} for speed`:""}, ${HATCH_EXTRA} for daring)</span></div>${fbSteps(p)}`;
       $("#nextwrap").classList.remove("hidden");
       $("#nextBtn").textContent="Crawl through";
       $("#nextBtn").onclick=()=>advance(3);
@@ -13097,6 +13136,7 @@ function answer(btn,mode){
 
   /* the bonus round costs nothing — one hint, one more try, then the working */
   if(mode==="practice"){
+    logMistake("bonus round", p, btn.dataset.v, S.tries+1);
     S.tries++;
     if(S.tries>=2){
       [...$("#choices").children].forEach(c=>c.disabled=true);
@@ -13115,6 +13155,7 @@ function answer(btn,mode){
   }
 
   if(mode==="bonus"){
+    logMistake(S.bonusGrand?"grand chest":"chest", p, btn.dataset.v, 1);
     [...$("#choices").children].forEach(c=>c.disabled=true);
     $("#chest").classList.add("hidden");
     S.tally.chestShutN++; S.tally.chestShut+=S.bonusGrand?4:2;
@@ -13128,6 +13169,7 @@ function answer(btn,mode){
   }
 
   if(mode==="shortcut"){
+    logMistake("hatch", p, btn.dataset.v, 1);
     [...$("#choices").children].forEach(c=>c.disabled=true);
     $("#hatch").classList.add("hidden");
     { const hl=Math.min(1,S.lanterns); S.tally.hatchFell=true; S.tally.lanternLost+=hl; S.tally.hatchLantern+=hl; }
@@ -13149,8 +13191,9 @@ function answer(btn,mode){
 
   /* remember the type, not the question — the bonus round hands back the same
      kind of problem, freshly generated */
-  const miss = S.missed[p.topic] || (S.missed[p.topic]={topic:p.topic,lvl:S.slot.lvl,gen:S.slot.gen,n:0});
-  miss.n++;
+  const miss = S.missed[p.topic] || (S.missed[p.topic]={topic:p.topic,lvl:S.slot.lvl,gen:S.slot.gen,n:0,wr:0,room:0});
+  miss.n++; miss.wr++; miss.room=FIRST_TRY-LATER_TRY;
+  logMistake("room", p, btn.dataset.v, S.tries+1);
 
   S.tries++;
   S.tally.wrongs++; S.tally.lanternLost+=Math.min(0.5,S.lanterns);
@@ -13198,7 +13241,8 @@ function wireProps(){
         One problem: the hardest kind ${BANK[S.level].name} has, and the wrong answers
         sit right next to the right one.
         Solve it and you skip three rooms <b style="color:var(--gold)">and still get the candy for all three</b>
-        (up to ${HATCH_ROOMS*ROOM_MAX} ${TH.treat}, as if you had got each one right first time).
+        (up to ${HATCH_ROOMS*ROOM_MAX} ${TH.treat}, as if you had got each one right first time) —
+        <b style="color:var(--gold)">plus ${HATCH_EXTRA} for daring</b>.
         Fail and it costs you <b style="color:var(--blood)">a whole lantern</b>.</p>
       <div class="row" style="margin-top:18px">
         <button class="btn" id="hatchYes">Go down</button>
@@ -14079,6 +14123,7 @@ function dragonAnswer(btn){
     return;
   }
   btn.classList.add("wrong"); btn.disabled=true;
+  logMistake("final challenge", p, btn.dataset.v, S.tries+1);
   D.shields--; S.tries++;
   replay(document.querySelector(".dg-fire"),"on");
   replay(document.querySelector(".dg-pop"),"on");
@@ -14938,11 +14983,15 @@ function familyScene(){
    King, no ending the run. It is offered from the report card and
    returns to it.
    ===================================================================== */
-const BONUS_MAX = 6;
+const BONUS_MAX = 10;   /* every kind you missed, so everything can be won back */
 /* A wrong answer in the house costs at least 2 (and half a lantern, 5, if you
    get out). The bonus round wins back 2 first time, 1 on the second go, no
    speed candy: practice helps, but never as much as getting it right. */
-const BONUS_FIRST = 2, BONUS_LATER = 1;
+const BONUS_FIRST = 2, BONUS_LATER = 1;   /* v28–v34; since v35 the bonus round pays back what the mistake cost (bonusPay) */
+/* v35: the hard ones pay more than a room. A chest: 4 + speed (a room is 3 + speed)
+   on top of its light; a grand chest 8 + speed; the hatch its three rooms + 5.
+   That is what lets a great run finish above 100. */
+const CHEST_CANDY = 4, GRAND_CANDY = 8, HATCH_EXTRA = 5;
 const missedList = () => Object.keys(S.missed).map(k=>S.missed[k]).sort((a,b)=>b.n-a.n);
 
 /* a warm room, for once */
@@ -15048,7 +15097,7 @@ function finishBonus(){
    ===================================================================== */
 /* Five categories, twenty points wide, on the score out of 100. */
 const RANKS=[
-  {n:1, min:0,  name:"Doorstep Dawdler"},
+  {n:1, min:0,  name:"Brave Beginner"},
   {n:2, min:20, name:"Trick-or-Treater"},
   {n:3, min:40, name:"Candle Bearer"},
   {n:4, min:60, name:"Lantern Keeper"},
@@ -15057,10 +15106,123 @@ function rankFor(score){ let r=RANKS[0]; for(const k of RANKS) if(score>=k.min) 
 
 /* The bucket. The run can make at most 100; the bonus round wins back candy
    that got away, but the bucket is full at 100. */
+/* ---------- the bonus round pays back what the mistake cost (v35) ----------
+   A room answered wrong first time paid 1 instead of 3 (2 lost) and, if you got
+   out, every wrong answer took half a lantern (5 at the door). Right first time
+   in the bonus round gives all of that back; right on the second go, half. */
+function bonusPay(m){
+  if(!m) return BONUS_FIRST;
+  return Math.max(1, (m.room||FIRST_TRY-LATER_TRY) + (S.won ? Math.round(PER_LANTERN*0.5*(m.wr||m.n||1)) : 0));
+}
+
+/* ---------- the mistakes log (v35) ----------
+   Every wrong answer — rooms, chests, the hatch, the final challenge and the
+   bonus round — with which try it was and when, kept in save.mistakes (newest
+   last, at most MISTAKES_MAX). Purpose: Lapo picks the topics a child keeps
+   getting wrong and builds Haunted Practice rooms for them, so it can be sent
+   by email. */
+const MISTAKES_MAX = 3000, MISTAKES_TO = "lfmori@gmail.com";
+function logMistake(kind, p, chosen, attempt){
+  try{
+    const e={d:new Date().toISOString(), lvl:S.level|0, g:BANK[S.level|0].name, w:W().name, k:kind,
+             t:p.topic, q:String(p.question).replace(/\s+/g," ").trim(), a:String(p.answer), x:String(chosen), n:attempt|0||1,
+             who:S.name||""};
+    save.mistakes.push(e); if(save.mistakes.length>MISTAKES_MAX) save.mistakes.splice(0, save.mistakes.length-MISTAKES_MAX);
+    (S.runMistakes||(S.runMistakes=[])).push(e);
+    store();
+  }catch(err){}
+}
+const fmtDay = iso => new Date(iso).toLocaleDateString(undefined,{day:"numeric",month:"short",year:"numeric"});
+const fmtWhen = iso => new Date(iso).toLocaleString(undefined,{day:"numeric",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"});
+const tryWord = n => n===1?"first try":n===2?"second try":`try ${n}`;
+/* by grade, then topic: wrong first time, wrong second time (or later), last seen */
+function mistakeSummary(list){
+  const by={};
+  list.forEach(e=>{ const G=by[e.g]||(by[e.g]={lvl:e.lvl,t:{}}); const T=G.t[e.t]||(G.t[e.t]={first:0,later:0,last:e.d});
+    if(e.n<=1) T.first++; else T.later++; if(e.d>T.last) T.last=e.d; });
+  return Object.keys(by).sort((a,b)=>by[a].lvl-by[b].lvl).map(g=>({g, topics:Object.entries(by[g].t)
+    .map(([t,v])=>({t,...v})).sort((x,y)=>(y.first+y.later)-(x.first+x.later) || x.t.localeCompare(y.t))}));
+}
+function mistakeEmail(list, heading){
+  const L=[]; const who=(list.find(e=>e.who)||{}).who||S.name||"";
+  L.push(`Haunted House — ${heading}${who?" — "+who:""}`);
+  L.push(`Sent ${fmtWhen(new Date().toISOString())} · ${list.length} wrong answer${list.length===1?"":"s"}`);
+  L.push("");
+  L.push("BY TOPIC (wrong first try / wrong second try or later · last seen)");
+  mistakeSummary(list).forEach(G=>{ L.push(""); L.push(G.g);
+    G.topics.forEach(T=>L.push(`  • ${T.t} — ${T.first} / ${T.later} · ${fmtDay(T.last)}`)); });
+  L.push(""); L.push("EVERY ONE, NEWEST FIRST");
+  let body=L.join("\n"); const lines=[];
+  list.slice().reverse().forEach(e=>lines.push(`${fmtWhen(e.d)} · ${e.g} · ${e.w} · ${e.k} · ${tryWord(e.n)}\n  ${e.t}: ${e.q}\n  answered ${e.x} — right answer ${e.a}`));
+  let used=0;
+  for(const ln of lines){ if(body.length+ln.length>7000){ body+=`\n…and ${lines.length-used} more (all counted in the topic list above).`; break; } body+="\n"+ln; used++; }
+  return body;
+}
+function emailMistakes(list, heading){
+  const subject=`Haunted House mistakes — ${heading}`;
+  const body=mistakeEmail(list, heading);
+  save.mistakesSent=Date.now(); store();
+  location.href=`mailto:${MISTAKES_TO}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+}
+function copyMistakes(list, heading, btn){
+  const txt=mistakeEmail(list, heading);
+  const done=()=>{ if(btn){ const o=btn.textContent; btn.textContent="Copied ✓"; setTimeout(()=>btn.textContent=o,1600); } };
+  if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(done, ()=>{ prompt("Copy this:", txt); });
+  else prompt("Copy this:", txt);
+}
+/* the block on the report card: this run's wrong answers, first and second try */
+function mistakesBlock(){
+  const run=S.runMistakes||[];
+  if(!run.length) return "";
+  const first=run.filter(e=>e.n<=1), later=run.filter(e=>e.n>1);
+  const li=e=>`<li><b>${esc(e.t)}</b> <span>(${esc(e.k)}) — ${esc(e.q.length>110?e.q.slice(0,108)+"…":e.q)} · answered ${esc(e.x)}, right ${esc(e.a)}</span></li>`;
+  return `<div class="mistakes"><h3>📒 To practise — this run</h3>
+    ${first.length?`<div class="grp">Wrong first try · ${first.length}</div><ul>${first.map(li).join("")}</ul>`:""}
+    ${later.length?`<div class="grp">Wrong second try or later · ${later.length}</div><ul>${later.map(li).join("")}</ul>`:""}
+    <div class="row"><button class="btn" id="mlEmailRun">📧 Email to ${MISTAKES_TO}</button>
+      <button class="btn ghost" id="mlCopyRun">Copy</button><button class="btn ghost" id="mlAll">All mistakes</button></div>
+    <div class="note">Saved on this device with the date (${save.mistakes.length} in all). The email opens in your mail app, ready to send.</div></div>`;
+}
+function wireMistakesBlock(){
+  const run=S.runMistakes||[]; if(!run.length) return;
+  const h=`${esc(BANK[S.level].name)}, ${W().name}, ${fmtDay(new Date().toISOString())}`;
+  $("#mlEmailRun").onclick=()=>emailMistakes(run, "this run: "+h);
+  $("#mlCopyRun").onclick=e=>copyMistakes(run, "this run: "+h, e.target);
+  $("#mlAll").onclick=()=>openMistakes();
+}
+function openMistakes(){
+  const all=save.mistakes||[], since=all.filter(e=>Date.parse(e.d)>(save.mistakesSent||0));
+  const sum=mistakeSummary(all);
+  $("#mlBody").innerHTML = !all.length ? `<p style="font-size:16px">No wrong answers saved yet.</p>` : `
+    <div class="row" style="gap:8px;justify-content:flex-start;flex-wrap:wrap;margin-bottom:12px">
+      <button class="btn" id="mlEmailNew" ${since.length?"":"disabled"}>📧 Email the new ones (${since.length})</button>
+      <button class="btn ghost" id="mlEmailAll">📧 Email everything (${all.length})</button>
+      <button class="btn ghost" id="mlCopyAll">Copy</button>
+      <button class="btn ghost" id="mlClear">Clear the log</button></div>
+    <div style="color:var(--dim);font-size:13.5px;margin-bottom:10px">Sent to ${MISTAKES_TO}${save.mistakesSent?` · last emailed ${fmtWhen(new Date(save.mistakesSent).toISOString())}`:""}</div>
+    ${sum.map(G=>`<h3 style="margin:16px 0 6px">${esc(G.g)}</h3><div class="tw"><table>
+      <tr><th>Topic</th><th>Wrong 1st try</th><th>Wrong 2nd+</th><th>Last</th></tr>
+      ${G.topics.map(T=>`<tr><td>${esc(T.t)}</td><td class="n">${T.first}</td><td class="n">${T.later}</td><td>${esc(fmtDay(T.last))}</td></tr>`).join("")}
+    </table></div>`).join("")}
+    <h3 style="margin:18px 0 6px">The latest 40</h3><div class="tw"><table>
+      <tr><th>When</th><th>Question</th><th>Answered</th><th>Right</th></tr>
+      ${all.slice(-40).reverse().map(e=>`<tr><td style="white-space:nowrap">${esc(fmtWhen(e.d))}<br><span style="color:var(--dim)">${esc(e.g)} · ${esc(tryWord(e.n))}</span></td>
+        <td><b>${esc(e.t)}</b><br><span style="color:var(--dim)">${esc(e.q)}</span></td><td>${esc(e.x)}</td><td>${esc(e.a)}</td></tr>`).join("")}
+    </table></div>`;
+  if(all.length){
+    $("#mlEmailNew").onclick=()=>emailMistakes(since, "new since last email");
+    $("#mlEmailAll").onclick=()=>emailMistakes(all, "all saved");
+    $("#mlCopyAll").onclick=e=>copyMistakes(all, "all saved", e.target);
+    $("#mlClear").onclick=()=>{ if(confirm("Clear every saved mistake from this device?")){ save.mistakes=[]; save.mistakesSent=0; store(); openMistakes(); } };
+  }
+  $("#mlog").classList.remove("hidden");
+}
+function closeMistakes(){ $("#mlog").classList.add("hidden"); }
+
 function bucketFor(won){
   const run = won ? S.candy : 0;
   const br  = S.brDone ? S.br.candy : 0;
-  const brCounted = Math.max(0, Math.min(br, RUN_MAX-run));
+  const brCounted = br;   /* v35: no cap — the bonus round wins back what mistakes cost, and chests and the hatch can lift a run past 100 */
   return {run, br, brCounted, total: run+brCounted};
 }
 
@@ -15088,12 +15250,12 @@ function endGame(won){
 function scoreBlock(won){
   const b=bucketFor(won), r=rankFor(b.total), T=TH.treat;
   return `
-    <div class="score"><b>${b.total}</b><span>/ ${RUN_MAX} ${T}</span></div>
+    <div class="score"><b>${b.total}</b><span>${b.total>RUN_MAX?`${T} — ${b.total-RUN_MAX} above a perfect ${RUN_MAX}!`:`/ ${RUN_MAX} ${T}`}</span></div>
     <div class="rank">${esc(r.name)}</div>
     <div class="cats">${RANKS.map(k=>{
         const hi=(RANKS[k.n]?RANKS[k.n].min-1:RUN_MAX);
         return `<div class="cat${k.n===r.n?" on":k.n<r.n?" past":""}">
-          <i>${k.n}</i><b>${esc(k.name)}</b><span>${k.min}–${hi}</span></div>`;}).join("")}</div>`;
+          <i>${k.n}</i><b>${esc(k.name)}</b><span>${k.n===RANKS.length?`${k.min}+`:`${k.min}–${hi}`}</span></div>`;}).join("")}</div>`;
 }
 
 /* ---------- the candy count ----------
@@ -15132,50 +15294,60 @@ function candyLedger(won){
   if(b.brCounted) add("Bonus round", `${S.br.right} of ${S.br.q.length} put right`
       + (b.br>b.brCounted?` — won ${b.br}, but the bucket is full at ${RUN_MAX}`:""), b.brCounted);
 
-  /* -------- where the rest went --------
-     A wrong answer is ONE line, carrying both of its costs: the room pays 1
-     instead of 3, and (if you get out) half a lantern is 5 fewer at the door. */
+  /* chests and the hatch's daring pay on top of a perfect run (v35) */
+  const chestCandy=(t.chest||0)+(t.grand||0), chestN=t.chestN+t.grandN;
+  add(chestN===1?"A chest":"Chests", `${plural(chestN,"chest")} opened — a hard question pays more than a room`, chestCandy);
+  add("Daring the hatch", "extra, on top of the three rooms", t.hatchExtra||0);
+
+  /* -------- still to collect: the way to a perfect 100, said as what you can win --------
+     Adds up to exactly 100 minus the regular part of the bucket (everything but
+     chest candy and the hatch's daring), so the two lists still meet at 100. */
   const lostRoom = t.retry*(FIRST_TRY-LATER_TRY);
   if(won){
     const lostLight = Math.round(PER_LANTERN*(t.lanternLost - t.hatchLantern));
-    miss("Wrong answers",
-      [t.wrongs?`${plural(t.wrongs,"wrong answer")}, half a lantern each (${lostLight})`:"",
-       t.retry?`${plural(t.retry,"room")} paid ${LATER_TRY} instead of ${FIRST_TRY} (${lostRoom})`:""].filter(Boolean).join(" · "),
+    miss("Right first time, every time",
+      [t.retry?`${plural(t.retry,"room")} paid ${LATER_TRY} instead of ${FIRST_TRY} (${lostRoom})`:"",
+       t.wrongs?`keep the half lantern each first guess cost (${lostLight})`:""].filter(Boolean).join(" · "),
       lostRoom+lostLight);
   } else {
-    miss("Wrong answers", `${plural(t.retry,"room")} paid ${LATER_TRY} instead of ${FIRST_TRY}`, lostRoom);
+    miss("Right first time, every time", `${plural(t.retry,"room")} pay ${FIRST_TRY} instead of ${LATER_TRY}`, lostRoom);
   }
-  if(!kidMode) miss("Slow answers", "time candy still on the clock when you answered", t.slow);
+  if(!kidMode) miss("A little quicker", "speed candy still on the clock when you answered", t.slow);
   if(won){
-    if(t.hatchFell) miss("Fell through the hatch", "a whole lantern gone", Math.round(PER_LANTERN*t.hatchLantern));
-    const chests=t.chestN+t.grandN;
-    if(t.lanternWon) miss("Light won back by chests",
-      `${plural(chests,"chest")} gave back ${lan(t.lanternWon)}`, -Math.round(PER_LANTERN*t.lanternWon));
+    if(t.hatchFell) miss("Land the hatch", "keep the lantern it took", Math.round(PER_LANTERN*t.hatchLantern));
+    if(t.lanternWon) miss("Light the chests gave back", `${plural(chestN,"chest")} already won back ${lan(t.lanternWon)}`, -Math.round(PER_LANTERN*t.lanternWon));
   } else {
     const unfinished = Math.max(0, 10-cleared-skipped);
-    miss("Rooms not finished", `${plural(unfinished,"room")} × up to ${ROOM_MAX}`, unfinished*ROOM_MAX);
-    miss("Never got out", `no lanterns left to carry out — up to ${3*PER_LANTERN}`, 3*PER_LANTERN);
-    miss("Dropped when he caught you", "what you had picked up inside", inside);
+    miss("The rooms still ahead", `${plural(unfinished,"room")} × up to ${ROOM_MAX}`, unfinished*ROOM_MAX);
+    miss("Carry your lanterns out", `3 lanterns × ${PER_LANTERN} at the door`, 3*PER_LANTERN);
+    /* chest candy and the hatch's daring are extra, not part of the 100 */
+    miss("Keep what you picked up", "it all comes home when you get out", inside-chestCandy-(t.hatchExtra||0));
   }
   if(b.brCounted) miss("Won back in the bonus round", "", -b.brCounted);
 
   const total=got.reduce((a,r)=>a+r.n,0);
-  const away=gone.reduce((a,r)=>a+r.n,0);
-  const row=(r,minus)=>`<tr><td><b>${esc(r.what)}</b>${r.how?`<span class="how">${esc(r.how)}</span>`:""}</td>
-     <td class="v ${minus?(r.n<0?"plus":"minus"):(r.n<0?"minus":"plus")}">${minus?(r.n<0?"+":"−"):(r.n<0?"−":"+")}${Math.abs(r.n)}</td></tr>`;
+  const extra=won ? chestCandy+(t.hatchExtra||0) : 0;   /* caught: they were dropped with the rest */
+  const togo=Math.max(0, gone.reduce((a,r)=>a+r.n,0));
+  const row=(r,second)=>{ const neg=r.n<0;
+    const cls = second ? (neg?"plus":"togo") : (neg?"minus":"plus");
+    const sign = second ? (neg?"−":"+") : (neg?"−":"+");
+    return `<tr><td><b>${esc(r.what)}</b>${r.how?`<span class="how">${esc(r.how)}</span>`:""}</td>
+     <td class="v ${cls}">${sign}${Math.abs(r.n)}</td></tr>`; };
+  const over = total-RUN_MAX;
   return `
     <div class="ledger">
       <div class="ledhead">How you got your ${total} ${T}</div>
       <table>${got.length?got.map(r=>row(r,false)).join("")
               :`<tr><td colspan="2"><span class="how">Nothing yet.</span></td></tr>`}
-        <tr class="total"><td><b>In the bucket</b></td><td class="v plus">${total} / ${RUN_MAX}</td></tr></table>
-      ${away?`
-      <div class="ledhead miss">Where the other ${away} went</div>
-      <table>${gone.map(r=>row(r,true)).join("")}
-        <tr class="total miss"><td><b>Still in the house</b>
-          <span class="how">${gone.map((r,k)=>`${k?(r.n<0?" − ":" + "):(r.n<0?"− ":"")}${esc(r.what.toLowerCase())} ${Math.abs(r.n)}`).join("")} = ${away}</span>
-          <span class="how">${total} in the bucket + ${away} still in the house = ${RUN_MAX}</span></td>
-          <td class="v minus">${away}</td></tr></table>`:`<div class="ledhead" style="margin-top:12px">Every sweet in the house. Nothing got away.</div>`}
+        <tr class="total"><td><b>In the bucket</b></td><td class="v plus">${total}</td></tr></table>
+      ${over>0?`<div class="extra">✨ ${over} above a perfect run — ${extra?"the chests and the hatch paid for that":"well beyond 100"}!</div>`:""}
+      ${togo>0?`
+      <div class="ledhead miss">Still to collect next time: ${togo}</div>
+      <table>${gone.filter(r=>r.n).map(r=>row(r,true)).join("")}
+        <tr class="total miss"><td><b>Your next ${togo}</b>
+          <span class="how">${total-extra} from the rooms and lanterns + ${togo} still to collect = ${RUN_MAX}${extra?` · and the chests and the hatch add on top`:""}</span></td>
+          <td class="v togo">+${togo}</td></tr></table>`
+        :`<div class="ledhead" style="margin-top:12px">Every sweet in the house. A perfect run!</div>`}
     </div>`;
 }
 
@@ -15217,18 +15389,19 @@ function showReport(won){
   const missed = missedList();
   const missBlock = missed.length ? `
     <div class="misslist">
-      <b>Wrong first time — ${missed.length} kind${missed.length===1?"":"s"} of problem:</b>
+      <b>Ones to practise — ${missed.length} kind${missed.length===1?"":"s"} of problem:</b>
       <ul>${missed.map(m=>`<li>${esc(m.topic)} <span>— ${m.n===1?"once":m.n+" times"}</span></li>`).join("")}</ul>
       ${S.brDone
         ? `<div style="margin-top:10px;color:var(--gold)">Bonus round done: ${S.br.right} of ${S.br.q.length} put right,
              +${S.br.candy} ${TH.treat}.</div>`
         : `<div style="margin-top:10px">Have another go at ${missed.length>BONUS_MAX?"the worst "+BONUS_MAX+" of them":"them"} —
-             fresh problems of the same kinds, <b>${BONUS_FIRST} ${TH.treat} each</b> (${BONUS_LATER} on a second go) — less than getting it right first time, but nothing to lose.</div>
+             fresh problems of the same kinds. Right first time wins back <b>everything that mistake cost you</b>
+             (${missed.slice(0,BONUS_MAX).reduce((a,m)=>a+bonusPay(m),0)} ${TH.treat} in all), right on a second go half — and nothing to lose.</div>
            <div class="row" style="margin-top:12px;justify-content:flex-start">
              <button class="btn" id="bonusBtn">Bonus round · ${Math.min(missed.length,BONUS_MAX)} problem${Math.min(missed.length,BONUS_MAX)===1?"":"s"}</button>
            </div>`}
     </div>` : `<div class="missed" style="margin-top:14px">${
-      cleared ? "Nothing caught you out first time. Try a grade higher." : "You never got started."}</div>`;
+      cleared ? "Nothing caught you out first time. Try a grade higher!" : "Ready when you are — the first door is waiting."}</div>`;
   const nextTier = tierFor(S.level)<3
     ? `<div class="missed" style="margin-top:8px">Next time at ${BANK[S.level].name} the house will be
        <b style="color:var(--blood)">${TIERS[Math.min(3,tierFor(S.level))].name}</b>.</div>` : "";
@@ -15262,7 +15435,7 @@ function showReport(won){
     ${unlocked?`<div class="unlock">${unlocked.icon} <b>${esc(unlocked.name)}</b> is open to you
        <b style="color:var(--gold)">at ${esc(BANK[S.level].name)}</b>.
        <div style="font-size:13.5px;color:var(--dim);margin-top:5px">Other grades still have to open it themselves.</div></div>`:""}
-    ${missBlock}${nextTier}
+    ${missBlock}${mistakesBlock()}${nextTier}
     ${(()=>{ const nx=nextPlace(won);
       return `<div class="row endrow" style="margin-top:20px">
       <button class="btn ghost" id="againBtn">↻ Repeat ${esc(W().name.replace(/^The /,"the "))}</button>
@@ -15272,6 +15445,7 @@ function showReport(won){
     <div class="rcfoot">${VERSION_LINE}</div>`;
   $("#overlay").classList.remove("hidden");
   const bb=$("#bonusBtn"); if(bb) bb.onclick=()=>{ SFX.click(); startBonus(); };
+  wireMistakesBlock();
   /* Repeat really repeats: a win has already moved save.world on to the next place */
   $("#againBtn").onclick=()=>{ save.world=S.world; store(); $("#overlay").classList.add("hidden"); startGame(); };
   $("#nextPlaceBtn").onclick=()=>{ const nx=nextPlace(won); if(!nx.open) return;
@@ -15364,6 +15538,9 @@ function closeTopics(){
   $("#topics").classList.add("hidden"); paintTopicsBtn();
 }
 $("#topicsBtn").onclick=()=>{ SFX.click(); openTopics(save.level); };
+$("#mlogBtn").onclick=()=>{ SFX.click(); openMistakes(); };
+$("#mlogX").onclick=closeMistakes;
+$("#mlog").onclick=e=>{ if(e.target===$("#mlog")) closeMistakes(); };
 $("#topicsX").onclick=closeTopics;
 $("#tpDone").onclick=()=>{ SFX.click(); closeTopics(); };
 $("#topics").onclick=e=>{ if(e.target===$("#topics")) closeTopics(); };
@@ -15399,6 +15576,7 @@ $("#sfxBtn2").onclick=toggleSfx;
 $("#nameInput").addEventListener("keydown",e=>{ if(e.key==="Enter") $("#startBtn").click(); });
 window.addEventListener("resize",()=>{ if(!$("#game").classList.contains("hidden")) renderChase(); });
 document.addEventListener("keydown",e=>{
+  if(!$("#mlog").classList.contains("hidden")){ if(e.key==="Escape") closeMistakes(); return; }
   if(!$("#topics").classList.contains("hidden")){ if(e.key==="Escape") closeTopics(); return; }
   if(!$("#help").classList.contains("hidden")){ if(e.key==="Escape") closeHelp(); return; }
   if($("#game").classList.contains("hidden")||!$("#overlay").classList.contains("hidden")) return;
