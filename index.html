@@ -12519,7 +12519,7 @@ function applyTheme(){
    moment it goes out. Shown on the setup screen and at the foot of the
    report card, so a player can say which build they are playing.
    ===================================================================== */
-const BUILD = 35, RELEASED = "24 Oct 2026, 12:36";
+const BUILD = 37, RELEASED = "24 Oct 2026, 16:00";
 const COPYRIGHT = "© 2026 m1keLima. All rights reserved.";
 const VERSION_LINE = `v${BUILD} · released ${RELEASED} · ${COPYRIGHT}`;
 
@@ -15122,6 +15122,41 @@ function bonusPay(m){
    getting wrong and builds Haunted Practice rooms for them, so it can be sent
    by email. */
 const MISTAKES_MAX = 3000, MISTAKES_TO = "lfmori@gmail.com";
+/* Sending without a mail app (v36). MAIL_HOOK is the address of Lapo's own Google
+   Apps Script web app (script in hauntedhouse-notes.md, *Email without a mail
+   app*): the game POSTs {key, subject, body} and the script emails it to
+   MISTAKES_TO from Lapo's Gmail. Nothing else is sent anywhere. Empty = the old
+   mailto: link. The reply cannot be read (no-cors), so "sent" means "handed to
+   Google"; if the iPad is offline the report waits in save.outbox and goes the
+   next time the page is open and online. MAIL_KEY must match KEY in the script. */
+const MAIL_HOOK = "", MAIL_KEY = "pumpkin-king-2026";
+function postMail(subject, body){
+  return fetch(MAIL_HOOK,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},
+    body:JSON.stringify({key:MAIL_KEY,subject,body})});
+}
+function sendMail(subject, body, onDone){
+  if(!MAIL_HOOK) return false;
+  postMail(subject, body).then(()=>onDone&&onDone(true), ()=>{ (save.outbox||(save.outbox=[])).push({subject,body}); store(); onDone&&onDone(false); });
+  return true;
+}
+function flushOutbox(){
+  if(!MAIL_HOOK || !(save.outbox||[]).length || navigator.onLine===false) return;
+  const box=save.outbox.slice(); save.outbox=[]; store();
+  box.forEach(m=>postMail(m.subject,m.body).catch(()=>{ save.outbox.push(m); store(); }));
+}
+window.addEventListener("online", flushOutbox);
+/* at the end of every run: the result, this run's mistakes and any not sent before */
+function autoReport(won){
+  if(!MAIL_HOOK) return;
+  const b=bucketFor(won), r=rankFor(b.total), since=(save.mistakes||[]).filter(e=>Date.parse(e.d)>(save.mistakesSent||0));
+  const who=S.name||"", g=BANK[S.level|0].name, place=W().name, firstTry=(S.tally&&S.tally.first)||0;
+  const head=[`${who?who+" — ":""}${g} · ${place} · ${won?"got out":"caught"} · ${b.total} sweets (${r.name})`,
+    `Rooms ${S.room}/10 · right first time ${firstTry} · wrong answers this run ${(S.runMistakes||[]).length}`, ""].join("\n");
+  const body=head+(since.length?mistakeEmail(since,"this run and any not sent before"):"No wrong answers to report.");
+  const sentAt=Date.now();
+  sendMail(`Haunted House — ${who?who+", ":""}${g}, ${place}: ${b.total} sweets${since.length?`, ${since.length} to practise`:""}`, body,
+    ok=>{ if(ok){ save.mistakesSent=sentAt; store(); } });
+}
 function logMistake(kind, p, chosen, attempt){
   try{
     const e={d:new Date().toISOString(), lvl:S.level|0, g:BANK[S.level|0].name, w:W().name, k:kind,
@@ -15158,10 +15193,11 @@ function mistakeEmail(list, heading){
   for(const ln of lines){ if(body.length+ln.length>7000){ body+=`\n…and ${lines.length-used} more (all counted in the topic list above).`; break; } body+="\n"+ln; used++; }
   return body;
 }
-function emailMistakes(list, heading){
+function emailMistakes(list, heading, btn){
   const subject=`Haunted House mistakes — ${heading}`;
   const body=mistakeEmail(list, heading);
   save.mistakesSent=Date.now(); store();
+  if(sendMail(subject, body, ok=>{ if(btn) btn.textContent = ok ? "Sent ✓" : "Saved — it will go when online"; })){ if(btn){ btn.disabled=true; btn.textContent="Sending…"; } return; }
   location.href=`mailto:${MISTAKES_TO}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 }
 function copyMistakes(list, heading, btn){
@@ -15179,14 +15215,14 @@ function mistakesBlock(){
   return `<div class="mistakes"><h3>📒 To practise — this run</h3>
     ${first.length?`<div class="grp">Wrong first try · ${first.length}</div><ul>${first.map(li).join("")}</ul>`:""}
     ${later.length?`<div class="grp">Wrong second try or later · ${later.length}</div><ul>${later.map(li).join("")}</ul>`:""}
-    <div class="row"><button class="btn" id="mlEmailRun">📧 Email to ${MISTAKES_TO}</button>
+    <div class="row"><button class="btn" id="mlEmailRun">📧 ${MAIL_HOOK?"Send":"Email"} to ${MISTAKES_TO}</button>
       <button class="btn ghost" id="mlCopyRun">Copy</button><button class="btn ghost" id="mlAll">All mistakes</button></div>
-    <div class="note">Saved on this device with the date (${save.mistakes.length} in all). The email opens in your mail app, ready to send.</div></div>`;
+    <div class="note">Saved on this device with the date (${save.mistakes.length} in all). ${MAIL_HOOK?`Sent to ${MISTAKES_TO} by itself at the end of each run — no mail app needed.`:"The email opens in your mail app, ready to send."}</div></div>`;
 }
 function wireMistakesBlock(){
   const run=S.runMistakes||[]; if(!run.length) return;
   const h=`${esc(BANK[S.level].name)}, ${W().name}, ${fmtDay(new Date().toISOString())}`;
-  $("#mlEmailRun").onclick=()=>emailMistakes(run, "this run: "+h);
+  $("#mlEmailRun").onclick=e=>emailMistakes(run, "this run: "+h, e.target);
   $("#mlCopyRun").onclick=e=>copyMistakes(run, "this run: "+h, e.target);
   $("#mlAll").onclick=()=>openMistakes();
 }
@@ -15210,14 +15246,56 @@ function openMistakes(){
         <td><b>${esc(e.t)}</b><br><span style="color:var(--dim)">${esc(e.q)}</span></td><td>${esc(e.x)}</td><td>${esc(e.a)}</td></tr>`).join("")}
     </table></div>`;
   if(all.length){
-    $("#mlEmailNew").onclick=()=>emailMistakes(since, "new since last email");
-    $("#mlEmailAll").onclick=()=>emailMistakes(all, "all saved");
+    $("#mlEmailNew").onclick=e=>emailMistakes(since, "new since last email", e.target);
+    $("#mlEmailAll").onclick=e=>emailMistakes(all, "all saved", e.target);
     $("#mlCopyAll").onclick=e=>copyMistakes(all, "all saved", e.target);
     $("#mlClear").onclick=()=>{ if(confirm("Clear every saved mistake from this device?")){ save.mistakes=[]; save.mistakesSent=0; store(); openMistakes(); } };
   }
   $("#mlog").classList.remove("hidden");
 }
 function closeMistakes(){ $("#mlog").classList.add("hidden"); }
+
+/* ---------- results by iMessage, with a link to the full results (v37) ----------
+   A web page cannot send a message itself, so the button opens Messages with the
+   text ready (sms: link) and someone taps Send. The full results travel INSIDE the
+   link, after the "#": the run is packed as JSON, deflated and base64url-coded, and
+   hauntedresults.html unpacks it. Nothing is stored anywhere and the part after "#"
+   is never sent to a server. MSG_TO: Lapo's iMessage address — empty = Messages
+   opens with no recipient and the child picks one. */
+const MSG_TO = "", RESULTS_URL = "https://m1kelima.github.io/hauntedhouse/hauntedresults.html";
+const b64url = u8 => { let s=""; for(let i=0;i<u8.length;i+=0x8000) s+=String.fromCharCode.apply(null,u8.subarray(i,i+0x8000));
+  return btoa(s).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,""); };
+async function packResults(obj){
+  const raw=new TextEncoder().encode(JSON.stringify(obj));
+  if(typeof CompressionStream==="undefined") return "j"+b64url(raw);
+  const z=await new Response(new Blob([raw]).stream().pipeThrough(new CompressionStream("deflate-raw"))).arrayBuffer();
+  return "z"+b64url(new Uint8Array(z));
+}
+function runResults(won){
+  const b=bucketFor(won), r=rankFor(b.total), log=S.log||[], first=log.filter(l=>l.firstTry).length;
+  const secs=Math.round((Date.now()-S.started)/1000);
+  return {v:1, n:S.name||"", g:BANK[S.level|0].name, w:W().name, won:!!won, s:b.total, r:r.name, rm:S.room|0,
+    a:log.length?Math.round(first/log.length*100):0, t:`${Math.floor(secs/60)}m ${secs%60}s`, d:new Date().toISOString(),
+    m:(S.runMistakes||[]).slice(-80).map(e=>[e.t, e.q.length>220?e.q.slice(0,218)+"…":e.q, e.x, e.a, e.n, e.k])};
+}
+function shareText(R, url){
+  const by={}; R.m.forEach(m=>by[m[0]]=(by[m[0]]||0)+1);
+  const topics=Object.entries(by).sort((a,b)=>b[1]-a[1]).map(([t,n])=>n>1?`${t} (${n})`:t);
+  return `🎃 Haunted House — ${R.n?R.n+", ":""}${R.g}, ${R.w}: ${R.won?"got out":"caught"}, ${R.s} sweets (${R.r}). Right first time ${R.a}%.`
+    + (topics.length?`\nTo practise: ${topics.join(", ")}.`:"\nNo mistakes!") + `\nFull results: ${url}`;
+}
+function shareBlock(){
+  return `<div class="row" style="margin-top:14px"><button class="btn" id="msgBtn" disabled>💬 Send results by iMessage</button></div>
+    <div class="note" style="text-align:center">Opens Messages with the results and a link to the full report — then tap Send.</div>`;
+}
+function wireShareBlock(won){
+  const btn=$("#msgBtn"); if(!btn) return; const R=runResults(won);
+  packResults(R).then(code=>{ const url=RESULTS_URL+"#r="+code, text=shareText(R,url);
+    btn.disabled=false;
+    /* navigation must happen inside the tap, so everything is ready before it */
+    btn.onclick=()=>{ SFX.click(); location.href=`sms:${MSG_TO}&body=${encodeURIComponent(text)}`; };
+  }).catch(()=>{});
+}
 
 function bucketFor(won){
   const run = won ? S.candy : 0;
@@ -15236,6 +15314,7 @@ function endGame(won){
     save.totals.rooms += S.room; if(won) save.totals.wins++;
     if(S.room>save.best.rooms) save.best.rooms=S.room;
     if(!won) SFX.lose();
+    autoReport(won);
   }
   /* best is kept on the 100 scale; the old best.candy was on a different one */
   const carried=bucketFor(won).total;
@@ -15435,7 +15514,7 @@ function showReport(won){
     ${unlocked?`<div class="unlock">${unlocked.icon} <b>${esc(unlocked.name)}</b> is open to you
        <b style="color:var(--gold)">at ${esc(BANK[S.level].name)}</b>.
        <div style="font-size:13.5px;color:var(--dim);margin-top:5px">Other grades still have to open it themselves.</div></div>`:""}
-    ${missBlock}${mistakesBlock()}${nextTier}
+    ${missBlock}${mistakesBlock()}${shareBlock()}${nextTier}
     ${(()=>{ const nx=nextPlace(won);
       return `<div class="row endrow" style="margin-top:20px">
       <button class="btn ghost" id="againBtn">↻ Repeat ${esc(W().name.replace(/^The /,"the "))}</button>
@@ -15445,7 +15524,7 @@ function showReport(won){
     <div class="rcfoot">${VERSION_LINE}</div>`;
   $("#overlay").classList.remove("hidden");
   const bb=$("#bonusBtn"); if(bb) bb.onclick=()=>{ SFX.click(); startBonus(); };
-  wireMistakesBlock();
+  wireMistakesBlock(); wireShareBlock(won);
   /* Repeat really repeats: a win has already moved save.world on to the next place */
   $("#againBtn").onclick=()=>{ save.world=S.world; store(); $("#overlay").classList.add("hidden"); startGame(); };
   $("#nextPlaceBtn").onclick=()=>{ const nx=nextPlace(won); if(!nx.open) return;
@@ -15584,7 +15663,7 @@ document.addEventListener("keydown",e=>{
   if(e.key==="Enter"&&!$("#nextwrap").classList.contains("hidden")) $("#nextBtn").click();
 });
 
-load(); sfxOn=save.sfx!==false; musicOn=save.music!==false; kidMode=save.kid===true; applyTheme();
+load(); setTimeout(flushOutbox,3000); sfxOn=save.sfx!==false; musicOn=save.music!==false; kidMode=save.kid===true; applyTheme();
 $("#musBtn2").textContent=musicOn?"♪":"♪̸";
 wireProps(); buildSetup();
 if(!save.help) openHelp();          /* first visit: say what this is before anything else */
