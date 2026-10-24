@@ -11148,13 +11148,17 @@ TOPIC.forEach((ts,L)=>ts.forEach((t,g)=>{ if(g>=ADD_BASE[L] && ADD_HARD_T.has(t)
 function challengeProblem(level, tight, avoid){
   const on = onTypes(level), isM = g => (MULTI[level]||[]).indexOf(g)>=0;
   const fresh = g => !(avoid && avoid.has(TOPIC[level][g]));
-  let pool = on.filter(g=>fresh(g) && !isM(g));
+  /* the hatch (v39): a MULTI-STEP problem from the top of the grade — difficulty
+     4 or more, numbers near the top of their ranges — so it is clearly harder
+     than any room. Chests stay one step above the room, single-step. */
+  let pool = tight ? on.filter(g=>fresh(g) && isM(g)) : on.filter(g=>fresh(g) && !isM(g));
+  if(tight && pool.length){ const top=pool.filter(g=>typeD(level,g)>=4); if(top.length>=2) pool=top; }
+  if(!pool.length) pool = on.filter(g=>fresh(g) && !isM(g));
   if(!pool.length) pool = on.filter(fresh);
   if(!pool.length) pool = on.length ? on : BANK[level].gens.map((_,i)=>i);
-  /* a step above the room you are in: the hatch a step and a half */
-  const gi = nearestType(level, pool, targetD(S.room, tight ? 1.5 : 1));
+  const gi = nearestType(level, pool, tight ? Math.max(4.5, targetD(S.room, 1.5)) : targetD(S.room, 1));
   if(avoid) avoid.add(TOPIC[level][gi]);
-  const p = makeProblem(level, gi, rampFor(S.room, 0.15));
+  const p = makeProblem(level, gi, tight ? Math.max(0.7, rampFor(S.room, 0.4)) : rampFor(S.room, 0.15));
   if(tight) tighten(p);
   return p;
 }
@@ -12536,7 +12540,7 @@ function applyTheme(){
    moment it goes out. Shown on the setup screen and at the foot of the
    report card, so a player can say which build they are playing.
    ===================================================================== */
-const BUILD = 38, RELEASED = "24 Oct 2026, 17:30";
+const BUILD = 39, RELEASED = "24 Oct 2026, 16:58";
 const COPYRIGHT = "© 2026 m1keLima. All rights reserved.";
 const VERSION_LINE = `v${BUILD} · released ${RELEASED} · ${COPYRIGHT}`;
 
@@ -13258,8 +13262,8 @@ function wireProps(){
       <h2 style="color:var(--blood)">A hatch in the floor</h2>
       <p style="font-size:17px;line-height:1.7;color:var(--dim)">
         It drops into somewhere three rooms ahead. Something has been using it.<br><br>
-        One problem: the hardest kind ${BANK[S.level].name} has, and the wrong answers
-        sit right next to the right one.
+        One problem: a <b style="color:#d9b6ff">multi-step</b> one of the hardest kinds ${BANK[S.level].name} has,
+        with big numbers, and the wrong answers sit right next to the right one.
         Solve it and you skip three rooms <b style="color:var(--gold)">and still get the candy for all three</b>
         (up to ${HATCH_ROOMS*ROOM_MAX} ${TH.treat}, as if you had got each one right first time) —
         <b style="color:var(--gold)">plus ${HATCH_EXTRA} for daring</b>.
