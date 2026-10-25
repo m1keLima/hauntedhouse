@@ -57,7 +57,7 @@ const tryWord=n=>n<=1?"first try":n===2?"second try":`try ${n}`;
   document.title=`${R.n||"Haunted House"} — ${R.done===false?"session":R.s+" sweets"}`;
   $("#sub").textContent=`${R.n?R.n+" · ":""}${R.g} · ${R.w} · ${when}`;
   const wrongBy={}; items.filter(it=>!it.tries[0][5]).forEach(it=>wrongBy[it.t]=(wrongBy[it.t]||0)+1);
-  const practise=Object.entries(wrongBy).sort((a,b)=>b[1]-a[1]);
+  const practice=Object.entries(wrongBy).sort((a,b)=>b[1]-a[1]);
   const mark=it=> it.tries[0][5]?`<span class="a">✓ first try</span>`: it.ok?`<span class="gold">✓ on try ${it.tries.findIndex(x=>x[5])+1}</span>`:`<span class="x">${R.v>=2?"✗ not this time":"✗ answered wrong"}</span>`;
   const secs=it=>{ const t=it.tries.map(x=>x[7]).filter(x=>x!=null), n=t.reduce((a,b)=>a+b,0); return n?` · ${n} s`:""; };
   $("#out").innerHTML=`${R.v>=2&&R.done===false?"":`<div class="card">
@@ -68,11 +68,11 @@ const tryWord=n=>n<=1?"first try":n===2?"second try":`try ${n}`;
     ${R.v>=2?`<div class="card"><div class="facts" style="margin-top:0">
         <div class="fact"><i>Exercises</i><b>${items.length}</b></div><div class="fact"><i>Right first time</i><b class="a">${firstOk}</b></div>
         <div class="fact"><i>Right on a later try</i><b class="gold">${laterOk}</b></div><div class="fact"><i>Not got</i><b class="x">${never}</b></div></div>
-      ${practise.length?`<p style="margin:14px 0 0"><b>To practise:</b> ${practise.map(([t,n])=>esc(t)+(n>1?` (${n})`:"")).join(", ")}</p>`:`<p class="none" style="margin:14px 0 0">Everything right first time!</p>`}</div>`:""}
-    <div class="card"><h2>${R.v>=2?"📝 Every exercise, in order":"📒 To practise"}</h2>
+      ${practice.length?`<p style="margin:14px 0 0"><b>To practice:</b> ${practice.map(([t,n])=>esc(t)+(n>1?` (${n})`:"")).join(", ")}</p>`:`<p class="none" style="margin:14px 0 0">Everything right first time!</p>`}</div>`:""}
+    <div class="card"><h2>${R.v>=2?"📝 Every exercise, in order":"📒 To practice"}</h2>
       ${items.length?items.map((it,i)=>`<div class="m"><small>${i+1}. ${esc(it.k)} · ${esc(it.t)}${secs(it)}</small>
           <div class="q">${esc(it.q)}</div><div>${mark(it)} · right answer <span class="a">${esc(it.a)}</span>${it.tries.filter(x=>!x[5]).length?` · <span class="x">answered ${it.tries.filter(x=>!x[5]).map(x=>esc(x[3])).join(", then ")}</span>`:""}</div></div>`).join("")
         :`<div class="none">No exercises in this session.</div>`}
-      <p style="margin:16px 0 0;font-size:15px;color:var(--dim)">Practise the ideas behind these in <a href="hauntedpractice.html">Haunted Practice</a>.</p></div>`;
+      <p style="margin:16px 0 0;font-size:15px;color:var(--dim)">Practice the ideas behind these in <a href="hauntedpractice.html">Haunted Practice</a>.</p></div>`;
 })();
 </script></body></html>

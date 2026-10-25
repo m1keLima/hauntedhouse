@@ -837,7 +837,7 @@ table.rc td:last-child{text-align:right;font-weight:800;color:var(--gold)}
               four answers &mdash; and removes the clock entirely.</li>
           <li><b>A bonus round</b> at the end offers fresh problems of exactly the kinds they got wrong first
               time, and right first time there wins back everything the mistake cost, with nothing at stake. Offered after a loss too.</li>
-          <li>The report card gives first-try accuracy and names the topics worth practising.</li>
+          <li>The report card gives first-try accuracy and names the topics worth practicing.</li>
           <li><b>Nothing leaves this device.</b> No account, no network, no adverts, no tracking. Progress is
               saved in this browser alone, and the whole game is one file that works offline.</li>
         </ul>
@@ -12540,7 +12540,7 @@ function applyTheme(){
    moment it goes out. Shown on the setup screen and at the foot of the
    report card, so a player can say which build they are playing.
    ===================================================================== */
-const BUILD = 39, RELEASED = "24 Oct 2026, 16:58";
+const BUILD = 40, RELEASED = "25 Oct 2026, 13:30";
 const COPYRIGHT = "© 2026 m1keLima. All rights reserved.";
 const VERSION_LINE = `v${BUILD} · released ${RELEASED} · ${COPYRIGHT}`;
 
@@ -15179,7 +15179,7 @@ function autoReport(won){
     `Rooms ${S.room}/10 · right first time ${firstTry} · wrong answers this run ${(S.runMistakes||[]).length}`, ""].join("\n");
   const body=head+(since.length?mistakeEmail(since,"this run and any not sent before"):"No wrong answers to report.");
   const sentAt=Date.now();
-  sendMail(`Haunted House — ${who?who+", ":""}${g}, ${place}: ${b.total} sweets${since.length?`, ${since.length} to practise`:""}`, body,
+  sendMail(`Haunted House — ${who?who+", ":""}${g}, ${place}: ${b.total} sweets${since.length?`, ${since.length} to practice`:""}`, body,
     ok=>{ if(ok){ save.mistakesSent=sentAt; store(); } });
 }
 function logMistake(kind, p, chosen, attempt){
@@ -15237,7 +15237,7 @@ function mistakesBlock(){
   if(!run.length) return "";
   const first=run.filter(e=>e.n<=1), later=run.filter(e=>e.n>1);
   const li=e=>`<li><b>${esc(e.t)}</b> <span>(${esc(e.k)}) — ${esc(e.q.length>110?e.q.slice(0,108)+"…":e.q)} · answered ${esc(e.x)}, right ${esc(e.a)}</span></li>`;
-  return `<div class="mistakes"><h3>📒 To practise — this run</h3>
+  return `<div class="mistakes"><h3>📒 To practice — this run</h3>
     ${first.length?`<div class="grp">Wrong first try · ${first.length}</div><ul>${first.map(li).join("")}</ul>`:""}
     ${later.length?`<div class="grp">Wrong second try or later · ${later.length}</div><ul>${later.map(li).join("")}</ul>`:""}
     <div class="row"><button class="btn" id="mlEmailRun">📧 ${MAIL_HOOK?"Send":"Email"} to ${MISTAKES_TO}</button>
@@ -15339,7 +15339,7 @@ function shareText(R, url){
   const topics=Object.entries(by).sort((a,b)=>b[1]-a[1]).map(([t,n])=>n>1?`${t} (${n})`:t);
   const qs=new Set(R.ex.map(e=>e[0]+"|"+e[2])).size, firstOk=R.ex.filter(e=>e[5]&&e[6]===1).length;
   return `🎃 Haunted House — ${R.n?R.n+", ":""}${R.g}, ${R.w}: ${R.done?`${R.won?"got out":"caught"}, ${R.s} sweets (${R.r})`:"unfinished"}. ${qs} exercises, ${firstOk} right first time.`
-    + (topics.length?`\nTo practise: ${topics.join(", ")}.`:"\nNo mistakes!") + `\nThe whole session: ${url}`;
+    + (topics.length?`\nTo practice: ${topics.join(", ")}.`:"\nNo mistakes!") + `\nThe whole session: ${url}`;
 }
 function sessionLink(ses, name){ const R=sessionPayload(ses,name); return packResults(R).then(code=>({R, url:RESULTS_URL+"#r="+code})); }
 const openMessages = text => { location.href=`sms:${MSG_TO}&body=${encodeURIComponent(text)}`; };
@@ -15546,7 +15546,7 @@ function showReport(won){
   const missed = missedList();
   const missBlock = missed.length ? `
     <div class="misslist">
-      <b>Ones to practise — ${missed.length} kind${missed.length===1?"":"s"} of problem:</b>
+      <b>Ones to practice — ${missed.length} kind${missed.length===1?"":"s"} of problem:</b>
       <ul>${missed.map(m=>`<li>${esc(m.topic)} <span>— ${m.n===1?"once":m.n+" times"}</span></li>`).join("")}</ul>
       ${S.brDone
         ? `<div style="margin-top:10px;color:var(--gold)">Bonus round done: ${S.br.right} of ${S.br.q.length} put right,

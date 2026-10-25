@@ -366,7 +366,7 @@ button{font:inherit;color:inherit;cursor:pointer}
 
 <script>
 "use strict";
-const BUILD = 5, RELEASED = "25 Oct 2026, 12:00";
+const BUILD = 6, RELEASED = "25 Oct 2026, 13:30";
 const COPYRIGHT = "© 2026 m1keLima";
 const $ = s => document.querySelector(s);
 /* Practice numbers come from NSEED fixed number sets per room (seeded), so every
@@ -2744,13 +2744,13 @@ function finish(){
     <p style="font-size:20px">You finished <b>${d.name}</b>.<br>${ST.stars} of ${ST.nprac} practice ones right first time.</p></div>`;
   const msg=[`Well done! You lit the lantern for ${d.name}.`,`${ST.stars} of ${ST.nprac} right first time.`];
   $("#bubble").innerHTML=msg.join(" "); narrate(msg); $("#dots").innerHTML="";
-  const b=[["Practise again",()=>openStation(d.id,true),"ghost"]];
+  const b=[["Practice again",()=>openStation(d.id,true),"ghost"]];
   if(nx) b.push([`Next room: ${nx.name} →`,()=>openStation(nx.id)]);
   b.push([ST.sec.name+": all rooms",toMap,"ghost"]);
   setActs(b); $("#skipLesson").classList.add("hidden");
 }
 function toMap(){ stopSpeech(); clearTimeout(numTimer); ST=null; $("#lesson").classList.add("hidden"); $("#map").classList.remove("hidden"); drawMap(); window.scrollTo(0,0); }
-const HOME_INTRO="Even the Pumpkin King had to practise! Pick a section, then a room: watch, then try it yourself. Every room you finish lights a lantern.";
+const HOME_INTRO="Even the Pumpkin King had to practice! Pick a section, then a room: watch, then try it yourself. Every room you finish lights a lantern.";
 
 /* ===================================================================
    MAP
