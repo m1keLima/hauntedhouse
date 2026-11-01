@@ -11915,7 +11915,7 @@ self.onmessage=async e=>{ const m=e.data;
     try{ const t0=performance.now(); const a=await tts.generate(m.text,{voice:"af_heart",speed:m.speed});
       const pcm=a.audio; self.postMessage({t:"audio",pcm,sr:a.sampling_rate,ms:performance.now()-t0},[pcm.buffer]); }
     catch(err){ self.postMessage({t:"audio",e:String(err)}); } } };`;
-const NV={state:"off", w:null, q:[], cur:null, prom:new Map(), url:new Map(), n:0, slowN:0};
+const NV={state:"off", w:null, q:[], cur:null, prom:new Map(), url:new Map(), n:0, slowN:0, ratios:[]};
 function nvStart(){
   if(NV.state!=="off"||!window.Worker||!natOn()) return;
   try{ NV.w=new Worker(URL.createObjectURL(new Blob([NV_SRC],{type:"text/javascript"})),{type:"module"}); }
@@ -11928,14 +11928,23 @@ function nvStart(){
     else if(m.t==="audio"){ const it=NV.cur; NV.cur=null;
       if(it){ if(m.e) it.no(); else {
         const url=URL.createObjectURL(wavBlob(m.pcm,m.sr)); NV.url.set(it.text,url); it.yes(url);
-        /* a device that needs over 4x real time cannot keep a room ahead: use the device voice */
-        NV.n++; if(m.ms/1000 > 4*m.pcm.length/m.sr) NV.slowN++;
-        if(NV.n>=3 && NV.slowN>=3){ NV.state="slow"; NV.q.forEach(x=>x.no()); NV.q=[]; }
+        /* Speed check (v41). v33 judged the first three lines and switched to the device
+           voice for good; Grade 1's short lines ("8 + 3 = ?") are mostly fixed start-up
+           cost, so an iPad tripped it at once. Now: only lines of 1.5 s or more count, the
+           last five are averaged, and "slow" is not for good — it only means say() does
+           not WAIT for a line still being made. The model keeps working a room ahead, so
+           anything already made is still spoken in the natural voice, and the state
+           goes back to ready when the device keeps up again. */
+        NV.n++; const secs=m.pcm.length/m.sr;
+        if(secs>=1.5){ NV.ratios.push(m.ms/1000/secs); if(NV.ratios.length>5) NV.ratios.shift(); }
+        const avg=NV.ratios.length ? NV.ratios.reduce((a,b)=>a+b,0)/NV.ratios.length : 0;
+        if(NV.state==="ready" && NV.ratios.length>=3 && avg>4){ NV.state="slow"; NV.slowN++; }
+        else if(NV.state==="slow" && avg<=3) NV.state="ready";
         if(NV.url.size>80){ const k=NV.url.keys().next().value; URL.revokeObjectURL(NV.url.get(k)); NV.url.delete(k); NV.prom.delete(k); } } }
       nvPump(); } };
   NV.w.postMessage({t:"load"});
 }
-function nvPump(){ if(NV.state!=="ready"||NV.cur||!NV.q.length) return;
+function nvPump(){ if((NV.state!=="ready"&&NV.state!=="slow")||NV.cur||!NV.q.length) return;
   NV.cur=NV.q.shift(); NV.w.postMessage({t:"gen",text:NV.cur.text,speed:NV_SPEED}); }
 /* the audio for one line (a promise of a blob URL); urgent jumps the queue */
 function nvGet(text,urgent){
@@ -11956,10 +11965,11 @@ function sentences(t){ return t.split(/(?<=[.?!:;])\s+(?=\S)/).map(x=>x.trim()).
 /* queue several lines; urgent ones go to the front, keeping their order */
 function nvGetAll(list,urgent){ if(urgent) list.slice().reverse().forEach(t=>nvGet(t,true)); else list.forEach(t=>nvGet(t,false)); return list.map(t=>NV.prom.get(t)||nvGet(t)); }
 /* get a problem's question and hint ready before they are needed */
-function prefetchP(p,urgent){
+function prefetchP(p,urgent,only){
   if(!p||!voiceWanted()) return; nvStart();
-  if(NV.state==="fail"||NV.state==="slow") return;
-  [speakable(p.question), speakable(p.hint)].forEach((t,i)=>{ if(t&&!CLIPS.has(clipId(t))) nvGetAll(sentences(t), urgent&&i===0); });
+  if(NV.state==="fail") return;
+  const want = only==="q" ? [p.question] : only==="h" ? [p.hint] : [p.question, p.hint];
+  want.map(t=>speakable(t)).forEach((t,i)=>{ if(t&&!CLIPS.has(clipId(t))) nvGetAll(sentences(t), urgent&&i===0&&only!=="h"); });
 }
 function playSeq(srcs,parts,rate,h){
   stopTTS(); const tok=++audTok, a=audEl(); let i=0;
@@ -11982,10 +11992,14 @@ function say(x,rate){
   const parts=(Array.isArray(x)?x:[x]).map(t=>speakable(t)).filter(Boolean); if(!parts.length) return null;
   const h={onend:null,onerror:null};
   if(natOn()){
+    if(voiceWanted()) nvStart();
     /* a recorded line plays whole; anything else goes to the model sentence by sentence */
     const pieces=parts.flatMap(t=>CLIPS.has(clipId(t)) ? [t] : sentences(t));
     const fresh=pieces.filter(t=>!CLIPS.has(clipId(t)) && !NV.url.has(t));
-    if(!fresh.length || NV.state==="ready"){
+    /* ready or still loading: wait up to NV_WAIT for the natural voice (v41 — a tap on
+       the speaker while the model loaded used to go straight to the device voice);
+       slow: use it only if every piece is already made */
+    if(!fresh.length || NV.state==="ready" || NV.state==="loading"){
       if(fresh.length) nvGetAll(fresh,true);
       const srcs=pieces.map(t=>{ const id=clipId(t);
         return CLIPS.has(id) ? Promise.resolve(AUDIO_DIR+id+".m4a") : NV.url.has(t) ? Promise.resolve(NV.url.get(t)) : NV.prom.get(t); });
@@ -12540,7 +12554,7 @@ function applyTheme(){
    moment it goes out. Shown on the setup screen and at the foot of the
    report card, so a player can say which build they are playing.
    ===================================================================== */
-const BUILD = 40, RELEASED = "25 Oct 2026, 13:30";
+const BUILD = 41, RELEASED = "1 Nov 2026, 16:40";
 const COPYRIGHT = "© 2026 m1keLima. All rights reserved.";
 const VERSION_LINE = `v${BUILD} · released ${RELEASED} · ${COPYRIGHT}`;
 
@@ -12921,10 +12935,15 @@ function loadRoom(){
   S.pre=null;
   S.current.hardType = slot.hard;
   if(slot.tight) tighten(S.current);
-  prefetchP(S.current,true);
+  /* queue order (v41): this question, the NEXT room's question, then the two hints —
+     a hint is only needed after a wrong answer, so it must not hold up the next question */
+  prefetchP(S.current,true,"q");
   const nslot=S.plan[S.room+1];
-  if(nslot && voiceWanted() && NV.state!=="fail" && NV.state!=="slow"){
-    S.pre={room:S.room+1, slot:nslot, p:makeProblem(nslot.lvl, nslot.gen, rampFor(S.room+1))}; prefetchP(S.pre.p); }
+  /* the next room's question is made now — in "slow" mode too (v41), that is what keeps it natural */
+  if(nslot && voiceWanted() && NV.state!=="fail"){
+    S.pre={room:S.room+1, slot:nslot, p:makeProblem(nslot.lvl, nslot.gen, rampFor(S.room+1))}; prefetchP(S.pre.p,false,"q"); }
+  prefetchP(S.current,false,"h");
+  if(S.pre && S.pre.room===S.room+1) prefetchP(S.pre.p,false,"h");
   $("#scene").innerHTML=sceneSVG(S.room,S.avatar);
   $("#roomtag").textContent=`${S.room+1}. ${W().rooms[S.room]}`;
   $("#roomline").textContent=P(SCARELINES);
@@ -15065,7 +15084,7 @@ function bonusScene(){
 
 function startBonus(){
   S.br={q:missedList().slice(0,BONUS_MAX), i:0, candy:0, right:0, first:0};
-  if(voiceWanted()){ S.br.pre=S.br.q.map(sl=>makeProblem(sl.lvl, sl.gen, rampFor(0))); S.br.pre.forEach((p,i)=>prefetchP(p,i===0)); }
+  if(voiceWanted()){ S.br.pre=S.br.q.map(sl=>makeProblem(sl.lvl, sl.gen, rampFor(0))); S.br.pre.forEach((p,i)=>prefetchP(p,i===0,"q")); S.br.pre.forEach(p=>prefetchP(p,false,"h")); }
   $("#overlay").classList.add("hidden");
   $("#setup").classList.add("hidden"); $("#game").classList.remove("hidden");
   $("#chase").classList.add("hidden");
