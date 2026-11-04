@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!-- Haunted House results. The run travels inside the link (#r=…), packed by the game;
      nothing is stored or sent anywhere. Copyright (c) 2026 m1keLima. All rights reserved. -->
-<html lang="en"><head><meta charset="utf-8">
+<html lang="en-US"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="darkreader-lock">
 <title>Haunted House Results</title>
@@ -47,7 +47,7 @@ const tryWord=n=>n<=1?"first try":n===2?"second try":`try ${n}`;
   const m=location.hash.match(/r=([A-Za-z0-9_-]+)/);
   if(!m){ $("#out").innerHTML=`<div class="card err">This page shows a run's results when opened from the link the game sends.</div>`; return; }
   let R; try{ R=await unpack(m[1]); }catch(e){ $("#out").innerHTML=`<div class="card err">This link is incomplete or damaged — ask for it to be sent again.</div>`; return; }
-  const when=new Date(R.d).toLocaleString(undefined,{weekday:"short",day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"});
+  const when=new Date(R.d).toLocaleString("en-US",{weekday:"short",day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"});
   /* v1 links (v37) carried only the mistakes; v2 (v38) carries every attempt */
   const ex = R.v>=2 ? R.ex : R.m.map(m=>[m[5]||"room",m[0],m[1],m[2],m[3],0,m[4],null]);
   /* one item per exercise: consecutive attempts at the same question */
