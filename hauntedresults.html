@@ -54,14 +54,14 @@ const tryWord=n=>n<=1?"first try":n===2?"second try":`try ${n}`;
   const items=[]; ex.forEach(e=>{ const last=items[items.length-1];
     if(last && last.k===e[0] && last.q===e[2] && !last.ok) last.tries.push(e); else items.push({k:e[0],t:e[1],q:e[2],a:e[4],tries:[e],get ok(){ return this.tries.some(x=>x[5]); }}); });
   const firstOk=items.filter(it=>it.tries[0][5]).length, laterOk=items.filter(it=>!it.tries[0][5]&&it.ok).length, never=items.filter(it=>!it.ok).length;
-  document.title=`${R.n||"Haunted House"} — ${R.done===false?"session":R.s+" sweets"}`;
+  document.title=`${R.n||"Haunted House"} — ${R.done===false?"session":R.s+" candies"}`;
   $("#sub").textContent=`${R.n?R.n+" · ":""}${R.g} · ${R.w} · ${when}`;
   const wrongBy={}; items.filter(it=>!it.tries[0][5]).forEach(it=>wrongBy[it.t]=(wrongBy[it.t]||0)+1);
   const practice=Object.entries(wrongBy).sort((a,b)=>b[1]-a[1]);
   const mark=it=> it.tries[0][5]?`<span class="a">✓ first try</span>`: it.ok?`<span class="gold">✓ on try ${it.tries.findIndex(x=>x[5])+1}</span>`:`<span class="x">${R.v>=2?"✗ not this time":"✗ answered wrong"}</span>`;
   const secs=it=>{ const t=it.tries.map(x=>x[7]).filter(x=>x!=null), n=t.reduce((a,b)=>a+b,0); return n?` · ${n} s`:""; };
   $("#out").innerHTML=`${R.v>=2&&R.done===false?"":`<div class="card">
-      <div class="score"><b>${R.s}</b><span>sweets</span></div><div class="rank">${esc(R.r)}</div>
+      <div class="score"><b>${R.s}</b><span>candies</span></div><div class="rank">${esc(R.r)}</div>
       <div class="facts"><div class="fact"><i>Result</i><b>${R.won?"🌕 got out":"🎃 caught"}</b></div>
         <div class="fact"><i>Rooms</i><b>${R.rm} / 10</b></div><div class="fact"><i>Time</i><b>${esc(R.t)}</b></div>
         <div class="fact"><i>Grade</i><b>${esc(R.g)}</b></div></div></div>`}
