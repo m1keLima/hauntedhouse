@@ -12581,7 +12581,7 @@ function applyTheme(){
    moment it goes out. Shown on the setup screen and at the foot of the
    report card, so a player can say which build they are playing.
    ===================================================================== */
-const BUILD = 44, RELEASED = "Nov 8, 2026, 12:15 PM";
+const BUILD = 45, RELEASED = "Nov 8, 2026, 12:45 PM";
 const COPYRIGHT = "© 2026 m1keLima. All rights reserved.";
 const VERSION_LINE = `v${BUILD} · released ${RELEASED} · ${COPYRIGHT}`;
 
@@ -12758,7 +12758,7 @@ function buildSetup(){
   $("#tierNote").innerHTML = tierLine(save.level);
   paintTopicsBtn();
   $("#levelGrid").onclick=e=>{const b=e.target.closest(".lvl"); if(!b)return;
-    save.level=+b.dataset.i; store(); SFX.click();
+    save.level=+b.dataset.i; store(); SFX.click(); if(voiceWanted()) nvStart();
     [...$("#levelGrid").children].forEach(c=>c.setAttribute("aria-pressed", c===b));
     $("#tierNote").innerHTML=tierLine(save.level); renderWorlds(); paintTopicsBtn();
     if(save.askTopics!==false) openTopics(save.level);};
@@ -15795,6 +15795,11 @@ document.addEventListener("keydown",e=>{
 load(); setTimeout(flushOutbox,3000); sfxOn=save.sfx!==false; musicOn=save.music!==false; kidMode=save.kid===true; applyTheme();
 $("#musBtn2").textContent=musicOn?"♪":"♪̸";
 wireProps(); buildSetup();
+/* v45 (Lapo 8 Nov: "the first question is already with the device voice"): the voice model used to start
+   loading at the first tap, so room 1 asked its question while it was still downloading or starting, and
+   after NV_WAIT the device voice took over. It loads from the moment the page opens now, while the
+   grade and character are picked (a Worker needs no tap; only playing sound does). */
+if(voiceWanted()) nvStart();
 if(!save.help) openHelp();          /* first visit: say what this is before anything else */
 </script>
 </body>
