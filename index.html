@@ -169,6 +169,7 @@ input[type=text]::placeholder{color:#5c5070}
 #famline b{color:var(--gold)}
 #tierNote{font-size:14px;color:var(--dim);margin-top:10px;line-height:1.6}
 #saveline{font-size:13px;color:var(--dim);text-align:center;margin-top:16px;line-height:1.7}
+#voicestat{font-size:13px;color:var(--dim);text-align:center;margin-top:8px;line-height:1.5}
 #saveline a{color:var(--dim)}
 .howto{font-size:15.5px;line-height:1.85;color:var(--dim)}
 kbd{background:#271a38;border:1px solid var(--line);border-radius:5px;padding:2px 7px;font-size:13px}
@@ -633,6 +634,7 @@ table.rc td:last-child{text-align:right;font-weight:800;color:var(--gold)}
     </div>
     <div id="famline"></div>
     <div id="saveline"></div>
+    <div id="voicestat"></div>
   </div>
 
   <div class="card" style="margin-top:16px">
@@ -11911,24 +11913,28 @@ let tts=null;
 self.onmessage=async e=>{ const m=e.data;
   if(m.t==="load"){
     try{ const k=await import("https://cdn.jsdelivr.net/npm/kokoro-js@1.2.1/+esm");
-      tts=await k.KokoroTTS.from_pretrained("onnx-community/Kokoro-82M-v1.0-ONNX",{dtype:"q8",device:"wasm"});
+      tts=await k.KokoroTTS.from_pretrained("onnx-community/Kokoro-82M-v1.0-ONNX",{dtype:"q8",device:"wasm",
+        progress_callback:p=>{ if(p&&p.status==="progress"&&p.total>5e6) self.postMessage({t:"prog",pct:Math.round(100*p.loaded/p.total)}); }});
       self.postMessage({t:"ready"}); }catch(err){ self.postMessage({t:"fail",e:String(err)}); } }
   else if(m.t==="gen"){
     try{ const t0=performance.now(); const a=await tts.generate(m.text,{voice:"af_heart",speed:m.speed});
       const pcm=a.audio; self.postMessage({t:"audio",pcm,sr:a.sampling_rate,ms:performance.now()-t0},[pcm.buffer]); }
     catch(err){ self.postMessage({t:"audio",e:String(err)}); } } };`;
-const NV={state:"off", w:null, q:[], cur:null, prom:new Map(), url:new Map(), n:0, slowN:0, ratios:[]};
+const NV={state:"off", w:null, q:[], cur:null, prom:new Map(), url:new Map(), n:0, slowN:0, ratios:[],
+  pct:null, err:"", fb:{}};   /* v44: what the voice is doing, shown on the front page (#voicestat) */
+const nvFb = why => { NV.fb[why]=(NV.fb[why]||0)+1; };
 function nvStart(){
   if(NV.state!=="off"||!window.Worker||!natOn()) return;
   try{ NV.w=new Worker(URL.createObjectURL(new Blob([NV_SRC],{type:"text/javascript"})),{type:"module"}); }
   catch(e){ NV.state="fail"; return; }
   NV.state="loading";
-  NV.w.onerror=()=>{ NV.state="fail"; NV.q.forEach(it=>it.no()); NV.q=[]; };
+  NV.w.onerror=ev=>{ NV.state="fail"; NV.err="the voice stopped: "+((ev&&ev.message)||"no reason given, often out of memory"); NV.q.forEach(it=>it.no()); NV.q=[]; };
   NV.w.onmessage=e=>{ const m=e.data;
-    if(m.t==="ready"){ NV.state="ready"; nvPump(); }
-    else if(m.t==="fail"){ NV.state="fail"; NV.q.forEach(it=>it.no()); NV.q=[]; }
+    if(m.t==="ready"){ NV.state="ready"; NV.pct=null; nvPump(); }
+    else if(m.t==="prog"){ NV.pct=m.pct; }
+    else if(m.t==="fail"){ NV.state="fail"; NV.err=m.e||"no reason given"; NV.q.forEach(it=>it.no()); NV.q=[]; }
     else if(m.t==="audio"){ const it=NV.cur; NV.cur=null;
-      if(it){ if(m.e) it.no(); else {
+      if(it){ if(m.e){ NV.err="speaking failed: "+m.e; it.no(); } else {
         const url=URL.createObjectURL(wavBlob(m.pcm,m.sr)); NV.url.set(it.text,url); it.yes(url);
         /* Speed check (v41). v33 judged the first three lines and switched to the device
            voice for good; Grade 1's short lines ("8 + 3 = ?") are mostly fixed start-up
@@ -11975,17 +11981,17 @@ function prefetchP(p,urgent,only){
 }
 function playSeq(srcs,parts,rate,h){
   stopTTS(); const tok=++audTok, a=audEl(); let i=0;
-  const bail=()=>{ if(tok!==audTok) return; audTok++; ttsSay(parts.slice(i).join(" "),rate,h); };
+  const bail=why=>{ if(tok!==audTok) return; nvFb(why); audTok++; ttsSay(parts.slice(i).join(" "),rate,h); };
   const next=()=>{ if(tok!==audTok) return;
     if(i>=srcs.length){ if(h.onend) h.onend(); return; }
     /* give up after NV_WAIT — but if this very sentence is being made right now, wait once more */
     let timer, more=true;
-    const arm=()=>{ timer=setTimeout(()=>{ if(more && NV.cur && NV.cur.text===parts[i]){ more=false; arm(); return; } timer=null; bail(); }, NV_WAIT); };
+    const arm=()=>{ timer=setTimeout(()=>{ if(more && NV.cur && NV.cur.text===parts[i]){ more=false; arm(); return; } timer=null; bail("wait"); }, NV_WAIT); };
     arm();
     srcs[i].then(url=>{ if(!timer||tok!==audTok) return; clearTimeout(timer);
-      a.onended=()=>{ i++; next(); }; a.onerror=bail; a.src=url;
-      try{ const r=a.play(); if(r&&r.catch) r.catch(bail); }catch(e){ bail(); } },
-      ()=>{ if(timer){ clearTimeout(timer); bail(); } });
+      a.onended=()=>{ i++; next(); }; a.onerror=()=>bail("play"); a.src=url;
+      try{ const r=a.play(); if(r&&r.catch) r.catch(e=>{ NV.err="audio blocked: "+((e&&e.name)||e); bail("play"); }); }catch(e){ bail("play"); } },
+      ()=>{ if(timer){ clearTimeout(timer); bail("fail"); } });
   };
   next();
 }
@@ -12008,9 +12014,28 @@ function say(x,rate){
       if(srcs.every(Boolean)){ playSeq(srcs,pieces,rate,h); return h; }
     }
   }
+  if(natOn()) nvFb(NV.state);
   audTok++; try{ if(AUD) AUD.pause(); }catch(e){}
   return ttsSay(parts.join(" "),rate,h);
 }
+/* v44 (Lapo 8 Nov: "still running the bad voice on the ipad"): the front page says what the
+   natural voice is doing on THIS device, and why each line it did not speak went to the device voice */
+const NV_WHY={wait:"not ready in time",fail:"model failed",play:"audio blocked",slow:"device too slow",loading:"still loading",off:"not started",ready:"not made yet"};
+function nvStatusText(){
+  if(!natOn()) return "Voice: the device's own voice is chosen.";
+  const avg=NV.ratios.length ? NV.ratios.reduce((a,b)=>a+b,0)/NV.ratios.length : 0;
+  let s = NV.state==="off" ? (voiceWanted() ? "Natural voice: starts at your first tap." : "Natural voice: used for read-aloud, or Kindergarten to Grade 2.")
+    : NV.state==="loading" ? (NV.pct!=null ? `Natural voice: downloading, ${NV.pct}%…` : "Natural voice: loading…")
+    : NV.state==="ready" ? "Natural voice: ready"+(avg?` · makes speech at ${avg.toFixed(1)}× real time`:"")+"."
+    : NV.state==="slow" ? `Natural voice: this device is slow (${avg.toFixed(1)}× real time), so lines not made in time use the device voice.`
+    : "Natural voice: could not load"+(NV.err?` (${NV.err.slice(0,140)})`:"")+". Using the device voice; tap Voice twice to try again.";
+  if(NV.state!=="fail" && NV.err) s+=` Last problem: ${NV.err.slice(0,140)}.`;
+  const fb=Object.entries(NV.fb).filter(([,v])=>v);
+  if(fb.length) s+=` Device voice used: ${fb.map(([k,v])=>`${NV_WHY[k]||k} ${v}`).join(", ")}.`;
+  return s;
+}
+function paintVoiceStat(){ const el=$("#voicestat"); if(el && el.offsetParent!==null){ const t=nvStatusText(); if(el.textContent!==t) el.textContent=t; } }
+setInterval(paintVoiceStat,1000);
 function ttsSay(text,rate,h){
   h=h||{onend:null,onerror:null};
   const ss=window.speechSynthesis; if(!ss) return null;
@@ -12556,7 +12581,7 @@ function applyTheme(){
    moment it goes out. Shown on the setup screen and at the foot of the
    report card, so a player can say which build they are playing.
    ===================================================================== */
-const BUILD = 43, RELEASED = "Nov 3, 2026, 7:30 PM";
+const BUILD = 44, RELEASED = "Nov 8, 2026, 12:15 PM";
 const COPYRIGHT = "© 2026 m1keLima. All rights reserved.";
 const VERSION_LINE = `v${BUILD} · released ${RELEASED} · ${COPYRIGHT}`;
 
@@ -12758,6 +12783,7 @@ function buildSetup(){
   $("#sfxBtn").textContent = sfxOn?"Sound: on":"Sound: off";
   $("#musBtn").textContent = musicOn?"Music: on":"Music: off";
   $("#voiceBtn").textContent = natOn()?"Voice: natural":"Voice: device";
+  paintVoiceStat();
   paintKid();
   paintFamilies();
   renderThemes();
@@ -15749,6 +15775,7 @@ $("#quitBtn").onclick=()=>{
 };
 $("#sfxBtn").onclick=toggleSfx;
 $("#voiceBtn").onclick=()=>{ save.natural=!natOn(); store(); SFX.click();
+  if(natOn() && NV.state==="fail"){ try{ NV.w&&NV.w.terminate(); }catch(e){} NV.state="off"; NV.err=""; NV.pct=null; }   /* a second try */
   $("#voiceBtn").textContent = natOn()?"Voice: natural":"Voice: device";
   if(natOn()){ nvStart(); say("Hello! I am the Pumpkin King. Come in, if you dare."); } else { stopSpeech(); ttsSay("This is the device voice."); } };
 $("#musBtn").onclick=toggleMusic;
