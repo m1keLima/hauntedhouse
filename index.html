@@ -12662,7 +12662,7 @@ function applyTheme(){
    moment it goes out. Shown on the setup screen and at the foot of the
    report card, so a player can say which build they are playing.
    ===================================================================== */
-const BUILD = 47, RELEASED = "Nov 14, 2026, 3:00 PM";
+const BUILD = 48, RELEASED = "Nov 14, 2026, 4:00 PM";
 const COPYRIGHT = "© 2026 m1keLima. All rights reserved.";
 const VERSION_LINE = `v${BUILD} · released ${RELEASED} · ${COPYRIGHT}`;
 
@@ -13463,10 +13463,10 @@ function escapeScene(){
   for(let k=0;k<7;k++){ const x=R(90,720), y=R(40,150), s=(Math.random()*0.5+0.5).toFixed(2);
     bats+=`<g transform="translate(${x},${y}) scale(${s})" opacity=".8" class="flick">
       <path d="M0 0 q-10 -8 -20 -2 q8 2 10 8 q6 -4 10 -6 q4 2 10 6 q2 -6 10 -8 q-10 -6 -20 2Z" fill="#0b0810"/></g>`; }
-  let sweets="";
+  let candies="";
   const cols=["#ff8a1f","#ff4d8a","#4fbf7a","#5f96e0","#ffcf5c","#c47aff"];
   for(let k=0;k<Math.min(26,Math.max(6,S.candy));k++){
-    sweets+=`<g transform="translate(${196+((k*13)%74)},${352-Math.floor(k/6)*11}) rotate(${R(-40,40)})">
+    candies+=`<g transform="translate(${196+((k*13)%74)},${352-Math.floor(k/6)*11}) rotate(${R(-40,40)})">
       <rect x="0" y="0" width="11" height="7" rx="2.5" fill="${cols[k%6]}"/>
       <path d="M0 3.5 l-4 -3.5 v7Z" fill="${cols[k%6]}"/><path d="M11 3.5 l4 -3.5 v7Z" fill="${cols[k%6]}"/></g>`;
   }
@@ -15196,10 +15196,10 @@ function bonusScene(){
     candles+=`<g><rect x="${x-4}" y="${300-h}" width="8" height="${h}" fill="#e4d8bc"/>
       <path d="M${x} ${292-h} q-5 7 0 13 q5 -6 0 -13Z" fill="#ffb347" class="flick"/>
       <circle cx="${x}" cy="${298-h}" r="34" fill="url(#halo)"/></g>`; }
-  let sweets="";
+  let candies="";
   const cols=["#ff8a1f","#ff4d8a","#4fbf7a","#5f96e0","#ffcf5c","#c47aff"];
   for(let k=0;k<18;k++){
-    sweets+=`<g transform="translate(${470+((k*17)%200)},${330-Math.floor(k/7)*13}) rotate(${R(-30,30)})">
+    candies+=`<g transform="translate(${470+((k*17)%200)},${330-Math.floor(k/7)*13}) rotate(${R(-30,30)})">
       <rect x="0" y="0" width="13" height="8" rx="3" fill="${cols[k%6]}"/>
       <path d="M0 4 l-5 -4 v8Z" fill="${cols[k%6]}"/><path d="M13 4 l5 -4 v8Z" fill="${cols[k%6]}"/></g>`;
   }
