@@ -169,6 +169,9 @@ input[type=text]::placeholder{color:#5c5070}
 #famline b{color:var(--gold)}
 #tierNote{font-size:14px;color:var(--dim);margin-top:10px;line-height:1.6}
 #saveline{font-size:13px;color:var(--dim);text-align:center;margin-top:16px;line-height:1.7}
+#tipBubble{position:fixed;z-index:9999;max-width:290px;background:#1d1430;border:1px solid var(--line);color:var(--ink);
+  font-size:14px;line-height:1.4;padding:8px 11px;border-radius:10px;box-shadow:0 6px 24px #000a;pointer-events:none;display:none}
+[data-tip],#topic{cursor:help}
 #voicestat{font-size:13px;color:var(--dim);text-align:center;margin-top:8px;line-height:1.5}
 #saveline a{color:var(--dim)}
 .howto{font-size:15.5px;line-height:1.85;color:var(--dim)}
@@ -623,6 +626,7 @@ table.rc td:last-child{text-align:right;font-weight:800;color:var(--gold)}
     <div id="themeNote"></div>
 
     <div class="row" style="margin-top:26px">
+      <button class="btn" id="resumeBtn" style="display:none"></button>
       <button class="btn" id="startBtn">Approach the house</button>
       <button class="btn ghost" id="helpBtn">How this works</button>
       <button class="btn ghost" id="mlogBtn">📒 Mistakes</button>
@@ -683,19 +687,19 @@ table.rc td:last-child{text-align:right;font-weight:800;color:var(--gold)}
 
 <section id="game" class="hidden">
   <div id="hud">
-    <div class="hudbox placebox" id="placebox" title="Where you are"><span id="placeIcon">🏚️</span>
+    <div class="hudbox placebox" id="placebox" data-tip="place"><span id="placeIcon">🏚️</span>
       <b id="placeName">The House</b> <small id="placeStep">1 of 7</small></div>
-    <div class="hudbox"><span id="roomnum">Room 1 / 10</span></div>
-    <div class="hudbox"><span class="lanterns" id="lanterns"></span></div>
-    <div class="hudbox"><span id="treatIcon">🍬</span> <span class="candy" id="candynum">0</span></div>
-    <div class="hudbox"><span id="tierBadge">Restless</span></div>
+    <div class="hudbox" data-tip="room"><span id="roomnum">Room 1 / 10</span></div>
+    <div class="hudbox" data-tip="lanterns"><span class="lanterns" id="lanterns"></span></div>
+    <div class="hudbox" data-tip="candy"><span id="treatIcon">🍬</span> <span class="candy" id="candynum">0</span></div>
+    <div class="hudbox" data-tip="tier"><span id="tierBadge">Restless</span></div>
     <div class="spacer"></div>
     <button class="iconbtn" id="musBtn2" title="Music on/off">♪</button>
     <button class="iconbtn" id="sfxBtn2" title="Sound on/off">🔊</button>
     <button class="btn ghost" id="quitBtn">Walk out</button>
   </div>
 
-  <div id="chase">
+  <div id="chase" data-tip="chase">
     <div id="chasetrack"></div>
     <div id="king"></div><div id="hero"></div>
   </div>
@@ -731,7 +735,7 @@ table.rc td:last-child{text-align:right;font-weight:800;color:var(--gold)}
 
   <div class="card" id="qcard">
     <div id="topic"></div>
-    <div id="timerwrap">
+    <div id="timerwrap" data-tip="timer">
       <div id="timerbar"><div id="timerfill"></div></div>
       <span id="timertext">30.0s</span>
       <span id="timerhint">candy clock</span>
@@ -12058,6 +12062,59 @@ function nvStatusText(){
   if(fb.length) s+=` Device voice used: ${fb.map(([k,v])=>`${NV_WHY[k]||k} ${v}`).join(", ")}.`;
   return s;
 }
+/* TIPS (v47, Lapo 14 Nov: "tooltip on elements of the page (e.g., Damned at the top)"). The top bar,
+   the chase, the clock and the labels over the question explain themselves: hover with a mouse, TAP on
+   the iPad (there is no hover there). Text is made when shown, so it is always the current value. */
+const TIP_LABELS=[
+  [/^close answers/, "The wrong answers are very close to the right one, so check carefully."],
+  [/^a hard one/, "One of the harder kinds of question for your grade."],
+  [/^more than one step/, "This one takes two or more steps. Do them one at a time."],
+  [/^multi-step · double/, "A multi-step problem from a grand chest. Solve it for a whole lantern and double candy."],
+  [/^hard ·/, "A hard question from a bonus chest. Solve it for half a lantern and candy; a wrong answer costs nothing."],
+  [/^very hard · exact answer/, "The hatch: a very hard problem. Solve it to skip three rooms; a wrong answer costs a whole lantern."],
+  [/^you missed this one/, "You got this kind wrong earlier in the run. Here is another chance at it."],
+  [/^\d+ of \d+|to go$/, "How much is left to beat the final challenge."]
+];
+function tipText(el){
+  const k=el.dataset&&el.dataset.tip;
+  if(k==="place"){ const i=Math.max(0,WORLDS.indexOf(W()));
+    return `You are in ${W().name}, place ${i+1} of ${WORLDS.length}. Get out of a place with ${NEXT_SCORE} or more to open the next one.`; }
+  if(k==="room") return `Room ${Math.min(10,S.room+1)} of 10. Answer a question in every room to get out.`;
+  if(k==="lanterns"){ const l=S.lanterns;
+    return `Lanterns: ${l} of 3 left. A wrong answer blows out half a lantern; when they are all out the run ends. Chests can win light back, and every lantern you carry out is worth extra candy.`; }
+  if(k==="candy") return `Candy so far: ${S.candy}. Right answers earn candy, quick answers earn more. A run is scored out of 100.`;
+  if(k==="tier"){ if(S.br) return "The bonus round: questions you missed, for extra candy. Nothing to lose in here.";
+    const t=TIERS[S.tier]||TIERS[0];
+    return `${t.name}: ${t.blurb}. A grade gets harder the more you play it: Restless, then Haunted after 2 runs, Cursed after 6, Damned after 12.`; }
+  if(k==="timer") return "The candy clock: answer before it runs out for extra candy. Running out costs nothing.";
+  if(k==="chase") return "The Pumpkin King is chasing you. Every lantern you lose lets him get closer.";
+  if(k==="label"){ const t=el.textContent.trim(); const hit=TIP_LABELS.find(([re])=>re.test(t));
+    if(hit) return hit[1];
+    if(BANK.some(b=>b.name===t)) return `Your grade: ${t}.`;
+    return null; }
+  if(k==="topic") return "The kind of question this is.";
+  return null;
+}
+const tipEl=()=>$("#tipBubble")||document.body.appendChild(Object.assign(document.createElement("div"),{id:"tipBubble"}));
+let tipTimer=null, tipFor=null;
+function showTip(el){
+  const t=tipText(el); if(!t) return hideTip();
+  const b=tipEl(); b.textContent=t; b.style.display="block"; tipFor=el;
+  const r=el.getBoundingClientRect(), bw=b.offsetWidth, bh=b.offsetHeight;
+  b.style.left=Math.max(8,Math.min(innerWidth-bw-8, r.left+r.width/2-bw/2))+"px";
+  b.style.top=(r.bottom+bh+10<innerHeight ? r.bottom+8 : Math.max(8,r.top-bh-8))+"px";
+  clearTimeout(tipTimer); tipTimer=setTimeout(hideTip,5000);
+}
+function hideTip(){ const b=$("#tipBubble"); if(b) b.style.display="none"; tipFor=null; clearTimeout(tipTimer); }
+function tipTarget(e){
+  const el=e.target.closest&&e.target.closest("[data-tip],#topic i.above,#topic");
+  if(!el) return null;
+  if(el.matches("#topic i.above")) el.dataset.tip="label";
+  else if(el.id==="topic") el.dataset.tip="topic";
+  return el;
+}
+document.addEventListener("pointerover",e=>{ if(e.pointerType!=="mouse") return; const el=tipTarget(e); if(el) showTip(el); else if(tipFor) hideTip(); });
+document.addEventListener("click",e=>{ const el=tipTarget(e); if(el && !e.target.closest("button")){ tipFor===el ? hideTip() : showTip(el); } else if(tipFor) hideTip(); });
 function paintVoiceStat(){ const el=$("#voicestat"); if(el && el.offsetParent!==null){ const t=nvStatusText(); if(el.textContent!==t) el.textContent=t; } }
 setInterval(paintVoiceStat,1000);
 function ttsSay(text,rate,h){
@@ -12605,7 +12662,7 @@ function applyTheme(){
    moment it goes out. Shown on the setup screen and at the foot of the
    report card, so a player can say which build they are playing.
    ===================================================================== */
-const BUILD = 46, RELEASED = "Nov 8, 2026, 2:00 PM";
+const BUILD = 47, RELEASED = "Nov 14, 2026, 3:00 PM";
 const COPYRIGHT = "© 2026 m1keLima. All rights reserved.";
 const VERSION_LINE = `v${BUILD} · released ${RELEASED} · ${COPYRIGHT}`;
 
@@ -12807,7 +12864,7 @@ function buildSetup(){
   $("#sfxBtn").textContent = sfxOn?"Sound: on":"Sound: off";
   $("#musBtn").textContent = musicOn?"Music: on":"Music: off";
   $("#voiceBtn").textContent = natOn()?"Voice: natural":"Voice: device";
-  paintVoiceStat();
+  paintVoiceStat(); paintResume();
   paintKid();
   paintFamilies();
   renderThemes();
@@ -12957,7 +13014,47 @@ function paintPlace(){
   $("#placeIcon").textContent=w.icon; $("#placeName").textContent=w.name;
   $("#placeStep").textContent=`${i+1} of ${WORLDS.length}`;
 }
+/* RESUME AFTER A REFRESH (v47, Lapo 14 Nov: "sometimes the game gets stuck … when you refresh the page
+   on Safari, it restarts from the point you got to"). Every room start saves the run (checkpoint(), its
+   own localStorage key, not the save); the front page then offers "Continue" and resumeGame() puts the
+   run back in that room with the same question. Kept 36 hours, cleared by endGame (walk out, lose,
+   report card). A refresh during the final challenge or the endings goes back to room 10. */
+const RESUME_KEY="hauntedhouse_resume";
+const CP_SKIP=new Set(["timerId","pre","slot","current","session","dragon","boss","ending","br","bonus","shortcut","usedTopics","spoken"]);
+function checkpoint(){
+  try{ const o={}; for(const k in S){ if(!CP_SKIP.has(k) && !(S[k] instanceof Set) && !(S[k] instanceof Map)) o[k]=S[k]; }
+    localStorage.setItem(RESUME_KEY, JSON.stringify({t:Date.now(), S:o, used:[...(S.usedTopics||[])], cur:S.current,
+      sid:S.session&&S.session.id, world:W().name})); }catch(e){}
+}
+function readCheckpoint(){
+  try{ const c=JSON.parse(localStorage.getItem(RESUME_KEY)||"null");
+    if(!c || !c.S || Date.now()-c.t>36*3600e3 || !(c.S.room>=0 && c.S.room<=9) || !c.cur) return null;
+    if(!Array.isArray(c.S.plan) || !c.S.plan.every(sl=>sl && BANK[sl.lvl] && sl.gen<BANK[sl.lvl].gens.length)) return null;
+    return c; }catch(e){ return null; }
+}
+function clearCheckpoint(){ try{ localStorage.removeItem(RESUME_KEY); }catch(e){} }
+function paintResume(){
+  const c=readCheckpoint(), b=$("#resumeBtn"); if(!b) return;
+  b.style.display=c?"":"none";
+  if(c) b.textContent=`▶ Continue: room ${c.S.room+1} of 10 · ${c.world||"the house"} · ${BANK[c.S.level|0].name}`;
+}
+function resumeGame(){
+  const c=readCheckpoint(); if(!c){ paintResume(); return; }
+  Object.assign(S, c.S); S.usedTopics=new Set(c.used||[]); S.timerId=null;
+  S.bonus=null; S.shortcut=null; S.dragon=null; S.boss=null; S.ending=null; S.br=null;
+  S.pre={room:S.room, slot:S.plan[Math.min(S.plan.length-1,S.room)], p:c.cur};   /* same question as before */
+  S.session=null;
+  try{ const kid=save.logbook&&save.logbook[kidKey(S.name)]; S.session=(kid&&kid.sessions.find(x=>x.id===c.sid))||null; }catch(e){}
+  $("#setup").classList.add("hidden"); $("#game").classList.remove("hidden");
+  $("#king").innerHTML=KING_SVG(48); $("#hero").innerHTML=avSVG(S.avatar,46);
+  $("#chasetrack").innerHTML=Array.from({length:10},(_,i)=>`<i>${i+1}</i>`).join("");
+  $("#tierBadge").textContent=TIERS[S.tier].name;
+  $("#chase").classList.remove("hidden"); $("#lanterns").parentNode.classList.remove("hidden");
+  musicStart(); SFX.door();
+  loadRoom();
+}
 function startGame(){
+  clearCheckpoint();
   S.level=save.level; S.world=Math.min(save.world||0, unlockFor(save.level)); S.avatar=save.avatar; S.name=(save.name||"").trim()||"the visitor";
   S.tier=tierFor(S.level); S.usedTopics=new Set(); S.plan=buildPlan(S.level,S.usedTopics);
   S.room=0; S.lanterns=3; S.candy=0; S.escapeBonus=0; S.speedCandy=0; S.started=Date.now(); S.log=[]; S.jump=0;
@@ -13019,6 +13116,7 @@ function loadRoom(){
   $("#hatch").classList.toggle("hidden",!hatch);
 
   askQuestion(S.current,"normal");
+  checkpoint();
 }
 
 /* ---------------------------------------------------------------
@@ -15456,7 +15554,7 @@ function bucketFor(won){
    bonus round goes back to it — so the run's bookkeeping lives here and
    the drawing lives in showReport(). */
 function endGame(won){
-  stopTimer(); stopSpeech();
+  stopTimer(); stopSpeech(); clearCheckpoint();
   if(!S.reported){
     S.reported=true; S.won=won;
     save.totals.rooms += S.room; if(won) save.totals.wins++;
@@ -15791,6 +15889,7 @@ $("#kidBtn").onclick=()=>{ kidMode=!kidMode; save.kid=kidMode; store(); SFX.clic
   else stopSpeech(); };
 $("#readBtn").onclick=()=>{ speakQuestion(S.spoken); };
 $("#startBtn").onclick=()=>{ ac(); musicStart(); startGame(); };
+$("#resumeBtn").onclick=()=>{ ac(); musicStart(); resumeGame(); };
 $("#quitBtn").onclick=()=>{
   /* walking out of the bonus round only ends the bonus round — the run is already over */
   if(S.br && !S.brDone){ stopTimer(); S.br.i=S.br.q.length; finishBonus(); return; }
